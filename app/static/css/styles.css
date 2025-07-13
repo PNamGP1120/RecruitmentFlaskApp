@@ -1,0 +1,40 @@
+body {
+    background-color: lightblue;
+    color: darkblue;
+}
+
+.navbar {
+    background: linear-gradient(to right, #0f0f0f, #1c1c1c);
+    border-radius: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.btn-register {
+    background-color: #2bbbad;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 16px;
+    text-decoration: none;
+}
+
+.btn-register:hover {
+    background-color: #249e90;
+    color: white;
+}
+
+.nav-link {
+    color: white !important;
+}
+
+.btn-teal {
+  background-color: #2bbbad;
+  color: white;
+  border-radius: 6px;
+}
+
+.btn-teal:hover {
+  background-color: #249e90;
+  color: white;
+}
