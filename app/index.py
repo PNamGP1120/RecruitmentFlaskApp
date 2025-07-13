@@ -13,5 +13,6 @@ def jobs():
     return render_template('jobs.html')
 
 if __name__ == '__main__':
-    from admin import *
-    app.run(debug=True)
+    with app.app_context():
+        from app import admin
+        app.run(debug=True)
