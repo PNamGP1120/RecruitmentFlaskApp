@@ -77,8 +77,8 @@ class User(BaseModel, UserMixin):
     def __str__(self):
         return self.get_full_name()
 
-class JobSeeker(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'))
+
+class JobSeeker(User):
     skill = Column(String(255))
     experience = Column(String(255))
     education = Column(String(255))
@@ -86,10 +86,8 @@ class JobSeeker(BaseModel):
     preferred_job_types = Column(String(255))
     linkedin_url = Column(String(255))
 
-    user = relationship("User", backref=backref("job_seeker", uselist=False))
 
-class Recruiter(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'))
+class Recruiter(User):
     website = Column(String(255))
     introduction = Column(Text)
     company_name = Column(String(255))
@@ -98,7 +96,6 @@ class Recruiter(BaseModel):
     verification_status = Column(String(50))
     location = Column(String(100))
 
-    user = relationship("User", backref=backref("recruiter", uselist=False))
 
 # ========== JOB & APPLICATION ==========
 class Category(BaseModel):
@@ -118,17 +115,17 @@ class JobPosting(BaseModel):
     location = Column(String(100))
     salary = Column(Integer)
     employment_type = Column(String(50))
-    status = Column(String(20), default=JobStatusEnum.DRAFT.value)
+    status = Column(Enum(JobStatusEnum), default=JobStatusEnum.DRAFT.value)
     expiration_date = Column(DateTime)
-    created_date = Column(DateTime, default=datetime.utcnow)
+    created_date = Column(DateTime, default=datetime.now())
     updated_date = Column(DateTime)
     view_count = Column(Integer, default=0)
-    recruiter_id = Column(Integer, ForeignKey(Recruiter.id))
-    category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
+    recruiter_id = Column(Integer, ForeignKey("recruiter.id"))
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
 
     recruiter = relationship('Recruiter', backref='job_postings', lazy=True)
 
-    # tags = relationship("Tag", secondary="tag_jobposting", lazy="subquery", backref=backref("jobposting",lazy=True))
+    tags = relationship("Tag", secondary="tag_jobposting", lazy="subquery", backref=backref("jobposting",lazy=True))
 
     def __str__(self):
         return self.title
@@ -210,6 +207,6 @@ class NotificationChannel(BaseModel):
 
 if __name__ == '__main__':
     with app.app_context():
-        # db.drop_all()  # Use with caution, this will delete all data
-        # db.create_all()
-        print(RoleEnum.JOBSEEKER.value=="JobSeeker")
+        db.drop_all()  # Use with caution, this will delete all data
+        db.create_all()
+        # print(RoleEnum.JOBSEEKER.value=="JobSeeker")
