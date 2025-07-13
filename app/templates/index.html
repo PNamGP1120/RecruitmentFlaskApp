@@ -1,5 +1,363 @@
 {% extends 'layout/base.html' %}
 
-{% block content %}
+{% block title %}Trang chủ{% endblock %}
 
+{% block content %}
+<section class="hero-section position-relative bg-dark text-white rounded-4 mx-2 my-3 overflow-hidden"
+    style="background: linear-gradient(120deg, rgba(30,30,60,0.85) 60%, rgba(0,180,150,0.7)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat; min-height: 520px;">
+    <div class="container py-5">
+        <div class="row justify-content-center align-items-center" style="min-height: 420px;">
+            <div class="col-lg-10 text-center">
+                {# Tiêu đề chính của Hero Section #}
+                <h1 class="display-3 fw-bold mb-3" style="letter-spacing: -1px;">
+                    Find Your Dream Job Today!
+                </h1>
+                {# Mô tả ngắn gọn #}
+                <p class="lead mb-4 text-light opacity-75 fs-5">Connecting Talent with Opportunity: Your Gateway to
+                    Career Success</p>
+
+                <form
+                    class="bg-white rounded-5 shadow-lg d-flex flex-column flex-md-row align-items-stretch gap-2 gap-md-0 mx-auto mb-5"
+                    style="max-width: 900px; border: 0px solid rgba(0, 0, 0, 0.08);"> {# Border và padding đã được điều
+                    chỉnh #}
+                    <div class="d-flex flex-fill align-items-center gap-2 gap-md-0">
+                        {# Input cho tiêu đề công việc hoặc công ty #}
+                        <input type="text" class="form-control border-0 bg-transparent flex-fill fs-5"
+                            placeholder="Job Title or Company">
+                        {# Đường phân cách dọc chỉ hiển thị trên màn hình lớn hơn #}
+                        <div class="vertical-divider mx-2 d-none d-md-block"></div>
+                        {# Select cho địa điểm #}
+                        <select class="form-select border-0 bg-transparent flex-fill fs-5">
+                            <option selected>Select Location</option>
+                            <option>Hanoi</option>
+                            <option>Ho Chi Minh</option>
+                            <option>Remote</option>
+                        </select>
+                        {# Đường phân cách dọc #}
+                        <div class="vertical-divider mx-2 d-none d-md-block"></div>
+                        {# Select cho danh mục #}
+                        <select class="form-select border-0 bg-transparent flex-fill fs-5">
+                            <option selected>Select Category</option>
+                            <option>IT</option>
+                            <option>Marketing</option>
+                            <option>Finance</option>
+                        </select>
+                    </div>
+
+                    {# Nút tìm kiếm #}
+                    <button type="submit"
+                        class="btn btn-teal-custom btn-lg d-flex align-items-center justify-content-center flex-shrink-0">
+                        <i class="bi bi-search me-2"></i> Search Job
+                    </button>
+                </form>
+
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-4 mt-5">
+
+                    <div class="d-flex flex-row align-items-center gap-3 text-start">
+                        <div class="stat-icon-small">
+                            <i class="bi bi-briefcase fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-4 text-white">25,850</div>
+                            <div class="small text-light text-opacity-75">Jobs Available</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center gap-3 text-start">
+                        <div class="stat-icon-small">
+                            <i class="bi bi-people fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-4 text-white">10,250</div>
+                            <div class="small text-light text-opacity-75">Candidates</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center gap-3 text-start">
+                        <div class="stat-icon-small">
+                            <i class="bi bi-building fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-4 text-white">18,400</div>
+                            <div class="small text-light text-opacity-75">Companies</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-black py-4 px-2 rounded-bottom-4">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-4">
+        <img src="https://cdn.worldvectorlogo.com/logos/spotify-2.svg" alt="Spotify" height="32">
+        <img src="https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg" alt="Slack" height="32">
+        <img src="https://cdn.worldvectorlogo.com/logos/adobe.svg" alt="Adobe" height="32">
+        <img src="https://cdn.worldvectorlogo.com/logos/asana-1.svg" alt="Asana" height="32">
+        <img src="https://cdn.worldvectorlogo.com/logos/linear.svg" alt="Linear" height="32">
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Recent Jobs Available</h2>
+                <p class="text-muted">At eu lobortis pretium tincidunt amet lacus ut Aenean aliquet..</p>
+            </div>
+            <div>
+                <a href="#" class="text-primary fw-semibold text-decoration-none">View all</a>
+            </div>
+        </div>
+
+        <div class="row gy-4">
+
+            <div class="col-12">
+                <div class="job-card opacity-75 bg-white rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3">10 min ago</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="https://ou.edu.vn/wp-content/uploads/2024/12/LOGO-35-NAM-FINAL-1-300x239.png" alt="Company Logo" height="40" width="40" class="rounded-circle">
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Forward Security Director</h6>
+                            <p class="mb-0 text-muted small">Bauch, Schuppe and Schulist Co</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3"> {# Sử dụng flex-wrap để các tag xuống dòng nếu không đủ chỗ #}
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> Hotels & Tourism</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> Full time</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> $40000-$42000</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> New-York, USA</div>
+                        
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="job-card opacity-75 bg-white rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3">10 min ago</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="https://ou.edu.vn/wp-content/uploads/2024/12/LOGO-35-NAM-FINAL-1-300x239.png" alt="Company Logo" height="40" width="40" class="rounded-circle">
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Forward Security Director</h6>
+                            <p class="mb-0 text-muted small">Bauch, Schuppe and Schulist Co</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3"> {# Sử dụng flex-wrap để các tag xuống dòng nếu không đủ chỗ #}
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> Hotels & Tourism</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> Full time</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> $40000-$42000</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> New-York, USA</div>
+                        
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="job-card opacity-75 bg-white rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3">10 min ago</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="https://ou.edu.vn/wp-content/uploads/2024/12/LOGO-35-NAM-FINAL-1-300x239.png" alt="Company Logo" height="40" width="40" class="rounded-circle">
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Forward Security Director</h6>
+                            <p class="mb-0 text-muted small">Bauch, Schuppe and Schulist Co</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3"> {# Sử dụng flex-wrap để các tag xuống dòng nếu không đủ chỗ #}
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> Hotels & Tourism</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> Full time</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> $40000-$42000</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> New-York, USA</div>
+                        
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="job-card opacity-75 bg-white rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3">10 min ago</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="https://ou.edu.vn/wp-content/uploads/2024/12/LOGO-35-NAM-FINAL-1-300x239.png" alt="Company Logo" height="40" width="40" class="rounded-circle">
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Forward Security Director</h6>
+                            <p class="mb-0 text-muted small">Bauch, Schuppe and Schulist Co</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3"> {# Sử dụng flex-wrap để các tag xuống dòng nếu không đủ chỗ #}
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> Hotels & Tourism</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> Full time</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> $40000-$42000</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> New-York, USA</div>
+                        
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="job-card opacity-75 bg-white rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3">10 min ago</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="https://ou.edu.vn/wp-content/uploads/2024/12/LOGO-35-NAM-FINAL-1-300x239.png" alt="Company Logo" height="40" width="40" class="rounded-circle">
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Forward Security Director</h6>
+                            <p class="mb-0 text-muted small">Bauch, Schuppe and Schulist Co</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3"> {# Sử dụng flex-wrap để các tag xuống dòng nếu không đủ chỗ #}
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> Hotels & Tourism</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> Full time</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> $40000-$42000</div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> New-York, USA</div>
+                        
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+{# Bắt đầu phần "Browse by Category" #}
+<section class="py-5"> {# Sử dụng một class nền khác để phân biệt #}
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-2">Browse by Category</h2>
+            <p class="text-muted">At eu lobortis pretium tincidunt amet lacus ut Aenean aliquet. Blandit a massa elementum id scel..</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"> {# Tạo lưới 4 cột trên màn hình lớn #}
+
+            {# Thẻ danh mục mẫu 1 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-tree fs-2 text-teal-custom"></i> {# Icon và màu teal #}
+                    </div>
+                    <h5 class="fw-bold mb-1">Agriculture</h5>
+                    <p class="text-muted small mb-0">1254 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 2 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-gear fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Metal Production</h5>
+                    <p class="text-muted small mb-0">816 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 3 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-bag fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Commerce</h5>
+                    <p class="text-muted small mb-0">2082 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 4 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-tools fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Construction</h5>
+                    <p class="text-muted small mb-0">1520 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 5 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-building fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Hotels & Tourism</h5>
+                    <p class="text-muted small mb-0">1022 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 6 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-mortarboard fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Education</h5>
+                    <p class="text-muted small mb-0">1496 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 7 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-cash fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Financial Services</h5>
+                    <p class="text-muted small mb-0">1529 jobs</p>
+                </div>
+            </div>
+
+            {# Thẻ danh mục mẫu 8 #}
+            <div class="col">
+                <div class="category-card rounded-4 p-4 text-center">
+                    <div class="category-icon mb-3">
+                        <i class="bi bi-truck fs-2 text-teal-custom"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Transport</h5>
+                    <p class="text-muted small mb-0">1244 jobs</p>
+                </div>
+            </div>
+
+        </div> {# Kết thúc row #}
+    </div> {# Kết thúc container #}
+</section>
 {% endblock %}
