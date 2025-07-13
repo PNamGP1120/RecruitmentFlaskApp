@@ -1,176 +1,188 @@
-from datetime import datetime
-from enum import Enum as MyEnum
-from app import app, db
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
+from app import db, app
+from datetime import datetime
+from enum import Enum
+from flask_login import UserMixin
 
-
-class BaseModel(db.Model):
-    __abstract__ = True
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} {self.id}>"
-
-class Role(MyEnum):
+# ========== ENUM KHAI BÁO ==========
+class RoleEnum(Enum):
     ADMIN = "Admin"
     JOBSEEKER = "JobSeeker"
     RECRUITER = "Recruiter"
 
-conversation_user = db.Table('conversation_user',Column("user.id", ForeignKey('user.id')),Column('conversation.id', ForeignKey('conversation.id')))
-
-class User(BaseModel):
-    username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(128), nullable=False)
-    first_name = Column(String(50), nullable=True)
-    last_name = Column(String(50), nullable=True)
-    email = Column(String(100), unique=True, nullable=False)
-    role = Column(Enum(Role), default=Role.JOBSEEKER, nullable=False)
-    avatar = Column(String(255), nullable=True)
-    joined_date = Column(DateTime, default=datetime.utcnow)
-    phone = Column(String(20), nullable=True)
-    last_login = Column(DateTime, nullable=True)
-    is_active = Column(Boolean, default=True)
-
-    conversation = relationship("Conversation", secondary='conversation_user', lazy="subquery", backref=backref('users', lazy=True))
-
-    def __repr__(self):
-        return f"<User {self.username} - {self.role.value}>"
-
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}" if self.first_name or self.last_name else self.username
-    
-    def is_admin(self):
-        return self.role == Role.ADMIN
-
-    def is_job_seeker(self):
-        return self.role == Role.JOBSEEKER
-
-    def is_recruiter(self):
-        return self.role == Role.RECRUITER
-
-    def get_avatar_url(self):
-        if self.avatar:
-            return self.avatar
-        return "https://www.gravatar.com/avatar/"
-    
-    def __str__(self):
-        return self.get_full_name() if self.get_full_name() else self.username
-
-class JobSeeker(db.Model):
-    id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    skill = Column(String(255), nullable=True)
-    experience= Column(String(255), nullable=True)
-    education = Column(String(255), nullable=True)
-    preferred_locations = Column(String(255), nullable=True)
-    preferred_job_types = Column(String(255), nullable=True)
-    linkedin_url = Column(String(255), nullable=True)
-    user = relationship("User")
-
-
-class Resume(BaseModel):
-    title = Column(String(100), nullable=False)
-    content = Column(Text, nullable=False)
-    file_path = Column(String(255), nullable=False)
-    is_default = Column(Boolean, default=False)
-    created_date = Column(DateTime, default=datetime.utcnow)
-    updated_date = Column(DateTime)
-    job_seeker_id = Column(Integer, ForeignKey('job_seeker.id'))
-
-
-class Recruiter(db.Model):
-    id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    website = Column(String(255))
-    introduction = Column(Text)
-    company_name = Column(String(255))
-    industry = Column(String(100))
-    company_size = Column(String(50))
-    verification_status = Column(String(50))
-    location = Column(String(100))
-    user = relationship("User")
-
-
-class JobStatus(MyEnum):
+class JobStatusEnum(Enum):
     DRAFT = "Draft"
     ACTIVE = "Active"
     CLOSED = "Closed"
     EXPIRED = "Expired"
 
-class ApplicationStatus(MyEnum):
+class ApplicationStatusEnum(Enum):
     DRAFT = "Draft"
     SUBMITTED = "Submitted"
     INTERVIEW = "Interview"
     REJECTED = "Rejected"
     ACCEPTED = "Accepted"
 
-class InterviewStatus(MyEnum):
+class InterviewStatusEnum(Enum):
     SCHEDULED = "Scheduled"
     COMPLETED = "Completed"
     CANCELLED = "Cancelled"
 
+# ========== BASE MODEL ==========
+class BaseModel(db.Model):
+    __abstract__ = True
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.id}>"
 
+# ========== MIDDLE TABLE ==========
+conversation_user = db.Table(
+    'conversation_user',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('conversation_id', db.Integer, db.ForeignKey('conversation.id'))
+)
+
+# ========== USER & RELATED ==========
+class User(BaseModel, UserMixin):
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    role = db.Column(db.String(20), default=RoleEnum.JOBSEEKER.value)
+    avatar = db.Column(db.String(255))
+    joined_date = db.Column(db.DateTime, default=datetime.utcnow)
+    phone = db.Column(db.String(20))
+    last_login = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+
+    conversation = relationship("Conversation", secondary=conversation_user, backref=backref('users', lazy=True))
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}" if self.first_name or self.last_name else self.username
+
+    def is_admin(self):
+        return self.role == RoleEnum.ADMIN.value
+
+    def is_job_seeker(self):
+        return self.role == RoleEnum.JOBSEEKER.value
+
+    def is_recruiter(self):
+        return self.role == RoleEnum.RECRUITER.value
+
+    def get_avatar_url(self):
+        return self.avatar if self.avatar else "https://www.gravatar.com/avatar/"
+
+    def __str__(self):
+        return self.get_full_name()
+
+class JobSeeker(BaseModel):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    skill = db.Column(db.String(255))
+    experience = db.Column(db.String(255))
+    education = db.Column(db.String(255))
+    preferred_locations = db.Column(db.String(255))
+    preferred_job_types = db.Column(db.String(255))
+    linkedin_url = db.Column(db.String(255))
+
+    user = relationship("User", backref=backref("job_seeker", uselist=False))
+
+class Recruiter(BaseModel):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    website = db.Column(db.String(255))
+    introduction = db.Column(db.Text)
+    company_name = db.Column(db.String(255))
+    industry = db.Column(db.String(100))
+    company_size = db.Column(db.String(50))
+    verification_status = db.Column(db.String(50))
+    location = db.Column(db.String(100))
+
+    user = relationship("User", backref=backref("recruiter", uselist=False))
+
+# ========== JOB & APPLICATION ==========
 class JobPosting(BaseModel):
-    title = Column(String(100))
-    description = Column(Text)
-    requirements = Column(Text)
-    location = Column(String(100))
-    salary = Column(Integer)
-    employment_type = Column(String(50))
-    status = Column(Enum(JobStatus), default=JobStatus.EXPIRED)
-    expiration_date = Column(DateTime)
-    created_date = Column(DateTime, default=datetime.utcnow)
-    updated_date = Column(DateTime)
-    view_count = Column(Integer, default=0)
-    recruiter_id = Column(Integer, ForeignKey('recruiter.id'))
+    title = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    location = db.Column(db.String(100))
+    salary = db.Column(db.Integer)
+    employment_type = db.Column(db.String(50))
+    status = db.Column(db.String(20), default=JobStatusEnum.DRAFT.value)
+    expiration_date = db.Column(db.DateTime)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_date = db.Column(db.DateTime)
+    view_count = db.Column(db.Integer, default=0)
+    recruiter_id = db.Column(db.Integer, db.ForeignKey('recruiter.id'))
+
+    recruiter = relationship('Recruiter', backref='job_postings')
 
     def __str__(self):
         return self.title
 
-class Application(BaseModel):
-    cover_letter = Column(Text)
-    status = Column(Enum(ApplicationStatus), default=ApplicationStatus.DRAFT)
-    applied_date = Column(DateTime, default=datetime.utcnow)
-    updated_date = Column(DateTime)
-    feedback = Column(Text)
-    resume_id = Column(Integer, ForeignKey('resume.id'))
-    job_posting_id = Column(Integer, ForeignKey('job_posting.id'))
+class Resume(BaseModel):
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)
+    is_default = db.Column(db.Boolean, default=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_date = db.Column(db.DateTime)
+    job_seeker_id = db.Column(db.Integer, db.ForeignKey('job_seeker.id'))
 
+    job_seeker = relationship("JobSeeker", backref="resumes")
+
+class Application(BaseModel):
+    cover_letter = db.Column(db.Text)
+    status = db.Column(db.String(20), default=ApplicationStatusEnum.DRAFT.value)
+    applied_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_date = db.Column(db.DateTime)
+    feedback = db.Column(db.Text)
+    resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'))
+    job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'))
+
+    resume = relationship("Resume")
+    job_posting = relationship("JobPosting")
 
 class Interview(BaseModel):
-    dateTime = Column(DateTime)
-    status = Column(Enum(InterviewStatus), default=InterviewStatus.SCHEDULED)
-    url = Column(String(255))
-    application_id = Column(Integer, ForeignKey('application.id'))
+    dateTime = db.Column(db.DateTime)
+    status = db.Column(db.String(20), default=InterviewStatusEnum.SCHEDULED.value)
+    url = db.Column(db.String(255))
+    application_id = db.Column(db.Integer, db.ForeignKey('application.id'))
 
+    application = relationship("Application", backref="interviews")
+
+# ========== CHAT ==========
+class Conversation(BaseModel):
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Chat(BaseModel):
-    message = Column(Text)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    is_read = Column(Boolean, default=False)
-    conversation_id = Column(Integer, ForeignKey('conversation.id'))
-    sender_id = Column(Integer, ForeignKey('user.id'))
+    message = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'))
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    conversation = relationship("Conversation", backref="chats")
+    sender = relationship("User")
 
-class Conversation(BaseModel):
-    created_date = Column(DateTime, default=datetime.utcnow)
-
-
-
-
+# ========== NOTIFICATION ==========
 class Notification(BaseModel):
-    content = Column(Text)
-    is_read = Column(Boolean, default=False)
-    created_date = Column(DateTime, default=datetime.utcnow)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    content = db.Column(db.Text)
+    is_read = db.Column(db.Boolean, default=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    user = relationship("User", backref="notifications")
 
 class NotificationChannel(BaseModel):
-    channel_type = Column(String(50))
-    status = Column(String(50))
-    sent_at = Column(DateTime)
-    notification_id = Column(Integer, ForeignKey('notification.id'))
+    channel_type = db.Column(db.String(50))
+    status = db.Column(db.String(50))
+    sent_at = db.Column(db.DateTime)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'))
+
+    notification = relationship("Notification", backref="channels")
+
 
 if __name__ == '__main__':
     with app.app_context():
+        db.drop_all()  # Use with caution, this will delete all data
         db.create_all()
