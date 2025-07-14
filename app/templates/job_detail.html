@@ -1,0 +1,172 @@
+{% extends 'layout/base.html' %}
+
+
+{% block title %}Job Detail{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="mb-3">
+                <p class="text-muted small">10 min ago</p>
+                <h3 class="fw-bold">{{ job.title }}</h3>
+                <p class="text-muted mb-2">{{ job.company.company_name or "Unknown Company" }}</p>
+                <div class="d-flex flex-wrap gap-4 text-muted small mb-3">
+                    <span><i class="bi bi-briefcase"></i> {{ job.category or "Uncategorized" }}</span>
+                    <span><i class="bi bi-clock"></i> {{ job.employment_type.value if job.employment_type else "Unknown" }}</span>
+                    <span><i class="bi bi-currency-dollar"></i> {{ job.salary or "Negotiable" }}</span>
+                    <span><i class="bi bi-geo-alt"></i> {{ job.location or "Unknown Location" }}</span>
+                <a class="btn btn-success mb-4" href="#">Apply Job</a>
+
+                </div>
+            </div>
+
+            <h5 class="fw-bold">Job Description</h5>
+            <p class="text-muted">
+                {{job.description}}
+            </p>
+
+            <h5 class="fw-bold">Key Responsibilities</h5>
+            <ul class="list-unstyled text-muted">
+                <li><i class="bi bi-check2 text-success me-2"></i>Et nunc ut tempus duis nisl sed massa...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Cras facilisis dignissim augue lorem amet...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Ornare varius faucibus nisi vitae vitae cras ornare...
+                </li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in. Orci imperdiet...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in. Orci imperdiet...</li>
+            </ul>
+
+            <h5 class="fw-bold">Professional Skills</h5>
+            <ul class="list-unstyled text-muted">
+                <li><i class="bi bi-check2 text-success me-2"></i>Et nunc ut tempus duis nisl sed massa...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Ornare varius faucibus nisi vitae cras ornare...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+            </ul>
+
+            <div class="my-4">
+                <h6>Tags:</h6>
+                <span class="badge rounded-pill text-bg-light text-success border border-success me-2">Full time</span>
+                <span class="badge rounded-pill text-bg-light text-success border border-success me-2">Commerce</span>
+                <span class="badge rounded-pill text-bg-light text-success border border-success me-2">New - York</span>
+                <span class="badge rounded-pill text-bg-light text-success border border-success me-2">Corporate</span>
+                <span class="badge rounded-pill text-bg-light text-success border border-success">Location</span>
+            </div>
+
+            <div class="mb-5">
+                <strong>Share Job:</strong>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-twitter-x"></i></a>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-linkedin"></i></a>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="p-4 mb-4 rounded" style="background-color: #f2fafa;">
+                <h6 class="fw-bold mb-3">Job Overview</h6>
+                <p class="mb-1"><strong>Job Title:</strong> {{job.title}}</p>
+                <p class="mb-1"><strong>Job Type:</strong> {{job.employment_type}}</p>
+                <p class="mb-1"><strong>Category:</strong> {{job.category}}</p>
+                <p class="mb-1"><strong>Experience:</strong> {{job.title}}</p>
+                <p class="mb-1"><strong>Degree:</strong> Master</p>
+                <p class="mb-1"><strong>Offered Salary:</strong> $ {{job.salary}}</p>
+                <p class="mb-2 "><strong>Location:</strong> VietNam, {{job.location}}</p>
+                <img src="https://via.placeholder.com/300x150?text=Map" class="img-fluid rounded" alt="map">
+            </div>
+
+            <div class="p-4 rounded" style="background-color: #f2fafa;">
+                <h6 class="fw-bold mb-3">Send Us Message</h6>
+                <form>
+                    <input type="text" class="form-control mb-2" placeholder="Full name">
+                    <input type="email" class="form-control mb-2" placeholder="Email Address">
+                    <input type="text" class="form-control mb-2" placeholder="Phone Number">
+                    <textarea class="form-control mb-2" rows="3" placeholder="Your Message"></textarea>
+                    <button type="submit" class="btn btn-success w-100">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container my-5">
+    <h4>Related Jobs</h4>
+    <p class="text-muted">At suscipit pretium tincidunt amet lacus at sem amet aliquet</p>
+
+    <!-- Job Item 1 -->
+    <div class="card mb-3 p-3">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small mb-1">24 min ago</p>
+                <h6 class="mb-1">Internal Creative Coordinator</h6>
+                <p class="text-muted small">Green Group</p>
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <span><i class="bi bi-building"></i> Commerce</span>
+                    <span><i class="bi bi-clock"></i> Full time</span>
+                    <span><i class="bi bi-currency-dollar"></i> $44000 - $46000</span>
+                    <span><i class="bi bi-geo-alt"></i> New York, USA</span>
+                </div>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-outline-success mb-2">Job Details</button>
+                <br>
+                <i class="bi bi-bookmark"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Item 2 -->
+    <div class="card mb-3 p-3">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small mb-1">24 min ago</p>
+                <h6 class="mb-1">District Intranet Director</h6>
+                <p class="text-muted small">Vickston - Weber Co</p>
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <span><i class="bi bi-building"></i> Commerce</span>
+                    <span><i class="bi bi-clock"></i> Full time</span>
+                    <span><i class="bi bi-currency-dollar"></i> $42000 - $44000</span>
+                    <span><i class="bi bi-geo-alt"></i> New York, USA</span>
+                </div>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-outline-success mb-2">Job Details</button>
+                <br>
+                <i class="bi bi-bookmark"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Item 3 -->
+    <div class="card mb-3 p-3">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small mb-1">24 min ago</p>
+                <h6 class="mb-1">Corporate Tactics Facilitator</h6>
+                <p class="text-muted small">Conner, Turner and Hurley Inc</p>
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <span><i class="bi bi-building"></i> Commerce</span>
+                    <span><i class="bi bi-clock"></i> Full time</span>
+                    <span><i class="bi bi-currency-dollar"></i> $38000 - $40000</span>
+                    <span><i class="bi bi-geo-alt"></i> New York, USA</span>
+                </div>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-outline-success mb-2">Job Details</button>
+                <br>
+                <i class="bi bi-bookmark"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+{% endblock %}

@@ -56,22 +56,6 @@
 
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Experience Level</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="noexp">
-                            <label class="form-check-label" for="noexp">No-experience</label>
-                        </div>
-                        <!-- Thêm các level khác -->
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Date Posted</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="all">
-                            <label class="form-check-label" for="all">All</label>
-                        </div>
-                        <!-- Thêm các lựa chọn khác -->
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label">Salary</label>
                         <input type="range" class="form-range" min="0" max="99999">
                         <div class="d-flex justify-content-between">
@@ -88,7 +72,7 @@
                         </div>
                     </div>
                     <div class="card bg-secondary text-white mt-4 card-body text-center">
-                        <button>Filter now!</button>
+                        <button>Find now!</button>
                     </div>
                 </form>
             </div>
@@ -98,7 +82,7 @@
         <!-- Main Content -->
         <div class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span>Showing {{jobs.page * 2}} of {{jobs.total}} results</span>
+                <span>Showing {{jobs.page * jobs.per_page }} of {{jobs.total}} results</span>
                 <select class="form-select w-auto">
                     <option>Sort by latest</option>
                 </select>

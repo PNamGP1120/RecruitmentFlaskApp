@@ -77,6 +77,8 @@ class Company(BaseModel):
     address = Column(String(100))
 
     user = relationship("User", backref=backref("company", uselist=False))
+    jobs = relationship('Job', backref='company', lazy=True)
+
 
 # ========== JOB & APPLICATION ==========
 class Category(BaseModel):
@@ -104,7 +106,6 @@ class Job(BaseModel):
     company_id = Column(Integer, ForeignKey('company.id'))
     category_id = Column(Integer, ForeignKey("category.id"))
 
-    company = relationship('Company', backref='jobs', lazy=True)
 
 
     def __str__(self):
@@ -283,20 +284,20 @@ if __name__ == '__main__':
         # db.session.add_all([job, job1,job2,job3,job4,job5])
         # db.session.commit()
 
-        job6 = Job(
-            title="Django Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Da Nang City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME.value,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=1,
-            category_id=1
-        )
-        db.session.add(job6)
-        db.session.commit()
+        # job6 = Job(
+        #     title="Django Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Da Nang City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME.value,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # db.session.add(job6)
+        # db.session.commit()
 
         # # ===== RESUME & CV =====
         # resume = Resume(

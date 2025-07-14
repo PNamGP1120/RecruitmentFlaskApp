@@ -12,7 +12,7 @@
             </div>
         </div>
         <div class="d-flex flex-column align-items-end">
-            <button class="btn btn-success mb-2">Job Details</button>
+            <button class="btn btn-success mb-2"> <a class="page-link" href="{{url_for('job_detail', job_id=job.id)}}"> Job Details </a> </button>
             <i class="bi bi-bookmark"></i>
         </div>
     </div>
