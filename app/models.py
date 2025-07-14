@@ -42,7 +42,7 @@ class BaseModel(db.Model):
 # ========== USER & RELATED ==========
 class User(BaseModel, UserMixin):
     username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
     email = Column(String(100), unique=True, nullable=False)

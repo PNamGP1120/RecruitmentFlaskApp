@@ -1,4 +1,71 @@
-from app.models import Category, User, Job, Company
-from app import app, db
+from sqlalchemy import or_
 
-# def load_job()
+from app import db, app
+from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
+    JobStatusEnum
+
+
+def load_jobs(
+    page=1,
+    per_page=10,
+    keyword=None,
+    location=None,
+    employment_type=None,
+    category_id=None,
+    company_id=None,
+    min_salary=None,
+    max_salary=None,
+    status=JobStatusEnum.POSTED
+):
+    """
+    Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
+
+    :param page: Số trang hiện tại (mặc định 1).
+    :param per_page: Số lượng công việc trên mỗi trang (mặc định 10).
+    :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
+    :param location: Địa điểm công việc.
+    :param employment_type: Loại hình việc làm (ví dụ: "Fulltime", "Parttime").
+    :param category_id: ID của danh mục công việc.
+    :param company_id: ID của công ty.
+    :param min_salary: Mức lương tối thiểu.
+    :param max_salary: Mức lương tối đa.
+    :param status: Trạng thái công việc (mặc định là 'Posted').
+    :return: Đối tượng phân trang (Pagination object) chứa các công việc.
+    """
+
+    query = db.session.query(Job)
+
+    query = query.filter(Job.status == status)
+
+    if keyword:
+        query = query.filter(
+            or_(
+                Job.title.contains(keyword),
+                Job.description.contains(keyword),
+                Job.requirements.contains(keyword)
+            )
+        )
+
+    if location:
+        query = query.filter(Job.location.contains(location))
+
+    if employment_type:
+        query = query.filter(Job.employment_type == employment_type)
+
+    if category_id:
+        query = query.filter(Job.category_id == category_id)
+
+    if company_id:
+        query = query.filter(Job.company_id == company_id)
+
+    if min_salary is not None:
+        query = query.filter(Job.salary >= min_salary)
+
+    if max_salary is not None:
+        query = query.filter(Job.salary <= max_salary)
+
+    query = query.order_by(Job.created_date.desc())
+
+    jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jobs_pagination
