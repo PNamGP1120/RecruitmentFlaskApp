@@ -6,7 +6,16 @@ from app import app, dao, login
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+
+    total_jobs = dao.count_jobs()
+    total_candidates = dao.count_candidates()
+    total_companies = dao.count_companies()
+
+    return render_template('index.html',
+                           total_jobs=total_jobs,
+                           total_candidates=total_candidates,
+                           total_companies=total_companies
+                           )
 
 @app.route("/register", methods=['GET', 'POST'])
 def register_process():
@@ -54,7 +63,19 @@ def get_user_by_id(user_id):
 
 @app.route('/about')
 def about():
-    return render_template('about_us.html')
+    title = "About Us"
+    subtitle = "Learn more about our company and our services."
+    return render_template('about_us.html',
+                           title=title,
+                           subtitle=subtitle)
+
+@app.route('/contact')
+def contact():
+    title = "Contact Us"
+    subtitle = "Get in touch with us for any questions or inquiries."
+    return  render_template('contact_us.html',
+                            title=title,
+                            subtitle=subtitle)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -166,3 +166,12 @@ def auth_user(username, password, role=None):
                 return user
     return None
 
+def count_jobs():
+    return db.session.query(Job).filter(Job.status == JobStatusEnum.POSTED).count()
+
+def count_candidates():
+    return db.session.query(User).filter(User.role == RoleEnum.JOBSEEKER, User.is_active == True).count()
+
+def count_companies():
+    return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
+
