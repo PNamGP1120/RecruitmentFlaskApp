@@ -55,23 +55,6 @@ class User(BaseModel, UserMixin):
 
     conversation = relationship("Conversation", secondary='conversation_user', lazy='subquery', backref=backref('users', lazy=True))
 
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}" if self.first_name or self.last_name else self.username
-
-    def is_admin(self):
-        return self.role == RoleEnum.ADMIN.value
-
-    def is_job_seeker(self):
-        return self.role == RoleEnum.JOBSEEKER.value
-
-    def is_recruiter(self):
-        return self.role == RoleEnum.RECRUITER.value
-
-    def get_avatar_url(self):
-        return self.avatar if self.avatar else "https://www.gravatar.com/avatar/"
-
-    def __str__(self):
-        return self.get_full_name()
 
 class Resume(BaseModel):
     user_id = Column(Integer, ForeignKey('user.id'))

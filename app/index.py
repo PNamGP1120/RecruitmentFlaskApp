@@ -1,28 +1,12 @@
-from flask import render_template, request
-from app import app, db
-# from utils import get_job_postings
-from app.models import Category
+from flask import render_template
+from app import app
 
 @app.route('/')
 def index():
-    
     return render_template('index.html')
-
-#
-# @app.route('/job_postings/<job_posting_id>')
-# def detail(job_posting_id):
-#     return render_template('jobs.html')
-
-
-@app.route("/jobs")
-def jobs():
-    
-    return render_template('jobs.html')
-
-
 
 
 if __name__ == '__main__':
     with app.app_context():
-        from app import admin
+        from app.admin import *
         app.run(debug=True)
