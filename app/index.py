@@ -8,9 +8,11 @@ from app import app, dao, login
 def index():
     return render_template('index.html')
 
-@app.route('/cvs')
-def cvs():
-    return render_template('cvs.html')
+@app.route('/profile')
+def profile():
+    title = "Resume & CV Management"
+    subtitle = "Edit your resume & CV"
+    return render_template('profile/profile.html', title=title, subtitle=subtitle)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register_process():

@@ -388,7 +388,7 @@ def populate_sample_data():
             cv_js1_python = CV(
                 resume_id=resume1.id,
                 title='Python Dev CV',
-                file_path='/static/cvs/tran_timviec_python.pdf',
+                file_path='/static/profile/tran_timviec_python.pdf',
                 is_default=True,
                 created_date=datetime.now() - timedelta(days=80)
             )
@@ -399,7 +399,7 @@ def populate_sample_data():
             cv_js2_java = CV(
                 resume_id=resume2.id,
                 title='Java Engineer CV',
-                file_path='/static/cvs/le_vieclam_java.pdf',
+                file_path='/static/profile/le_vieclam_java.pdf',
                 is_default=True,
                 created_date=datetime.now() - timedelta(days=50)
             )
