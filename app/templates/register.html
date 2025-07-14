@@ -1,0 +1,183 @@
+{% extends 'layout/base.html'%}
+
+{% block title %}Register Account{% endblock %}
+
+{% block css %}
+<style>
+    .info-box {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        height: 100%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .info-icon {
+        font-size: 1.5rem;
+        color: #20c997;
+        flex-shrink: 0;
+    }
+
+    .register-form-wrapper {
+        background-color: #edf8f6;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .form-group-inline {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        min-width: 130px;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .form-control,
+    .form-select {
+        flex: 1;
+    }
+
+    .btn-custom {
+        background-color: #20c997;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #17a589;
+    }
+
+    @media (max-width: 768px) {
+        .form-group-inline {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .form-label {
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+{% include 'layout/hero_section.html'%}
+
+<!-- Main Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- LEFT: Info -->
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3">You Will Grow, You Will Succeed. We Promise That</h2>
+                <p class="text-muted mb-4">
+                    Build a professional profile in just a few steps. Get access to thousands of jobs daily and grow your career with us.
+                </p>
+
+                <div class="row row-cols-2 g-3">
+                    {% set infos = [
+                        {'icon': 'bi-telephone', 'title': 'Call for inquiry', 'value': '+84 089-45765'},
+                        {'icon': 'bi-envelope', 'title': 'Send us email', 'value': 'ou.job@gmail.com'},
+                        {'icon': 'bi-clock', 'title': 'Opening hours', 'value': 'Mon - Fri: 10AM - 10PM'},
+                        {'icon': 'bi-geo-alt', 'title': 'Office', 'value': 'Nha Be, HCM'}
+                    ] %}
+                    {% for info in infos %}
+                    <div class="col">
+                        <div class="info-box">
+                            <i class="bi {{ info.icon }} info-icon"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ info.title }}</h6>
+                                <p class="mb-0">{{ info.value }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- RIGHT: Form -->
+            <div class="col-md-6">
+                <div class="register-form-wrapper">
+                    <h4 class="fw-bold mb-3">Register Information</h4>
+                    <p class="text-muted mb-4">Fill in the form below to create your account.</p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('register_process') }}" enctype="multipart/form-data">
+
+                        {% set fields = [
+                            {'id': 'first_name', 'label': 'First Name', 'type': 'text', 'placeholder': 'Your name', 'value': request.form.first_name},
+                            {'id': 'last_name', 'label': 'Last Name', 'type': 'text', 'placeholder': 'Your surname', 'value': request.form.last_name},
+                            {'id': 'username', 'label': 'Username', 'type': 'text', 'placeholder': 'Choose a username', 'value': request.form.username},
+                            {'id': 'email', 'label': 'Email', 'type': 'email', 'placeholder': 'your@email.com', 'value': request.form.email},
+                            {'id': 'password', 'label': 'Password', 'type': 'password', 'placeholder': 'Enter password'},
+                            {'id': 'confirm_password', 'label': 'Confirm', 'type': 'password', 'placeholder': 'Repeat password'},
+                        ] %}
+
+                        {% for field in fields %}
+                        <div class="form-group-inline">
+                            <label class="form-label" for="{{ field.id }}">{{ field.label }}</label>
+                            <input
+                                type="{{ field.type }}"
+                                class="form-control"
+                                id="{{ field.id }}"
+                                name="{{ field.id }}"
+                                placeholder="{{ field.placeholder }}"
+                                {% if field.value is defined %} value="{{ field.value }}" {% endif %}
+                                required
+                            >
+                        </div>
+                        {% endfor %}
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="avatar">Avatar</label>
+                            <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                        </div>
+
+                        <div class="form-group-inline mb-4">
+                            <label class="form-label" for="role">Role</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="" disabled selected>Select your role</option>
+                                <option value="JOBSEEKER" {% if request.form.role == 'JOBSEEKER' %}selected{% endif %}>Job Seeker</option>
+                                <option value="RECRUITER" {% if request.form.role == 'RECRUITER' %}selected{% endif %}>Recruiter</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-custom btn-lg">Create Account</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        Already have an account?
+                        <a href="{{ url_for('login_process') }}" class="text-decoration-none fw-semibold text-primary">Login now</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
