@@ -1,7 +1,10 @@
 from flask import render_template, request, redirect, url_for
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, current_user
+
+# from sqlalchemy.sql.functions import current_user
 
 from app import app, dao, login
+from app.models import RoleEnum
 
 
 @app.route('/')
@@ -19,10 +22,24 @@ def index():
 
 @app.route('/profile')
 def profile():
+    if current_user.is_authenticated:
+        if current_user.role == RoleEnum.RECRUITER:
+            return redirect(url_for('company'))
+        elif current_user.role == RoleEnum.JOBSEEKER:
+            return redirect(url_for('jobseeker_profile'))
+    else:
+        return redirect(url_for('login_process'))
     title = "Resume & CV Management"
     subtitle = "Edit your resume & CV"
     return render_template('profile/profile.html', title=title, subtitle=subtitle)
 
+@app.route('/company')
+def company():
+    title = "Company Profile"
+    subtitle = "Edit your company profile"
+    return render_template('profile/company.html',
+                           title=title,
+                           subtitle=subtitle)
 @app.route("/register", methods=['GET', 'POST'])
 def register_process():
     err_msg = None
