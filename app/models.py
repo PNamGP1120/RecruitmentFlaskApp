@@ -195,105 +195,120 @@ if __name__ == '__main__':
         # print("Role.value: ", type(RoleEnum.JOBSEEKER.value))
 
         # ===== COMPANY =====
-        company = Company(
-            user_id=3,
-            website="https://example.com",
-            introduction="A leading tech company",
-            company_name="ExampleTech",
-            industry="IT",
-            company_size="100-500",
-            address="123 Tech Avenue"
-        )
-        db.session.add(company)
-        db.session.commit()
+        # company = Company(
+        #     user_id=3,
+        #     website="https://example.com",
+        #     introduction="A leading tech company",
+        #     company_name="ExampleTech",
+        #     industry="IT",
+        #     company_size="100-500",
+        #     address="123 Tech Avenue"
+        # )
+        # db.session.add(company)
+        # db.session.commit()
 
         # ===== JOB =====
-        job = Job(
-            title="React Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Ho Chi Minh City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
-            category_id=1
-        )
-        job1 = Job(
-            title="C++ Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Ho Chi Minh City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
-            category_id=1
-        )
-        job2 = Job(
-            title="C# Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Ho Chi Minh City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
-            category_id=1
-        )
-        job3 = Job(
-            title="Python Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Ho Chi Minh City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
-            category_id=1
-        )
-        job4 = Job(
-            title="Java Developer",
-            description="Develop modern front-end apps",
-            requirements="3+ years React experience",
-            location="Ho Chi Minh City",
-            salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
-            status=JobStatusEnum.POSTED,
-            expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
-            category_id=1
-        )
-        job5 = Job(
+        # job = Job(
+        #     title="React Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Ho Chi Minh City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # job1 = Job(
+        #     title="C++ Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Ho Chi Minh City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # job2 = Job(
+        #     title="C# Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Phu Quoc City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # job3 = Job(
+        #     title="Python Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Ho Chi Minh City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # job4 = Job(
+        #     title="Java Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Ha Noi City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # job5 = Job(
+        #     title="Django Developer",
+        #     description="Develop modern front-end apps",
+        #     requirements="3+ years React experience",
+        #     location="Da Nang City",
+        #     salary=1500.0,
+        #     employment_type=EmploymentEnum.FULLTIME,
+        #     status=JobStatusEnum.POSTED,
+        #     expiration_date=datetime.now() + timedelta(days=30),
+        #     company_id=1,
+        #     category_id=1
+        # )
+        # db.session.add_all([job, job1,job2,job3,job4,job5])
+        # db.session.commit()
+
+        job6 = Job(
             title="Django Developer",
             description="Develop modern front-end apps",
             requirements="3+ years React experience",
-            location="Ho Chi Minh City",
+            location="Da Nang City",
             salary=1500.0,
-            employment_type=EmploymentEnum.FULLTIME,
+            employment_type=EmploymentEnum.FULLTIME.value,
             status=JobStatusEnum.POSTED,
             expiration_date=datetime.now() + timedelta(days=30),
-            company_id=company.id,
+            company_id=1,
             category_id=1
         )
-        db.session.add_all([job, job1,job2,job3,job4,job5])
+        db.session.add(job6)
         db.session.commit()
 
-        # ===== RESUME & CV =====
-        resume = Resume(
-            user_id=2,
-            skill="React, JavaScript, HTML, CSS",
-            experience="2 years at WebXYZ",
-            education="Bachelor of Computer Science",
-            preferred_locations="Ho Chi Minh",
-            preferred_job_types="Fulltime",
-            linkedin_url="https://linkedin.com/in/johndoe"
-        )
-        db.session.add(resume)
-        db.session.commit()
+        # # ===== RESUME & CV =====
+        # resume = Resume(
+        #     user_id=2,
+        #     skill="React, JavaScript, HTML, CSS",
+        #     experience="2 years at WebXYZ",
+        #     education="Bachelor of Computer Science",
+        #     preferred_locations="Ho Chi Minh",
+        #     preferred_job_types="Fulltime",
+        #     linkedin_url="https://linkedin.com/in/johndoe"
+        # )
+        # db.session.add(resume)
+        # db.session.commit()
 
         print("Dữ liệu mẫu đã được tạo thành công!")

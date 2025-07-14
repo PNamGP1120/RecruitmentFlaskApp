@@ -1,23 +1,43 @@
 from flask import render_template, request
 from app import app, db
 from app import dao
+from app.models import EmploymentEnum
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route("/jobs", methods=["get"])
+@app.route("/jobs", methods=["GET"])
 def job():
     cates = dao.load_cate()
     page = int(request.args.get('page', 1))
     page_size = 2
-    jobs = dao.load_jobs(page=page, per_page=page_size)
 
-    # job_title = requet
+    keyword = request.args.get("keyword")
+    locate = request.args.get("location")
+    jobType = request.args.get("jobType")
 
-    return render_template("jobs.html", cates=cates, jobs=jobs)
+    if not locate or locate == "Choose city":
+        locate = None
 
+    print("args", jobType)
+
+    # chuyen chuoi thanh enum
+    job_type_enum = None
+    if jobType:
+        try:
+            job_type_enum = EmploymentEnum[jobType]  # vi du "FULLTIME" -> EmploymentEnum.FULLTIME
+        except KeyError:
+            print(f"[!] jobType không hợp lệ: {jobType}")
+
+    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum)
+
+    locations = [loc[0] for loc in db.session.query(Job.location).distinct().all()]
+
+    return render_template(
+        "jobs.html",cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
 
 if __name__ == '__main__':
     with app.app_context():

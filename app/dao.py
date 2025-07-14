@@ -1,8 +1,10 @@
+from idlelib.query import Query
+
 from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category
+    JobStatusEnum, Category, EmploymentEnum
 
 
 def load_cate():
@@ -20,7 +22,7 @@ def load_jobs(
     company_id=None,
     min_salary=None,
     max_salary=None,
-    status=JobStatusEnum.POSTED
+    status=JobStatusEnum.POSTED,
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
@@ -42,15 +44,9 @@ def load_jobs(
     query = Job.query.filter(Job.status == status)
 
     if keyword:
-        query = query.filter(
-            or_(
-                Job.title.contains(keyword),
-                Job.description.contains(keyword),
-                Job.requirements.contains(keyword)
-            )
-        )
+        query = query.filter( Job.title.contains(keyword))
 
-    if location:
+    if location :
         query = query.filter(Job.location.contains(location))
 
     if employment_type:
@@ -68,15 +64,25 @@ def load_jobs(
     if max_salary is not None:
         query = query.filter(Job.salary <= max_salary)
 
-    query = query.order_by(Job.created_date.desc())
+    if employment_type:
+        try:
+            # Chuyển string sang enum
+            emp_enum = EmploymentEnum[employment_type]  # "FULLTIME" => EmploymentEnum.FULLTIME
+            print(emp_enum.name)
+            query = query.filter(Job.employment_type == emp_enum)
+        except KeyError:
+            pass  # không lọc nếu sai
+
 
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    print("a",jobs_pagination.items)
+    print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
 
 if __name__ == "__main__":
     with app.app_context():
-        u = load_jobs()
-        # for i in u:
-        #     print(i.title)
-        print(u.pages)
+        u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
+        for i in u:
+            print(i.title)
+        # print(u.items.employment_type)
