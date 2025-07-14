@@ -17,6 +17,12 @@ def index():
                            total_companies=total_companies
                            )
 
+@app.route('/profile')
+def profile():
+    title = "Resume & CV Management"
+    subtitle = "Edit your resume & CV"
+    return render_template('profile/profile.html', title=title, subtitle=subtitle)
+
 @app.route("/register", methods=['GET', 'POST'])
 def register_process():
     err_msg = None

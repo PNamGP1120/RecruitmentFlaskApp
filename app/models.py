@@ -119,7 +119,7 @@ class CV(BaseModel):
     updated_date = Column(DateTime)
     resume_id = Column(Integer, ForeignKey('resume.id'))
 
-    resume = relationship("Resume", backref="cvs", lazy=True)
+    resume = relationship("Resume", backref="profile", lazy=True)
 
 class Application(BaseModel):
     cover_letter = Column(Text)
