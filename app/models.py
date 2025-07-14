@@ -167,7 +167,7 @@ class Message(BaseModel):
     conversation_id = Column(Integer, ForeignKey('conversation.id'))
     sender_id = Column(Integer, ForeignKey('user.id'))
 
-    conversation = relationship("conversation", backref="messages", lazy=True)
+    conversation = relationship("Conversation", backref="messages", lazy=True)
     sender = relationship("User", backref="messages", lazy=True)
 
 # ========== MIDDLE TABLE ==========
@@ -189,7 +189,128 @@ class Notification(BaseModel):
 
 if __name__ == '__main__':
     with app.app_context():
+        # db.create_all()
+        # c1 = Category(name="Front-end")
+        # c2 = Category(name="Back-end")
+        # c3 = Category(name="FullStack")
+        #
+        # db.session.add_all([c1, c2, c3])
+        # db.session.commit()
 
+        # import hashlib
+        # u1 = User(username="Admin", password=str(hashlib.md5("123456".encode('utf-8')).hexdigest()), role=RoleEnum.ADMIN, email="admin@gmail.com" )
+        # u2 = User(username="JopSeeker1", password=str(hashlib.md5("123456".encode('utf-8')).hexdigest()), role=RoleEnum.JOBSEEKER, email="jobseeker1@gmail.com" )
+        # u3 = User(username="Recruiter1", password=str(hashlib.md5("123456".encode('utf-8')).hexdigest()), role=RoleEnum.RECRUITER, email="recruiter1@gmail.com" )
+        #
+        # db.session.add_all([u1, u2, u3])
+        # db.session.commit()
+        # u4 = User(username="Recruiter2", password=str(hashlib.md5("123456".encode('utf-8')).hexdigest()), role=RoleEnum.RECRUITER.value, email="recruiter2@gmail.com" )
+        # db.session.add(u4)
+        # db.session.commit()
 
-        db.create_all()
+        # print("Role: ", RoleEnum.JOBSEEKER)
+        # print("Role.value: ", type(RoleEnum.JOBSEEKER.value))
 
+        # ===== COMPANY =====
+        company = Company(
+            user_id=3,
+            website="https://example.com",
+            introduction="A leading tech company",
+            company_name="ExampleTech",
+            industry="IT",
+            company_size="100-500",
+            address="123 Tech Avenue"
+        )
+        db.session.add(company)
+        db.session.commit()
+
+        # ===== JOB =====
+        job = Job(
+            title="React Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        job1 = Job(
+            title="C++ Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        job2 = Job(
+            title="C# Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        job3 = Job(
+            title="Python Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        job4 = Job(
+            title="Java Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        job5 = Job(
+            title="Django Developer",
+            description="Develop modern front-end apps",
+            requirements="3+ years React experience",
+            location="Ho Chi Minh City",
+            salary=1500.0,
+            employment_type=EmploymentEnum.FULLTIME,
+            status=JobStatusEnum.POSTED,
+            expiration_date=datetime.now() + timedelta(days=30),
+            company_id=company.id,
+            category_id=1
+        )
+        db.session.add_all([job, job1,job2,job3,job4,job5])
+        db.session.commit()
+
+        # ===== RESUME & CV =====
+        resume = Resume(
+            user_id=2,
+            skill="React, JavaScript, HTML, CSS",
+            experience="2 years at WebXYZ",
+            education="Bachelor of Computer Science",
+            preferred_locations="Ho Chi Minh",
+            preferred_job_types="Fulltime",
+            linkedin_url="https://linkedin.com/in/johndoe"
+        )
+        db.session.add(resume)
+        db.session.commit()
+
+        print("Dữ liệu mẫu đã được tạo thành công!")
