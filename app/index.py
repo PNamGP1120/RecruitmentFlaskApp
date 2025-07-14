@@ -5,6 +5,9 @@ from app import app
 def index():
     return render_template('index.html')
 
+@app.route('/cvs')
+def cvs():
+    return render_template('cvs.html')
 
 if __name__ == '__main__':
     with app.app_context():
