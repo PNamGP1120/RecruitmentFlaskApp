@@ -2,12 +2,17 @@ from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum
+    JobStatusEnum, Category
+
+
+def load_cate():
+    cates = Category.query.order_by("id").all()
+    return cates
 
 
 def load_jobs(
-    page=1,
-    per_page=10,
+    page=None,
+    per_page=None,
     keyword=None,
     location=None,
     employment_type=None,
@@ -21,7 +26,7 @@ def load_jobs(
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
 
     :param page: Số trang hiện tại (mặc định 1).
-    :param per_page: Số lượng công việc trên mỗi trang (mặc định 10).
+    :param per_page: Số lượng công việc trên mỗi trang (mặc định 10)
     :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
     :param location: Địa điểm công việc.
     :param employment_type: Loại hình việc làm (ví dụ: "Fulltime", "Parttime").
@@ -33,9 +38,8 @@ def load_jobs(
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
 
-    query = db.session.query(Job)
 
-    query = query.filter(Job.status == status)
+    query = Job.query.filter(Job.status == status)
 
     if keyword:
         query = query.filter(
@@ -69,3 +73,10 @@ def load_jobs(
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return jobs_pagination
+
+if __name__ == "__main__":
+    with app.app_context():
+        u = load_jobs()
+        # for i in u:
+        #     print(i.title)
+        print(u.pages)

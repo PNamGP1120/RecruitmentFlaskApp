@@ -1,0 +1,19 @@
+<div class="list-group-item mb-3">
+    <div class="d-flex justify-content-between">
+        <div>
+            <span class="badge bg-success mb-2">10 min ago</span>
+            <h5 class="mb-1">{{ job.title }}</h5>
+            <div class="text-muted mb-1">Bauch, Schuppe and Schulist Co</div>
+            <div class="mb-1">
+                <span class="me-2"><i class="bi bi-briefcase"></i> {{ job.requirements }}</span>
+                <span class="me-2"><i class="bi bi-clock"></i> {{ job.employment_type.value }}</span>
+                <span class="me-2"><i class="bi bi-cash"></i> {{ job.salary }}</span>
+                <span class="me-2"><i class="bi bi-geo-alt"></i> {{ job.location }}</span>
+            </div>
+        </div>
+        <div class="d-flex flex-column align-items-end">
+            <button class="btn btn-success mb-2">Job Details</button>
+            <i class="bi bi-bookmark"></i>
+        </div>
+    </div>
+</div>

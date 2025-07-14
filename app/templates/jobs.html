@@ -1,118 +1,121 @@
-<!--{% extends 'layout/base.html' %}-->
+{% extends 'layout/base.html' %}
 
-<!--{% block content %}-->
-<!--<div class="container-fluid py-4">-->
-<!--  <div class="row">-->
-<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
-<!--    <div class="col-lg-3 mb-4">-->
-<!--      <div class="card p-3">-->
-<!--        <h5 class="mb-3">Search by Job Title</h5>-->
-<!--        <input type="text" class="form-control mb-3" placeholder="Job title or company">-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Location</label>-->
-<!--          <select class="form-select">-->
-<!--            <option>Choose city</option>-->
-<!--            &lt;!&ndash; Thêm các thành phố &ndash;&gt;-->
-<!--          </select>-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Category</label>-->
-<!--          <div class="form-check">-->
-<!--            <input class="form-check-input" type="checkbox" id="cat1">-->
-<!--            <label class="form-check-label" for="cat1">E Commerce</label>-->
-<!--          </div>-->
-<!--          &lt;!&ndash; Thêm các category khác &ndash;&gt;-->
-<!--          <button class="btn btn-link p-0 mt-1">Show More</button>-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Job Type</label>-->
-<!--          <div class="form-check">-->
-<!--            <input class="form-check-input" type="checkbox" id="fulltime">-->
-<!--            <label class="form-check-label" for="fulltime">Full Time</label>-->
-<!--          </div>-->
-<!--          &lt;!&ndash; Thêm các loại khác &ndash;&gt;-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Experience Level</label>-->
-<!--          <div class="form-check">-->
-<!--            <input class="form-check-input" type="checkbox" id="noexp">-->
-<!--            <label class="form-check-label" for="noexp">No-experience</label>-->
-<!--          </div>-->
-<!--          &lt;!&ndash; Thêm các level khác &ndash;&gt;-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Date Posted</label>-->
-<!--          <div class="form-check">-->
-<!--            <input class="form-check-input" type="checkbox" id="all">-->
-<!--            <label class="form-check-label" for="all">All</label>-->
-<!--          </div>-->
-<!--          &lt;!&ndash; Thêm các lựa chọn khác &ndash;&gt;-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Salary</label>-->
-<!--          <input type="range" class="form-range" min="0" max="99999">-->
-<!--          <div class="d-flex justify-content-between">-->
-<!--            <span>Salary: 90 - 99999</span>-->
-<!--            <button class="btn btn-primary btn-sm">Apply</button>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--          <label class="form-label">Tags</label>-->
-<!--          <div>-->
-<!--            <span class="badge bg-light text-dark border me-1 mb-1">engineering</span>-->
-<!--            <span class="badge bg-light text-dark border me-1 mb-1">design</span>-->
-<!--            &lt;!&ndash; Thêm các tag khác &ndash;&gt;-->
-<!--          </div>-->
-<!--        </div>-->
-<!--        <div class="card bg-secondary text-white mt-4">-->
-<!--          <div class="card-body text-center">-->
-<!--            <h6>WE ARE HIRING</h6>-->
-<!--            <p class="mb-0">Apply Today!</p>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--    &lt;!&ndash; Main Content &ndash;&gt;-->
-<!--    <div class="col-lg-9">-->
-<!--      <div class="d-flex justify-content-between align-items-center mb-3">-->
-<!--        <span>Showing 6-6 of 10 results</span>-->
-<!--        <select class="form-select w-auto">-->
-<!--          <option>Sort by latest</option>-->
-<!--        </select>-->
-<!--      </div>-->
-<!--      &lt;!&ndash; Job List &ndash;&gt;-->
-<!--      <div class="list-group">-->
-<!--        &lt;!&ndash; Job Item &ndash;&gt;-->
-<!--        <div class="list-group-item mb-3">-->
-<!--          <div class="d-flex justify-content-between">-->
-<!--            <div>-->
-<!--              <span class="badge bg-success mb-2">10 min ago</span>-->
-<!--              <h5 class="mb-1">Forward Security Director</h5>-->
-<!--              <div class="text-muted mb-1">Bauch, Schuppe and Schulist Co</div>-->
-<!--              <div class="mb-1">-->
-<!--                <span class="me-2"><i class="bi bi-briefcase"></i> Hotels & Tourism</span>-->
-<!--                <span class="me-2"><i class="bi bi-clock"></i> Full time</span>-->
-<!--                <span class="me-2"><i class="bi bi-cash"></i> $40000-$42000</span>-->
-<!--                <span class="me-2"><i class="bi bi-geo-alt"></i> New York, USA</span>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div class="d-flex flex-column align-items-end">-->
-<!--              <button class="btn btn-success mb-2">Job Details</button>-->
-<!--              <i class="bi bi-bookmark"></i>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--        &lt;!&ndash; Lặp lại cho các job khác &ndash;&gt;-->
-<!--      </div>-->
-<!--      &lt;!&ndash; Pagination &ndash;&gt;-->
-<!--      <nav class="mt-4">-->
-<!--        <ul class="pagination justify-content-center">-->
-<!--          <li class="page-item active"><a class="page-link" href="#">1</a></li>-->
-<!--          <li class="page-item"><a class="page-link" href="#">2</a></li>-->
-<!--          <li class="page-item"><a class="page-link" href="#">Next</a></li>-->
-<!--        </ul>-->
-<!--      </nav>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
-<!--{% endblock %}-->
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 mb-4">
+      <div class="card p-3">
+        <h5 class="mb-3">Search by Job Title</h5>
+        <input type="text" class="form-control mb-3" placeholder="Job title or company">
+        <div class="mb-3">
+          <label class="form-label">Location</label>
+          <select class="form-select">
+            <option>Choose city</option>
+            <!-- Thêm các thành phố -->
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+            {% for c in cates %}
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="{{ c.id }}">
+            <label class="form-check-label" for="{{ c.id }}">{{ c.name }}</label>
+          </div>
+            {% endfor%}
+          <button class="btn btn-link p-0 mt-1">Show More</button>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Job Type</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="fulltime">
+            <label class="form-check-label" for="fulltime">Full Time</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="parttime">
+            <label class="form-check-label" for="parttime">Part Time</label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Experience Level</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="noexp">
+            <label class="form-check-label" for="noexp">No-experience</label>
+          </div>
+          <!-- Thêm các level khác -->
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Date Posted</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="all">
+            <label class="form-check-label" for="all">All</label>
+          </div>
+          <!-- Thêm các lựa chọn khác -->
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Salary</label>
+          <input type="range" class="form-range" min="0" max="99999">
+          <div class="d-flex justify-content-between">
+            <span>Salary: 90 - 99999</span>
+            <button class="btn btn-primary btn-sm">Apply</button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Tags</label>
+          <div>
+            <span class="badge bg-light text-dark border me-1 mb-1">engineering</span>
+            <span class="badge bg-light text-dark border me-1 mb-1">design</span>
+            <!-- Thêm các tag khác -->
+          </div>
+        </div>
+        <div class="card bg-secondary text-white mt-4">
+          <div class="card-body text-center">
+            <h6>WE ARE HIRING</h6>
+            <p class="mb-0">Apply Today!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span>Showing {{jobs.page * 2}} of {{jobs.total}} results</span>
+        <select class="form-select w-auto">
+          <option>Sort by latest</option>
+        </select>
+      </div>
+      <!-- Job List -->
+      <div class="list-group">
+          {% if not jobs %}
+          <div class="text-center alert alert-danger">KHÔNG CÓ CÔNG VIỆC NÀO PHÙ HỢP!</div>
+          {% else %}
+            {% for job in jobs.items %}
+                <!-- Job Item -->
+              {% include 'layout/cardjob.html'%}
+
+            {% endfor %}
+          <!-- Pagination -->
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if jobs.has_prev  %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('job', page=jobs.prev_num) }}">Previous</a></li>
+          {% endif %}
+
+          {% for p in range(1, jobs.pages+1) %}
+          <li id="page{{p}}" class="page-item"><a class="page-link" href="{{ url_for('job', page=p) }}">{{p}}</a></li>
+          {% endfor %}
+
+          {% if jobs.has_next %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('job', page=jobs.next_num) }}">Next</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+          {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
