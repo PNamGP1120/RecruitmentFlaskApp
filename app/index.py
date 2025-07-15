@@ -12,7 +12,7 @@ def index():
 
 
 @app.route('/profile', methods=['POST', 'GET'])
-def profile_process():
+def resume_process():
     title = "Resume & CV Management"
     subtitle = "Edit your resume & CV"
 
@@ -43,10 +43,13 @@ def profile_process():
                 resume = Resume(**resume_data)
                 dao.add_resume(resume)
                 flash('Resume was successfully added', 'success')
-            return redirect(url_for('profile_process'))
+            return redirect(url_for('resume_process'))
 
     return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume)
 
+@app.route('/profile', methods=['POST', 'GET'])
+def cv_process():
+    return render_template()
 
 @app.route("/register", methods=['GET', 'POST'])
 def register_process():
