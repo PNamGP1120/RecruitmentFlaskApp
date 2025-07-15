@@ -1,0 +1,131 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded px-4 mt-2">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+             stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             class="feather feather-briefcase mr-2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 3h-4a2 2 0 0 0-2 2v2h8V5a2 2 0 0 0-2-2z"/>
+        </svg>
+        &nbsp;Job Portal
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/jobs' %}active{% endif %}" href="/jobs">Jobs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">About Us</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">Contact Us</a>
+            </li>
+        </ul>
+
+        <div class="d-flex align-items-center">
+            {% if current_user.is_authenticated %}
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownUser"
+                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if current_user.avatar %}
+                    <img src="{{ current_user.avatar }}" alt="User Avatar" class="rounded-circle me-2"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                    <img src="/static/images/default-avatar.png" alt="Default Avatar" class="rounded-circle me-2"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    {% endif %}
+                    {{ current_user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                    <li><a class="dropdown-item" href="{{url_for('profile')}}">Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+                </ul>
+            </div>
+            {% else %}
+                {# Login Link #}
+                <a class="nav-link text-white me-2
+                   {% if request.path == url_for('login_process') %}
+                       btn btn-primary active-auth-btn
+                   {% else %}
+                       btn-outline-primary
+                   {% endif %}"
+                   href="{{ url_for('login_process') }}">Login
+                </a>
+
+                {# Register Link #}
+                <a class="btn ms-2
+                   {% if request.path == url_for('register_process') %}
+                       btn-primary active-auth-btn
+                   {% else %}
+                       btn-outline-primary
+                   {% endif %}"
+                   href="{{ url_for('register_process') }}">Register
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<style>
+    /* Các styles đã có từ trước */
+    .dropdown-menu {
+        margin-top: 0.5rem;
+    }
+    .dropdown-toggle::after {
+        display: none;
+    }
+    .dropdown-toggle {
+        color: white !important;
+    }
+    .dropdown-toggle:hover {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    /* Styles cho nút Login/Register */
+    .btn-outline-primary {
+        color: #20c997;
+        border-color: #20c997;
+        background-color: transparent;
+        padding: 0.5rem 1rem;
+        border-radius: 0.3rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #20c997;
+        color: white;
+        border-color: #20c997;
+    }
+
+    .btn-primary.active-auth-btn {
+        background-color: #20c997 !important;
+        border-color: #20c997 !important;
+        color: white !important;
+    }
+    .nav-link.btn-primary, .nav-link.btn-outline-primary {
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* --- Styles for standard nav-links (Home, Jobs, etc.) --- */
+    /* Bootstrap's default .nav-link.active might be enough, but if you want specific bolding: */
+    .navbar-nav .nav-item .nav-link.active {
+        font-weight: bold; /* Make active link bold */
+        color: #20c997 !important; /* Change color to your teal */
+    }
+    /* Adjust hover for nav-links to match active color or keep standard */
+    .navbar-nav .nav-item .nav-link:hover {
+        color: #20c997 !important; /* Example: make them teal on hover too */
+    }
+</style>
