@@ -64,8 +64,15 @@ class Resume(BaseModel):
     preferred_locations = Column(String(255))
     preferred_job_types = Column(String(255))
     linkedin_url = Column(String(255))
-
     user = relationship("User", backref=backref("resume", uselist=False))
+
+    def __init__(self, skill, experience, education, preferred_locations, preferred_job_types, linkedin_url):
+        self.skill = skill
+        self.experience = experience
+        self.education = education
+        self.preferred_locations = preferred_locations
+        self.preferred_job_types = preferred_job_types
+        self.linkedin_url = linkedin_url
 
 class Company(BaseModel):
     user_id = Column(Integer, ForeignKey('user.id'))

@@ -2,6 +2,9 @@ from flask import render_template, request, redirect, url_for
 from flask_login import login_user, logout_user, current_user
 
 # from sqlalchemy.sql.functions import current_user
+import flask
+from flask import render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user, current_user
 
 from app import app, dao, login
 from app.models import RoleEnum
@@ -10,6 +13,7 @@ from flask import render_template, request
 from app import app, db
 from app import dao
 from app.models import EmploymentEnum
+from app.models import Resume
 
 
 @app.route('/')
@@ -25,18 +29,43 @@ def index():
                            total_companies=total_companies
                            )
 
-@app.route('/profile')
-def profile():
-    if current_user.is_authenticated:
-        if current_user.role == RoleEnum.RECRUITER:
-            return redirect(url_for('company'))
-        elif current_user.role == RoleEnum.JOBSEEKER:
-            return redirect(url_for('jobseeker_profile'))
-    else:
-        return redirect(url_for('login_process'))
+
+@app.route('/profile', methods=['POST', 'GET'])
+def profile_process():
     title = "Resume & CV Management"
     subtitle = "Edit your resume & CV"
-    return render_template('profile/profile.html', title=title, subtitle=subtitle)
+
+    # Fetch the current user's resume (if it exists)
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+
+    if request.method == 'POST':
+        if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
+                or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):
+            flash('Please enter all required resume details', 'danger')
+        else:
+            # Prepare resume data
+            resume_data = {
+                'skill': request.form['skill'],
+                'experience': request.form['experience'],
+                'education': request.form['education'],
+                'preferred_locations': request.form['location'],
+                'preferred_job_types': request.form['job'],
+                'linkedin_url': request.form.get('linkedin', '')
+            }
+            # Update or create resume
+            if resume:
+                # Update existing resume
+                dao.update_resume(resume, resume_data)
+                flash('Resume was successfully updated', 'success')
+            else:
+                # Create new resume
+                resume = Resume(**resume_data, user_id=current_user.id)
+                dao.add_resume(resume)
+                flash('Resume was successfully added', 'success')
+            return redirect(url_for('profile_process'))
+
+    return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume)
+
 
 @app.route('/company')
 def company():
@@ -64,13 +93,14 @@ def register_process():
     subtitle = "Join our platform and discover thousands of job opportunities."
     return render_template('register.html', err_msg=err_msg, title=title, subtitle=subtitle)
 
+
 @app.route("/login", methods=['GET', 'POST'])
 def login_process():
     if request.method.__eq__('POST'):
         username = request.form.get('username')
         password = request.form.get('password')
         print(username, password)
-        u = dao.auth_user(username = username, password = password)
+        u = dao.auth_user(username=username, password=password)
         print(u)
         if u:
             login_user(u)
@@ -80,14 +110,17 @@ def login_process():
     subtitle = "Please enter your credentials to proceed."
     return render_template('login.html', title=title, subtitle=subtitle)
 
+
 @app.route("/logout")
 def logout_process():
     logout_user()
     return redirect(url_for('login_process'))
 
+
 @login.user_loader
 def get_user_by_id(user_id):
     return dao.get_user_by_id(user_id)
+
 
 @app.route('/about')
 def about():
@@ -138,7 +171,9 @@ def job_detail(job_id):
     return render_template("job_detail.html", job=job)
 
 
+
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
+
         app.run(debug=True)

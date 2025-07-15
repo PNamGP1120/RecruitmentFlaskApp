@@ -22,37 +22,50 @@
     <div class="container">
         <div class="row g-5">
 
+            <!-- Resume Section -->
             <div class="col-md-6">
-                <div class="resume-form-wrapper"> {# Use the renamed class for clarity #}
-                    <h4 class="fw-bold mb-3">Your Resume</h4>
-                    <p class="text-muted mb-4">Please enter your resume.</p>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
 
-                    <form method="POST" action="">
-                        <div class="mb-3">
-                            <label class="form-label">Skill</label>
-                            <input type="text" class="form-control" name="skill" value="{{ resume.skill if resume else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Experience</label>
-                            <input type="text" class="form-control" name="experience" value="{{ resume.experience if resume else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Education</label>
-                            <input type="text" class="form-control" name="education" value="{{ resume.education if resume else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Preferred Locations</label>
-                            <input type="text" class="form-control" name="preferred_locations" value="{{ resume.preferred_locations if resume else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Preferred Job Types</label>
-                            <input type="text" class="form-control" name="preferred_job_types" value="{{ resume.preferred_job_types if resume else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">LinkedIn URL</label>
-                            <input type="text" class="form-control" name="linkedin_url" value="{{ resume.linkedin_url if resume else '' }}">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Resume</button>
+
+                <div class="resume-form-wrapper">
+                    <h4 class="fw-bold mb-3">Your Resume</h4>
+                    <p class="text-muted mb-4">Edit your resume details below.</p>
+
+                    <form action="{{ url_for('profile_process') }}" method="POST">
+                        <label>
+                            Skill
+                            <input type="text" name="skill" placeholder="Skill" value="{{ resume.skill if resume else '' }}">
+                        </label><br>
+                        <label>
+                            Experience
+                            <input type="text" name="experience" placeholder="Experience" value="{{ resume.experience if resume else '' }}">
+                        </label><br>
+                        <label>
+                            Education
+                            <input type="text" name="education" placeholder="Education" value="{{ resume.education if resume else '' }}">
+                        </label><br>
+                        <label>
+                            Preferred Location
+                            <input type="text" name="location" placeholder="Location" value="{{ resume.preferred_locations if resume else '' }}">
+                        </label><br>
+                        <label>
+                            Preferred Job Types
+                            <input type="text" name="job" placeholder="Job Type" value="{{ resume.preferred_job_types if resume else '' }}">
+                        </label><br>
+                        <label>
+                            LinkedIn URL
+                            <input type="text" name="linkedin" placeholder="LinkedIn URL" value="{{ resume.linkedin_url if resume else '' }}">
+                        </label><br>
+                        <input type="submit" value="Save Resume">
                     </form>
 
                 </div>
