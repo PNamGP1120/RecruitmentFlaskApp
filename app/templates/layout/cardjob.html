@@ -1,9 +1,9 @@
-<div class="list-group-item mb-3">
-    <div class="d-flex justify-content-between">
+<div class="list-group-item mb-3 ">
+    <div class="d-flex justify-content-between job-item--detail ">
         <div>
             <span class="badge bg-success mb-2">10 min ago</span>
             <h5 class="mb-1">{{ job.title }}</h5>
-            <div class="text-muted mb-1">Bauch, Schuppe and Schulist Co</div>
+            <div class="text-muted mb-1">{{ job.category }}</div>
             <div class="mb-1">
                 <span class="me-2"><i class="bi bi-briefcase"></i> {{ job.requirements }}</span>
                 <span class="me-2"><i class="bi bi-clock"></i> {{ job.employment_type.value }}</span>
@@ -11,7 +11,7 @@
                 <span class="me-2"><i class="bi bi-geo-alt"></i> {{ job.location }}</span>
             </div>
         </div>
-        <div class="d-flex flex-column align-items-end">
+        <div class="d-flex flex-row align-items-start card-job-item">
             <button class="btn btn-success mb-2"> <a class="page-link" href="{{url_for('job_detail', job_id=job.id)}}"> Job Details </a> </button>
             <i class="bi bi-bookmark"></i>
         </div>

@@ -1,11 +1,15 @@
 {% extends 'layout/base.html' %}
 
+
+
 {% block content %}
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
 <div class="container-fluid py-4">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-lg-3 mb-4">
-            <div class="card p-3">
+            <div class="card p-3" style="border-radius: 25px">
                 <h5 class="mb-3">Search by Job Title</h5>
                 <form class="d-flex" style="height: 40px" action="/jobs" method="get">
                     <input class="form-control me-2" type="text" name="keyword" placeholder="Enter title">
@@ -32,13 +36,16 @@
                     <div class="mb-3">
                         <label style="background-color: lightgray; width: 100%"
                                class="form-label mt-1 p-2">Category</label>
-                        {% for c in cates %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="{{ c.id }}">
-                            <label class="form-check-label" for="{{ c.id }}">{{ c.name }}</label>
+                        <div style="border-width: 1px; border-style: solid">
+                            <select name="category" class="form-select">
+                                <option> Choose Category</option>
+                                {%if cates %}
+                                {%for c in cates %}
+                                <option value="{{c.id}}">{{c}}</option>
+                                {% endfor %}
+                                {% endif %}
+                            </select>
                         </div>
-                        {% endfor%}
-                        <button class="btn btn-link p-0 mt-1">Show More</button>
                     </div>
                     <div class="mb-3">
                         <label class="form-label mt-1 p-2" style="background-color: lightgray; width: 100%">Job

@@ -245,3 +245,43 @@ form .form-select:focus {
 .category-card:hover .category-icon i {
     color: #249e90; /* Màu xanh teal đậm hơn khi hover */
 }
+
+
+/* job item in jobDetail.html*/
+.job-item--detail {
+    border-style: solid;
+    border-radius: 10px;
+    padding: 15px;
+    border-color: #1ab1ff;
+    margin-top: 5px
+}
+
+.card-job-item {
+    width: 150px;
+    /* background-color: red; */
+    /* flex-wrap: wrap; */
+    justify-content: space-around;
+}
+
+.border--radius {
+    border-radius: 25px;
+    background-color: #f2fafa;
+    padding: 20px
+}
+
+
+.sidebar-detail{
+    padding: 0px;
+}
+
+.sidebar-detail h6 {
+    padding: 15px;
+    background-color: #2bbbad;
+    border-top-right-radius:  15px;
+    border-top-left-radius:  15px;
+}
+
+.sidebar-detail div {
+    padding: 20px;
+    padding-top: 0px
+}

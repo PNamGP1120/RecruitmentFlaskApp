@@ -134,6 +134,8 @@ def contact():
 
 @app.route("/jobs", methods=["GET"])
 def job():
+    title = "JOB"
+    subtitle="Welcome to Job"
     cates = dao.load_cate()
     page = int(request.args.get('page', 1))
     page_size = 3
@@ -141,9 +143,13 @@ def job():
     keyword = request.args.get("keyword")
     locate = request.args.get("location")
     jobType = request.args.get("jobType")
+    category= request.args.get('category')
 
     if not locate or locate == "Choose city":
         locate = None
+
+    if not category or locate == "Choose Category":
+        category = None
 
     # chuyen chuoi thanh enum
     job_type_enum = None
@@ -153,16 +159,18 @@ def job():
             job_type_enum = EmploymentEnum[jobType]  # vi du "FULLTIME" -> EmploymentEnum.FULLTIME
         except KeyError:
             print(f"[!] jobType không hợp lệ: {jobType}")
-    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum)
+    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum, category_id=category)
     locations = [loc[0] for loc in db.session.query(Job.location).distinct().all()]
-    return render_template("jobs.html",cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
+    return render_template("jobs.html", title=title, subtitle=subtitle,cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
 
 
 @app.route("/job-detail/<int:job_id>", methods=["get"])
 def job_detail(job_id):
     job = Job.query.get(job_id)
-
-    return render_template("job_detail.html", job=job)
+    page = int(request.args.get('page', 1))
+    page_size = 3
+    jobs = dao.load_jobs(page=page, per_page=page_size, location=job.location, exclude_job=job.id)
+    return render_template("job_detail.html", jobDetail=job, jobs=jobs)
 
 
 

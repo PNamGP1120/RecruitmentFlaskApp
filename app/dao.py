@@ -28,6 +28,7 @@ def load_jobs(
     min_salary=None,
     max_salary=None,
     status=JobStatusEnum.POSTED,
+    exclude_job=None
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
@@ -77,6 +78,9 @@ def load_jobs(
             query = query.filter(Job.employment_type == emp_enum)
         except KeyError:
             pass  # không lọc nếu sai
+
+    if exclude_job:
+        query = query.filter(Job.id != exclude_job)
 
 
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
