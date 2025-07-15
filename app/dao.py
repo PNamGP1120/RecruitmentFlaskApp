@@ -2,6 +2,7 @@ import hashlib
 from datetime import datetime
 
 import cloudinary.uploader
+from flask_login import current_user
 from idlelib.query import Query
 
 from sqlalchemy import or_
@@ -167,6 +168,7 @@ def add_resume(resume):
         bool: True if the resume was added successfully, False otherwise.
     """
     try:
+        resume.user_id = current_user.id
         db.session.add(resume)
         db.session.commit()
         return True

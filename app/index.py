@@ -53,7 +53,7 @@ def profile_process():
                 flash('Resume was successfully updated', 'success')
             else:
                 # Create new resume
-                resume = Resume(**resume_data, user_id=current_user.id)
+                resume = Resume(**resume_data)
                 dao.add_resume(resume)
                 flash('Resume was successfully added', 'success')
             return redirect(url_for('profile_process'))
