@@ -20,27 +20,26 @@
 
 <section class="py-5">
     <div class="container">
-        <div class="row g-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
+        <div class="row g-5">
             <!-- Resume Section -->
             <div class="col-md-6">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-
                 <div class="resume-form-wrapper">
                     <h4 class="fw-bold mb-3">Your Resume</h4>
                     <p class="text-muted mb-4">Edit your resume details below.</p>
 
                     <form action="{{ url_for('profile_process') }}" method="POST">
+                        <input type="hidden" name="resume_form" value="1">
                         <label>
                             Skill
                             <input type="text" name="skill" placeholder="Skill" value="{{ resume.skill if resume else '' }}">
@@ -71,14 +70,51 @@
                 </div>
             </div>
 
+            <!-- CV Section -->
             <div class="col-md-6">
                 <h2 class="fw-bold mb-3">Your CV</h2>
                 <p class="text-muted mb-4">
-                    Here is your CV list.
+                    Upload and manage your CVs.
                 </p>
 
+                <form action="{{ url_for('profile_process') }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="cv_form" value="1">
+                    <label>
+                        Title
+                        <input type="text" name="title">
+                    </label><br>
+                    <label>File CV</label>
+                    <input type="file" name="file"><br>
+                    <label>
+                        Set default
+                        <input type="checkbox" name="default">
+                    </label><br>
+                    <input type="submit">
+                </form>
 
+                {% if rows %}
+                <table>
+                    <thead>
+                    <td><h3>Title</h3></td>
+                    <td><h3>File Path</h3></td>
+                    <td><h3>Is Default</h3></td>
+                    <td><h3>Created Date</h3></td>
+                    <td><h3>Updated Date</h3></td>
+                    </thead>
 
+                    {% for row in rows%}
+                    <tr>
+                        <td>{{ row.title }}</td>
+                            <td><a href="{{ row.file_path }}" target="_blank">View CV</a></td>
+                            <td>{{ 'Yes' if row.is_default else 'No' }}</td>
+                            <td>{{ row.created_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ row.updated_date.strftime('%Y-%m-%d %H:%M:%S') if row.updated_date else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <p>No CVs uploaded yet.</p>
+                {% endif %}
             </div>
 
         </div>
