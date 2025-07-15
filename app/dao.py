@@ -146,6 +146,47 @@ def add_user(avatar_file, **user_data):
         print(f"Lỗi khi thêm người dùng vào DB: {e}")
         return None
 
+def add_resume(resume):
+    """
+    Add a Resume object to the database.
+
+    Args:
+        resume (Resume): The Resume object to be saved.
+
+    Returns:
+        bool: True if the resume was added successfully, False otherwise.
+    """
+    try:
+        db.session.add(resume)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding resume: {e}")
+        return False
+
+
+def update_resume(resume, data):
+    """
+    Update an existing Resume object in the database.
+
+    Args:
+        resume (Resume): The Resume object to update.
+        data (dict): Dictionary containing the updated resume fields.
+
+    Returns:
+        bool: True if the resume was updated successfully, False otherwise.
+    """
+    try:
+        for key, value in data.items():
+            setattr(resume, key, value)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating resume: {e}")
+        return False
+
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
