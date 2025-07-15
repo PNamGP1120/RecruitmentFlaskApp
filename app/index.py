@@ -1,17 +1,11 @@
-from flask import render_template, request, redirect, url_for
-from flask_login import login_user, logout_user, current_user
-
 # from sqlalchemy.sql.functions import current_user
-import flask
-from flask import render_template, request, redirect, url_for, flash
+from flask import redirect, url_for, flash
+from flask import render_template, request
 from flask_login import login_user, logout_user, current_user
 
-from app import app, dao, login
-from app.models import RoleEnum
-
-from flask import render_template, request
-from app import app, db
+from app import app
 from app import dao
+from app import login
 from app.models import EmploymentEnum
 from app.models import Resume
 
