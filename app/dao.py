@@ -2,30 +2,37 @@ import hashlib
 from datetime import datetime
 
 import cloudinary.uploader
+from idlelib.query import Query
+
 from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, RoleEnum
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum
+
+
+def load_cate():
+    cates = Category.query.order_by("id").all()
+    return cates
 
 
 def load_jobs(
-        page=1,
-        per_page=10,
-        keyword=None,
-        location=None,
-        employment_type=None,
-        category_id=None,
-        company_id=None,
-        min_salary=None,
-        max_salary=None,
-        status=JobStatusEnum.POSTED
+    page=None,
+    per_page=None,
+    keyword=None,
+    location=None,
+    employment_type=None,
+    category_id=None,
+    company_id=None,
+    min_salary=None,
+    max_salary=None,
+    status=JobStatusEnum.POSTED,
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
 
     :param page: Số trang hiện tại (mặc định 1).
-    :param per_page: Số lượng công việc trên mỗi trang (mặc định 10).
+    :param per_page: Số lượng công việc trên mỗi trang (mặc định 10)
     :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
     :param location: Địa điểm công việc.
     :param employment_type: Loại hình việc làm (ví dụ: "Fulltime", "Parttime").
@@ -37,20 +44,13 @@ def load_jobs(
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
 
-    query = db.session.query(Job)
 
-    query = query.filter(Job.status == status)
+    query = Job.query.filter(Job.status == status)
 
     if keyword:
-        query = query.filter(
-            or_(
-                Job.title.contains(keyword),
-                Job.description.contains(keyword),
-                Job.requirements.contains(keyword)
-            )
-        )
+        query = query.filter( Job.title.contains(keyword))
 
-    if location:
+    if location :
         query = query.filter(Job.location.contains(location))
 
     if employment_type:
@@ -68,9 +68,19 @@ def load_jobs(
     if max_salary is not None:
         query = query.filter(Job.salary <= max_salary)
 
-    query = query.order_by(Job.created_date.desc())
+    if employment_type:
+        try:
+            # Chuyển string sang enum
+            emp_enum = EmploymentEnum[employment_type]  # "FULLTIME" => EmploymentEnum.FULLTIME
+            print(emp_enum.name)
+            query = query.filter(Job.employment_type == emp_enum)
+        except KeyError:
+            pass  # không lọc nếu sai
+
 
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    print("a",jobs_pagination.items)
+    print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
 
@@ -175,3 +185,10 @@ def count_candidates():
 def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
+
+if __name__ == "__main__":
+    with app.app_context():
+        u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
+        for i in u:
+            print(i.title)
+        # print(u.items.employment_type)
