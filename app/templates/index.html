@@ -1,3 +1,5 @@
+{# index.html #}
+
 {% extends 'layout/base.html' %}
 
 {% block title %}Trang chủ{% endblock %}
@@ -50,7 +52,8 @@
                             <i class="bi bi-briefcase fs-3"></i>
                         </div>
                         <div>
-                            <div class="fw-bold fs-4 text-white">25,850</div>
+                            {# Thay thế số cứng bằng biến total_jobs #}
+                            <div class="fw-bold fs-4 text-white">{{ '{:,.0f}'.format(total_jobs) }}</div>
                             <div class="small text-light text-opacity-75">Jobs Available</div>
                         </div>
                     </div>
@@ -59,7 +62,8 @@
                             <i class="bi bi-people fs-3"></i>
                         </div>
                         <div>
-                            <div class="fw-bold fs-4 text-white">10,250</div>
+                            {# Thay thế số cứng bằng biến total_candidates #}
+                            <div class="fw-bold fs-4 text-white">{{ '{:,.0f}'.format(total_candidates) }}</div>
                             <div class="small text-light text-opacity-75">Candidates</div>
                         </div>
                     </div>
@@ -68,7 +72,8 @@
                             <i class="bi bi-building fs-3"></i>
                         </div>
                         <div>
-                            <div class="fw-bold fs-4 text-white">18,400</div>
+                            {# Thay thế số cứng bằng biến total_companies #}
+                            <div class="fw-bold fs-4 text-white">{{ '{:,.0f}'.format(total_companies) }}</div>
                             <div class="small text-light text-opacity-75">Companies</div>
                         </div>
                     </div>
@@ -98,26 +103,22 @@
                 <p class="text-muted">At eu lobortis pretium tincidunt amet lacus ut Aenean aliquet..</p>
             </div>
             <div>
-                {# Sử dụng url_for để tạo liên kết "View all", trỏ đến cùng route 'index' nhưng có thể thêm params nếu muốn trang job riêng #}
                 <a href="{{ url_for('index') }}" class="text-primary fw-semibold text-decoration-none">View all</a>
             </div>
         </div>
 
         <div class="row gy-4">
-            {# Kiểm tra xem có job_postings nào không #}
             {% if job_postings %}
                 {% for job in job_postings %}
                 <div class="col-12">
                     <div class="job-card rounded-4 shadow-sm p-3 p-md-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            {# Hiển thị thời gian đăng, sử dụng format ngày tháng #}
                             <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3 rounded-pill">{{ job.created_date.strftime('%d %b %Y') }}</span>
                             <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
                         </div>
 
                         <div class="d-flex align-items-center mb-3">
                             <div class="me-3">
-                                {# Hiển thị avatar của công ty, fallback về placeholder nếu không có #}
                                 <img src="{{ job.recruiter.user.get_avatar_url() if job.recruiter and job.recruiter.user and job.recruiter.user.avatar else 'https://via.placeholder.com/40' }}"
                                      alt="Company Logo" height="40" width="40" class="rounded-circle border border-1 border-light">
                             </div>
@@ -133,7 +134,6 @@
                             <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> ${{ '{:,.0f}'.format(job.salary) }}</div>
                             <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ job.location }}</div>
 
-                            {# Liên kết đến trang chi tiết công việc (cần tạo route và template cho trang này sau) #}
                             <a href="#" class="btn-job-details ms-auto">Job Details</a>
                         </div>
                     </div>
