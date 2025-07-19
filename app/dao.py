@@ -3,7 +3,6 @@ from datetime import datetime
 
 import cloudinary.uploader
 from flask_login import current_user
-from idlelib.query import Query
 
 from sqlalchemy import or_
 
