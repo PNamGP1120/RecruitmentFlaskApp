@@ -46,7 +46,10 @@ def load_jobs(
     """
 
 
-    query = Job.query.filter(Job.status == status)
+    query = Job.query.filter()
+
+    if status:
+        query = query.filter(Job.status == status)
 
     if keyword:
         query = query.filter( Job.title.contains(keyword))
@@ -78,12 +81,60 @@ def load_jobs(
         except KeyError:
             pass  # không lọc nếu sai
 
-
+    query = query.order_by(Job.created_date.desc())
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     print("a",jobs_pagination.items)
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
+
+def add_job(company_id, **job_data):
+    """
+    Thêm một công việc mới vào cơ sở dữ liệu.
+    :param job_data: Dictionary chứa các dữ liệu công việc từ form, bao gồm:
+                    title, description, requirements, location, employment_type (chuỗi),
+                    category_id, company_id, salary, và bất kỳ trường nào khác bạn đã thêm vào form.
+    :return: Đối tượng Job nếu thêm thành công, ngược lại là None.
+    """
+    title = job_data.get('title')
+    description = job_data.get('description')
+    requirements = job_data.get('requirements')
+    location = job_data.get('location')
+    salary = job_data.get('salary', 0)
+    employment_type = job_data.get('employment_type', 'FULLTIME')
+    status = job_data.get('status', JobStatusEnum.POSTED)  
+    category_id = job_data.get('category_id')
+    is_active = job_data.get('is_active', True)
+
+    job = Job(
+        title=title,
+        description=description,
+        requirements=requirements,
+        location=location,
+        salary=salary,
+        employment_type=employment_type,
+        status=status,
+        created_date=datetime.now(),
+        updated_date=datetime.now(),
+        category_id=int(category_id),
+        company_id=company_id
+
+
+    )
+    print(category_id)
+    print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
+    try:
+        job.company_id = company_id
+        db.session.add(job)
+        db.session.commit()
+        print(f"Đã thêm công việc: {title} thành công.")
+        return job
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi thêm công việc vào DB: {e}")
+        return None
+
+
 
 
 def add_user(avatar_file, **user_data):
@@ -310,4 +361,5 @@ if __name__ == "__main__":
         u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
         for i in u:
             print(i.title)
-        # print(u.items.employment_type)
+        print(u.items.employment_type)
+

@@ -9,6 +9,13 @@ from app import login
 from app.models import EmploymentEnum, RoleEnum
 from app.models import Resume
 
+@app.context_processor
+def inject_user():
+    is_recruiter = current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER
+    is_jobSeeker = current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER
+    is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
+
+    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
 
 @app.route('/')
 def index():
@@ -20,7 +27,7 @@ def index():
     return render_template('index.html',
                            total_jobs=total_jobs,
                            total_candidates=total_candidates,
-                           total_companies=total_companies
+                           total_companies=total_companies,
                            )
 
 
@@ -260,6 +267,66 @@ def job_detail(job_id):
     return render_template("job_detail.html", job=job)
 
 
+# Recruiter
+@app.route('/job-posting', methods=['GET', 'POST'])
+def job_posting():
+    title = "Job Posting"
+    subtitle = "Post your job here"
+    page = int(request.args.get('page', 1))
+    page_size = 5
+
+    company = dao.load_company_by_id(current_user.id)
+    jobs = dao.load_jobs(company_id=company.id, page=page, per_page=page_size, status=None)
+
+
+    cates = dao.load_cate()
+
+
+
+    print(dao.load_company_by_id(current_user.id).id)
+    employment_enum = EmploymentEnum
+    print(employment_enum.FULLTIME)
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        requirements = request.form.get('requirements')
+        location = request.form.get('location')
+        salary = request.form.get('salary')
+        employment_type = request.form.get('employment_type')
+        status = request.form.get('status')
+        expiration_date = request.form.get('expiration_date')
+        category_id = request.form.get('category_id')
+        print(category_id)
+
+        if 'save_draft' in request.form:
+            status = 'DRAFT'
+        else:
+            status = 'POSTED'
+
+        dao.add_job(
+            company_id=dao.load_company_by_id(current_user.id).id,
+            title=title,
+            description=description,
+            requirements=requirements,
+            location=location,
+            salary=salary,
+            employment_type=employment_type,
+            status=status,
+            expiration_date=expiration_date,
+            category_id=category_id,
+        )
+
+        flash('Job was successfully added', 'success')
+        return redirect(url_for('job_posting'))
+
+
+
+    return render_template('recruiter/job_posting.html',
+                            title=title,
+                           subtitle=subtitle,
+                           jobs=jobs,
+                           categories=cates,
+                           employment_types=employment_enum,)
 
 if __name__ == '__main__':
     with app.app_context():

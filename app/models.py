@@ -67,7 +67,7 @@ class Resume(BaseModel):
     user = relationship("User", backref=backref("resume", uselist=False))
 
 class Company(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'), unique=True)
     website = Column(String(255))
     introduction = Column(Text)
     company_name = Column(String(255))
