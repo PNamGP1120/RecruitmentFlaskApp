@@ -75,6 +75,136 @@ def profile_process():
             # Fetch the current user's resume (if it exists)
             resume = Resume.query.filter_by(user_id=current_user.id).first()
 
+
+    if current_user.is_authenticated:
+        if current_user.role == RoleEnum.RECRUITER :
+            data_company = dao.load_company_by_id(current_user.id)
+
+            if request.method == 'POST':
+                form_data ={
+                    'website': request.form.get('website', ''),
+                    'introduction': request.form.get('introduction', ''),
+                    'company_name': request.form.get('company_name', ''),
+                    'industry': request.form.get('industry', ''),
+                    'company_size': request.form.get('company_size', ''),
+                    'address': request.form.get('address', ''),
+                }
+                if data_company:
+                    dao.update_company(data_company, form_data)
+                    flash('Company was successfully updated', 'success')
+                else:
+                    form_data['user_id'] = current_user.id
+                    dao.add_company(form_data)
+                    flash('Company was successfully added', 'success')
+
+            data_company = dao.load_company_by_id(current_user.id)
+
+            if not data_company:
+                data_company = {
+                    'website': '',
+                    'introduction': '',
+                    'company_name': '',
+                    'industry': '',
+                    'company_size': '',
+                    'address': '',
+                }
+
+            title = "Company Profile"
+            subtitle = "Edit your company profile"
+            print(current_user.company)
+            return render_template('profile/company.html',
+                                   data_company=data_company,
+                                   title=title,
+                                   subtitle=subtitle)
+        elif current_user.role == RoleEnum.JOBSEEKER :
+            title = "Resume & CV Management"
+            subtitle = "Edit your resume & CV"
+            # Fetch the current user's resume (if it exists)
+            resume = Resume.query.filter_by(user_id=current_user.id).first()
+    title = "Resume & CV Management"
+    subtitle = "Edit your resume & CV"
+
+    # Fetch the current user's resume (if it exists)
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    cv_list = CV.query.filter_by(resume_id=resume.id).all() if resume else []
+
+            if request.method == 'POST':
+                if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
+                        or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):
+                    flash('Please enter all required resume details', 'danger')
+                else:
+                    # Prepare resume data
+                    resume_data = {
+                        'skill': request.form['skill'],
+                        'experience': request.form['experience'],
+                        'education': request.form['education'],
+                        'preferred_locations': request.form['location'],
+                        'preferred_job_types': request.form['job'],
+                        'linkedin_url': request.form.get('linkedin', '')
+                    }
+                    # Update or create resume
+                    if resume:
+                        # Update existing resume
+                        dao.update_resume(resume, resume_data)
+                        flash('Resume was successfully updated', 'success')
+                    else:
+                        # Create new resume
+                        resume = Resume(**resume_data)
+                        dao.add_resume(resume)
+                        flash('Resume was successfully added', 'success')
+                    return redirect(url_for('profile_process'))
+    if request.method == 'POST':
+        if 'resume_form' in request.form:
+            if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
+                    or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):
+                flash('Please enter all required resume details', 'danger')
+            else:
+                # Prepare resume data
+                resume_data = {
+                    'skill': request.form['skill'],
+                    'experience': request.form['experience'],
+                    'education': request.form['education'],
+                    'preferred_locations': request.form['location'],
+                    'preferred_job_types': request.form['job'],
+                    'linkedin_url': request.form.get('linkedin', '')
+                }
+                # Update or create resume
+                if resume:
+                    # Update existing resume
+                    dao.update_resume(resume, resume_data)
+                    flash('Resume was successfully updated', 'success')
+                else:
+                    # Create new resume
+                    resume = Resume(**resume_data)
+                    dao.add_resume(resume)
+                    flash('Resume was successfully added', 'success')
+
+        elif 'cv_form' in request.form:  # Handle CV form submission
+            title = request.form['title']
+            file = request.files['file']
+            is_default = 'default' in request.form
+
+            if not resume:
+                flash('Please create a resume before uploading a CV', 'danger')
+            elif not title or not file:
+                flash('Please provide a title and file for the CV', 'danger')
+            else:
+                # Validate file type
+                if not file.filename.lower().endswith('.pdf'):
+                    flash('Only PDF files are allowed', 'danger')
+                else:
+                    success = dao.add_cv(
+                        title=title,
+                        file=file,
+                        is_default=is_default,
+                        resume_id=resume.id if resume else None
+                    )
+                    if success:
+                        flash('CV was successfully uploaded', 'success')
+                    else:
+                        flash('Error uploading CV', 'danger')
+
+        return redirect(url_for('profile_process'))
             if request.method == 'POST':
                 if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
                         or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):

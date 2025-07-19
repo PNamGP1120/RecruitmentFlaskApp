@@ -199,6 +199,63 @@ def update_resume(resume, data):
         print(f"Error updating resume: {e}")
         return False
 
+def add_cv(title, file, is_default, resume_id=None):
+    """
+    Add a CV to the database and upload the file to Cloudinary.
+
+    Args:
+        title (str): The title of the CV.
+        file: FileStorage object containing the CV file.
+        is_default (bool): Whether this CV should be set as default.
+        resume_id (int, optional): The ID of the associated resume.
+
+    Returns:
+        bool: True if the CV was added successfully, False otherwise.
+    """
+    try:
+        # Upload file to Cloudinary
+        upload_result = cloudinary.uploader.upload(file.stream)
+        file_path = upload_result['secure_url']
+
+        # If this CV is set as default, unset others for the same resume
+        if is_default and resume_id:
+            CV.query.filter_by(resume_id=resume_id, is_default=True).update({'is_default': False})
+
+        # Create new CV
+        cv = CV(
+            title=title,
+            file_path=file_path,
+            is_default=is_default,
+            resume_id=resume_id,
+            created_date=datetime.now(),
+            updated_date=datetime.now()
+        )
+        db.session.add(cv)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding CV: {e}")
+        return False
+
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
 
 def is_company_exist(user_id):
     return Company.query.filter_by(user_id=user_id).first() is not None
