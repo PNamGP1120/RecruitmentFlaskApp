@@ -5,3 +5,33 @@ document.addEventListener("DOMContentLoaded", function() {
     console.info(item);
     item.classList.add('active');
   });
+
+
+async function apply(jobId) {
+    const form = document.getElementById("applyForm");
+    const formData = new FormData(form);
+    const message = document.getElementById("error-apply");
+
+    try {
+        const response = await fetch(`/api/apply/${jobId}`, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+
+        if (response.status !== 200) {
+            // Giả sử server trả về: {"error": "You have already applied"}
+            message.innerText = data.message || "Đã xảy ra lỗi khi nộp đơn.";
+        } else {
+            alert(data.message || "You have successfully applied.");
+            window.location.href = "/applications";  // hoặc location.reload()
+        }
+    } catch (err) {
+        console.error("Lỗi khi gửi form:", err);
+        message.innerText = "Không thể kết nối đến server.";
+    }
+}
+
+

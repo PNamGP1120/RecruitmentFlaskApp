@@ -271,6 +271,43 @@ def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
 
+def load_cv_by_id(current_user):
+    resume = db.session.query(Resume).filter(Resume.user_id==current_user.id).first()
+    if not resume:
+        return None
+    else:
+        cvs = CV.query.filter(CV.resume_id==resume.id).all()
+        if not cvs:
+            return None
+        return cvs
+
+
+def load_applications(current_user, page=None, per_page=None):
+
+    # Lấy Resume của user
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    if not resume:
+        return []
+
+    # Lấy danh sách CV thuộc resume đó
+    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume.id).all()
+    if not cv_ids:
+        return []
+
+    # cv_ids là list các tuple (id,), cần chuyển thành list đơn
+    cv_ids = [id for (id,) in cv_ids]
+
+    # Lấy các đơn ứng tuyển thuộc các CV đó
+    applications = Application.query.filter(Application.cv_id.in_(cv_ids))
+    apps_pagination = applications.paginate(page=page, per_page=per_page)
+
+    return apps_pagination
+
+
+
+
+
+
 if __name__ == "__main__":
     with app.app_context():
         u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

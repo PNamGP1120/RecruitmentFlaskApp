@@ -17,8 +17,69 @@
                     <span><i class="bi bi-clock"></i> {{ jobDetail.employment_type.value if jobDetail.employment_type else "Unknown" }}</span>
                     <span><i class="bi bi-currency-dollar"></i> {{ jobDetail.salary or "Negotiable" }}</span>
                     <span><i class="bi bi-geo-alt"></i> {{ jobDetail.location or "Unknown Location" }}</span>
-                <a style="margin-top:-15px" class="btn btn-register" href="#">Apply Job</a>
+                    <!--<a style="margin-top:-15px" class="btn btn-register" href="#">Apply Job</a>-->
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.role == RoleEnum.JOBSEEKER %}
+                    <button style="margin-top:-15px" type="button" class="btn btn-register" data-bs-toggle="modal"
+                            data-bs-target="#myModal">
+                        Apply Job
+                    </button>
+                    {% endif %}
+                    {% else %}
+                     <div class="alert alert-danger">Please <a href="/login?next=/job-detail/{{jobDetail.id}}">log in</a> to apply.</div>
+                    {% endif %}
+                </div>
 
+
+                <!-- The Modal  Apply job -->
+                <div class="modal" id="myModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Appply for job {{jobDetail.title}}</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <!-- Modal body -->
+                            <div class="modal-body">
+
+                                <form id="applyForm">
+                                    <div class="mb-3 mt-3">
+                                        <label for="coverLetter" class="form-label">Cover letter:</label>
+                                        <input type="text" class="form-control" id="coverLetter"
+                                               placeholder="Enter cover letter..."
+                                               name="coverLetter">
+                                    </div>
+                                    <div>
+                                        {% if not cvs%}
+                                        <h6>You don't have any CV yet</h6>
+                                        {% else %}
+                                        {% for cv in cvs %}
+                                        <div>
+                                            <input type="radio" class="form-check-input" id="radio{{cv.id}}" name="cv"
+                                                   value="{{cv.id}}"> {{ cv.title }}
+                                            <label class="form-check-label" for="radio{{cv.id}}"></label>
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="message" id="error-apply"></div>
+                                </form>
+                            </div>
+
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="button" onclick="apply({{jobDetail.id}})" class="btn btn-success"
+                                        form="applyForm">Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -50,14 +111,13 @@
             <div class="my-4">
                 <h6>Tags:</h6>
                 {% if jobDetail.tags %}
-                 {% for tag in jobDetail.tags  %}
+                {% for tag in jobDetail.tags %}
                 <span class="badge rounded-pill text-bg-light text-success border border-success me-2">{{tag}}</span>
 
                 {% endfor %}
                 {% else %}
-                <span >not tag</span>
+                <span>not tag</span>
                 {% endif%}
-
 
 
             </div>
@@ -103,6 +163,7 @@
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+{% if current_user.role == RoleEnum.JOBSEEKER%}
 <div class="container my-5 ">
     <h4>Related Jobs</h4>
     <p class="text-muted">At suscipit pretium tincidunt amet lacus at sem amet aliquet</p>
@@ -111,11 +172,13 @@
         {% for job in jobs %}
         {% include 'layout/cardjob.html' %}
         {% endfor %}
-    {% endif %}
+        {% endif %}
     </div>
 
 
 </div>
+{% endif%}
+
 
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
