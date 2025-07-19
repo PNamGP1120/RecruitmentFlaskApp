@@ -31,35 +31,62 @@ def profile_process():
 
     # Fetch the current user's resume (if it exists)
     resume = Resume.query.filter_by(user_id=current_user.id).first()
+    cv_list = CV.query.filter_by(resume_id=resume.id).all() if resume else []
 
     if request.method == 'POST':
-        if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
-                or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):
-            flash('Please enter all required resume details', 'danger')
-        else:
-            # Prepare resume data
-            resume_data = {
-                'skill': request.form['skill'],
-                'experience': request.form['experience'],
-                'education': request.form['education'],
-                'preferred_locations': request.form['location'],
-                'preferred_job_types': request.form['job'],
-                'linkedin_url': request.form.get('linkedin', '')
-            }
-            # Update or create resume
-            if resume:
-                # Update existing resume
-                dao.update_resume(resume, resume_data)
-                flash('Resume was successfully updated', 'success')
+        if 'resume_form' in request.form:
+            if (not request.form['skill'] or not request.form['experience'] or not request.form['education']
+                    or not request.form['location'] or not request.form['job'] or not request.form['linkedin']):
+                flash('Please enter all required resume details', 'danger')
             else:
-                # Create new resume
-                resume = Resume(**resume_data)
-                dao.add_resume(resume)
-                flash('Resume was successfully added', 'success')
-            return redirect(url_for('profile_process'))
+                # Prepare resume data
+                resume_data = {
+                    'skill': request.form['skill'],
+                    'experience': request.form['experience'],
+                    'education': request.form['education'],
+                    'preferred_locations': request.form['location'],
+                    'preferred_job_types': request.form['job'],
+                    'linkedin_url': request.form.get('linkedin', '')
+                }
+                # Update or create resume
+                if resume:
+                    # Update existing resume
+                    dao.update_resume(resume, resume_data)
+                    flash('Resume was successfully updated', 'success')
+                else:
+                    # Create new resume
+                    resume = Resume(**resume_data)
+                    dao.add_resume(resume)
+                    flash('Resume was successfully added', 'success')
 
-    return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume)
+        elif 'cv_form' in request.form:  # Handle CV form submission
+            title = request.form['title']
+            file = request.files['file']
+            is_default = 'default' in request.form
 
+            if not resume:
+                flash('Please create a resume before uploading a CV', 'danger')
+            elif not title or not file:
+                flash('Please provide a title and file for the CV', 'danger')
+            else:
+                # Validate file type
+                if not file.filename.lower().endswith('.pdf'):
+                    flash('Only PDF files are allowed', 'danger')
+                else:
+                    success = dao.add_cv(
+                        title=title,
+                        file=file,
+                        is_default=is_default,
+                        resume_id=resume.id if resume else None
+                    )
+                    if success:
+                        flash('CV was successfully uploaded', 'success')
+                    else:
+                        flash('Error uploading CV', 'danger')
+
+        return redirect(url_for('profile_process'))
+
+    return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume, rows=cv_list)
 
 @app.route('/company')
 def company():
