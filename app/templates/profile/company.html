@@ -1,6 +1,6 @@
-{% extends 'layout/base.html' %}
+{% extends 'layout/base.html'%}
 
-{% block title %}Login to Your Account{% endblock %}
+{% block title %}Recruiter Registration{% endblock %}
 
 {% block css %}
 <style>
@@ -21,8 +21,7 @@
         flex-shrink: 0;
     }
 
-    /* Keep the same styling for the form wrapper as register, but rename the class for clarity */
-    .login-form-wrapper {
+    .register-form-wrapper {
         background-color: #edf8f6;
         border-radius: 1rem;
         padding: 2rem;
@@ -72,43 +71,18 @@
 
 {% block content %}
 
+<!-- Hero Section -->
 {% include 'layout/hero_section.html'%}
-
+<!-- Main Content -->
 <section class="py-5">
     <div class="container">
         <div class="row g-5">
 
+            <!-- LEFT: Form -->
             <div class="col-md-6">
-                <h2 class="fw-bold mb-3">Your Gateway to Career Growth!</h2>
-                <p class="text-muted mb-4">
-                    Seamlessly manage your professional life and unlock new opportunities.
-                </p>
-
-                <div class="row row-cols-2 g-3"> {# Retain row-cols-2 g-3 for consistent layout #}
-                    {% set infos = [
-                        {'icon': 'bi-speedometer2', 'title': 'Dashboard Access', 'value': 'Manage your profile and settings efficiently.'},
-                        {'icon': 'bi-search', 'title': 'Personalized Search', 'value': 'Find jobs tailored to your skills and preferences.'},
-                        {'icon': 'bi-chat-left-dots', 'title': 'Direct Messaging', 'value': 'Communicate with recruiters or job seekers easily.'},
-                        {'icon': 'bi-bookmark-check', 'title': 'Saved Jobs', 'value': 'Keep track of job listings that interest you.'}
-                    ] %}
-                    {% for info in infos %}
-                    <div class="col">
-                        <div class="info-box">
-                            <i class="bi {{ info.icon }} info-icon"></i>
-                            <div>
-                                <h6 class="fw-bold mb-1">{{ info.title }}</h6>
-                                <p class="mb-0">{{ info.value }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="login-form-wrapper"> {# Use the renamed class for clarity #}
-                    <h4 class="fw-bold mb-3">Login to Your Account</h4>
-                    <p class="text-muted mb-4">Please enter your credentials to proceed.</p>
+                <div class="register-form-wrapper">
+                    <h4 class="fw-bold mb-3">Recruiter Company Registration</h4>
+                    <p class="text-muted mb-4">Complete the form below to register your company and start posting jobs.</p>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -121,30 +95,65 @@
                         {% endif %}
                     {% endwith %}
 
-                    <form method="POST" action="{{ url_for('login_process') }}">
+                    <form method="POST" enctype="multipart/form-data">
 
+                        {% set fields = [
+                            {'id': 'company_name', 'label': 'Company Name', 'type': 'text', 'placeholder': 'e.g. ABC Tech Ltd.', 'value': data_company.company_name},
+                            {'id': 'website', 'label': 'Website', 'type': 'text', 'placeholder': 'e.g. https://abc-tech.com', 'value': data_company.website},
+                            {'id': 'industry', 'label': 'Industry Sector', 'type': 'text', 'placeholder': 'e.g. Information Technology', 'value': data_company.industry},
+                            {'id': 'company_size', 'label': 'Company Size', 'type': 'text', 'placeholder': 'e.g. 100-500 employees', 'value': data_company.company_size},
+                            {'id': 'address', 'label': 'Company Address', 'type': 'text', 'placeholder': 'e.g. 123 Le Loi, HCMC', 'value': data_company.address},
+                            {'id': 'introduction', 'label': 'About Company', 'type': 'text', 'placeholder': 'Brief introduction about your company', 'value': data_company.introduction}
+                        ] %}
+
+                        {% for field in fields %}
                         <div class="form-group-inline">
-                            <label class="form-label" for="username">Username</label>
-                            <input type="text" class="form-control" id="username" name="username"
-                                placeholder="Your username" required
-                                {% if request.form.username %} value="{{ request.form.username }}" {% endif %}>
+                            <label class="form-label" for="{{ field.id }}">{{ field.label }}</label>
+                            <input
+                                type="{{ field.type }}"
+                                class="form-control"
+                                id="{{ field.id }}"
+                                name="{{ field.id }}"
+                                placeholder="{{ field.placeholder }}"
+                                {% if field.value is defined %} value="{{ field.value }}" {% endif %}
+                                required
+                            >
                         </div>
-
-                        <div class="form-group-inline mb-4">
-                            <label class="form-label" for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Your password" required>
-                        </div>
+                        {% endfor %}
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-custom btn-lg">Login</button>
+                            <button type="submit" class="btn btn-custom btn-lg">Register Company</button>
                         </div>
                     </form>
+                </div>
+            </div>
 
-                    <div class="text-center mt-4">
-                        Don't have an account?
-                        <a href="{{ url_for('register_process') }}" class="text-decoration-none fw-semibold text-primary">Register now</a>
+            <!-- RIGHT: Info -->
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3">Connect Talent to Your Team</h2>
+                <p class="text-muted mb-4">
+                    Join thousands of companies using our platform to recruit top talent quickly and efficiently.
+                </p>
+
+                <div class="row row-cols-2 g-3">
+                    {% set infos = [
+                        {'icon': 'bi-telephone', 'title': 'Recruiter Support', 'value': '+84 089-45765'},
+                        {'icon': 'bi-envelope', 'title': 'Contact Us', 'value': 'recruit@oujob.vn'},
+                        {'icon': 'bi-clock', 'title': 'Working Hours', 'value': 'Mon - Fri: 9AM - 6PM'},
+                        {'icon': 'bi-geo-alt', 'title': 'Head Office', 'value': 'OU Campus, HCMC'}
+                    ] %}
+
+                    {% for info in infos %}
+                    <div class="col">
+                        <div class="info-box">
+                            <i class="bi {{ info.icon }} info-icon"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ info.title }}</h6>
+                                <p class="mb-0">{{ info.value }}</p>
+                            </div>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
 

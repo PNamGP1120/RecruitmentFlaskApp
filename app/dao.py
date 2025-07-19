@@ -238,6 +238,25 @@ def add_cv(title, file, is_default, resume_id=None):
         print(f"Error adding CV: {e}")
         return False
 
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
+
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
