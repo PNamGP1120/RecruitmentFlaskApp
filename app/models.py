@@ -68,7 +68,7 @@ class Resume(BaseModel):
     user = relationship("User", backref=backref("resume", uselist=False))
 
 class Company(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'), unique=True)
     website = Column(String(255))
     introduction = Column(Text)
     company_name = Column(String(255))
@@ -185,7 +185,7 @@ class Tag(BaseModel):
 
 if __name__ == '__main__':
     with app.app_context():
-        # db.create_all()
+        db.create_all()
         # c1 = Category(name="Front-end")
         # c2 = Category(name="Back-end")
         # c3 = Category(name="FullStack")

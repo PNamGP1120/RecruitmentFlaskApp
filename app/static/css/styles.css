@@ -246,6 +246,77 @@ form .form-select:focus {
     color: #249e90; /* Màu xanh teal đậm hơn khi hover */
 }
 
+.resume-section {
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.resume-section:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+}
+
+.form-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-subtitle {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+}
+
+.form-control:focus {
+    border-color: #3cc8a3;
+    box-shadow: 0 0 0 0.2rem rgba(60, 200, 163, 0.25);
+}
+
+.form-check-label {
+    margin-left: 0.25rem;
+}
+
+.submit-btn {
+    background-color: #3cc8a3;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #2ea889;
+}
+
+.table thead th {
+    background-color: #f1f5f9;
+}
+
+.table td a {
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.alert {
+    border-radius: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .resume-section {
+        padding: 2rem;
+    }
+}
+
 
 /* job item in jobDetail.html*/
 .job-item--detail {

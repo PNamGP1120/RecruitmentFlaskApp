@@ -3,7 +3,6 @@ from datetime import datetime
 
 import cloudinary.uploader
 from flask_login import current_user
-from idlelib.query import Query
 
 from sqlalchemy import or_
 
@@ -47,7 +46,10 @@ def load_jobs(
     """
 
 
-    query = Job.query.filter(Job.status == status)
+    query = Job.query.filter()
+
+    if status:
+        query = query.filter(Job.status == status)
 
     if keyword:
         query = query.filter( Job.title.contains(keyword))
@@ -83,11 +85,60 @@ def load_jobs(
         query = query.filter(Job.id != exclude_job)
 
 
+    query = query.order_by(Job.created_date.desc())
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     print("a",jobs_pagination.items)
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
+
+def add_job(company_id, **job_data):
+    """
+    Thêm một công việc mới vào cơ sở dữ liệu.
+    :param job_data: Dictionary chứa các dữ liệu công việc từ form, bao gồm:
+                    title, description, requirements, location, employment_type (chuỗi),
+                    category_id, company_id, salary, và bất kỳ trường nào khác bạn đã thêm vào form.
+    :return: Đối tượng Job nếu thêm thành công, ngược lại là None.
+    """
+    title = job_data.get('title')
+    description = job_data.get('description')
+    requirements = job_data.get('requirements')
+    location = job_data.get('location')
+    salary = job_data.get('salary', 0)
+    employment_type = job_data.get('employment_type', 'FULLTIME')
+    status = job_data.get('status', JobStatusEnum.POSTED)
+    category_id = job_data.get('category_id')
+    is_active = job_data.get('is_active', True)
+
+    job = Job(
+        title=title,
+        description=description,
+        requirements=requirements,
+        location=location,
+        salary=salary,
+        employment_type=employment_type,
+        status=status,
+        created_date=datetime.now(),
+        updated_date=datetime.now(),
+        category_id=int(category_id),
+        company_id=company_id
+
+
+    )
+    print(category_id)
+    print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
+    try:
+        job.company_id = company_id
+        db.session.add(job)
+        db.session.commit()
+        print(f"Đã thêm công việc: {title} thành công.")
+        return job
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi thêm công việc vào DB: {e}")
+        return None
+
+
 
 
 def add_user(avatar_file, **user_data):
@@ -241,6 +292,44 @@ def add_cv(title, file, is_default, resume_id=None):
         db.session.rollback()
         print(f"Error adding CV: {e}")
         return False
+
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
+
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
