@@ -27,6 +27,7 @@ def load_jobs(
     min_salary=None,
     max_salary=None,
     status=JobStatusEnum.POSTED,
+    exclude_job=None
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
@@ -80,6 +81,10 @@ def load_jobs(
         except KeyError:
             pass  # không lọc nếu sai
 
+    if exclude_job:
+        query = query.filter(Job.id != exclude_job)
+
+
     query = query.order_by(Job.created_date.desc())
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     print("a",jobs_pagination.items)
@@ -101,7 +106,7 @@ def add_job(company_id, **job_data):
     location = job_data.get('location')
     salary = job_data.get('salary', 0)
     employment_type = job_data.get('employment_type', 'FULLTIME')
-    status = job_data.get('status', JobStatusEnum.POSTED)  
+    status = job_data.get('status', JobStatusEnum.POSTED)
     category_id = job_data.get('category_id')
     is_active = job_data.get('is_active', True)
 
@@ -134,18 +139,18 @@ def add_job(company_id, **job_data):
         return None
 
 
-def load_applications(job_id, page=None, per_page=None):
-    """
-    Tải danh sách các ứng viên đã nộp đơn cho một công việc cụ thể.
-    :param job_id: ID của công việc.
-    :param page: Số trang hiện tại (mặc định 1).
-    :param per_page: Số lượng ứng viên trên mỗi trang (mặc định 10).
-    :return: Đối tượng phân trang (Pagination object) chứa các ứng viên.
-    """
-    query = Application.query.filter(Application.job_id == job_id).order_by(Application.applied_date.desc())
-    applications_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    print("Applications Query:", query.statement.compile(compile_kwargs={"literal_binds": True}))
-    return applications_pagination
+# def load_applications(job_id, page=None, per_page=None):
+#     """
+#     Tải danh sách các ứng viên đã nộp đơn cho một công việc cụ thể.
+#     :param job_id: ID của công việc.
+#     :param page: Số trang hiện tại (mặc định 1).
+#     :param per_page: Số lượng ứng viên trên mỗi trang (mặc định 10).
+#     :return: Đối tượng phân trang (Pagination object) chứa các ứng viên.
+#     """
+#     query = Application.query.filter(Application.job_id == job_id).order_by(Application.applied_date.desc())
+#     applications_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+#     print("Applications Query:", query.statement.compile(compile_kwargs={"literal_binds": True}))
+#     return applications_pagination
 
 
 
@@ -368,11 +373,47 @@ def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
 
+def load_cv_by_id(current_user):
+    resume = db.session.query(Resume).filter(Resume.user_id==current_user.id).first()
+    if not resume:
+        return None
+    else:
+        cvs = CV.query.filter(CV.resume_id==resume.id).all()
+        if not cvs:
+            return None
+        return cvs
+
+
+def load_applications(current_user, page=None, per_page=None):
+
+    # Lấy Resume của user
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    if not resume:
+        return []
+
+    # Lấy danh sách CV thuộc resume đó
+    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume.id).all()
+    if not cv_ids:
+        return []
+
+    # cv_ids là list các tuple (id,), cần chuyển thành list đơn
+    cv_ids = [id for (id,) in cv_ids]
+
+    # Lấy các đơn ứng tuyển thuộc các CV đó
+    applications = Application.query.filter(Application.cv_id.in_(cv_ids))
+    apps_pagination = applications.paginate(page=page, per_page=per_page)
+
+    return apps_pagination
+
+
+
+
+
+
 
 if __name__ == "__main__":
     with app.app_context():
         u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
         for i in u:
             print(i.title)
-        print(u.items.employment_type)
-
+        # print(u.items.employment_type)

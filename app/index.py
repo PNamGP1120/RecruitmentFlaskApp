@@ -1,11 +1,12 @@
 # from sqlalchemy.sql.functions import current_user
-from flask import redirect, url_for, flash
-from flask import render_template, request
+import dbm.sqlite3
+
+from flask import redirect, url_for, flash, session
+from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 
-from app import app
-from app import dao
-from app import login
+from app import app, dao, login
+from app.models import EmploymentEnum, JobStatusEnum, ApplicationStatusEnum, RoleEnum
 from app.models import EmploymentEnum, RoleEnum
 from app.models import Resume
 
@@ -236,6 +237,8 @@ def contact():
 
 @app.route("/jobs", methods=["GET"])
 def job():
+    title = "JOB"
+    subtitle="Welcome to Job"
     cates = dao.load_cate()
     page = int(request.args.get('page', 1))
     page_size = 3
@@ -243,9 +246,13 @@ def job():
     keyword = request.args.get("keyword")
     locate = request.args.get("location")
     jobType = request.args.get("jobType")
+    category= request.args.get('category')
 
     if not locate or locate == "Choose city":
         locate = None
+
+    if not category or category == "Choose Category":
+        category = None
 
     # chuyen chuoi thanh enum
     job_type_enum = None
@@ -255,20 +262,67 @@ def job():
             job_type_enum = EmploymentEnum[jobType]  # vi du "FULLTIME" -> EmploymentEnum.FULLTIME
         except KeyError:
             print(f"[!] jobType không hợp lệ: {jobType}")
-    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum)
+    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum, category_id=category)
     locations = [loc[0] for loc in db.session.query(Job.location).distinct().all()]
-    return render_template("jobs.html",cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
+    return render_template("jobs.html", title=title, subtitle=subtitle,cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
 
 
 @app.route("/job-detail/<int:job_id>", methods=["get"])
 def job_detail(job_id):
     job = Job.query.get(job_id)
     page = int(request.args.get('page', 1))
-    page_size = 5
-    applications = dao.load_applications(job_id=job_id, page=page, per_page=page_size)
+    page_size = 3
+    jobs = dao.load_jobs(page=page, per_page=page_size, location=job.location, exclude_job=job.id)
+    cvs = []
+    if current_user.is_authenticated:
+        cvs = dao.load_cv_by_id(current_user)
+    return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum)
 
-    return render_template("job_detail.html", job=job, applications=applications)
 
+@app.route("/api/apply/<int:job_id>", methods=["POST"])
+@login_required
+def apply_job(job_id):
+    if current_user.role == RoleEnum.JOBSEEKER:
+        coverLetter = request.form.get("coverLetter")
+        cv = request.form.get("cv")
+        if not coverLetter or not cv:
+            return jsonify({"message":"Please fill in all information"}), 400
+        cv_obj = CV.query.get(cv)
+        if not cv_obj or cv_obj.resume.user_id!= current_user.id:
+            return jsonify({"message": "Invalid CV"}), 400
+
+        job = Job.query.get(job_id)
+        if not job or job.status != JobStatusEnum.POSTED:
+            return jsonify({"message":"The job does not exist or has expired"}), 400
+
+        applycation = Application.query.filter_by(cv_id=cv, job_id=job.id).first()
+        if applycation:
+            return jsonify({"message": "You have already applied for this job"}), 400
+
+        applycation = Application(cover_letter=coverLetter, status=ApplicationStatusEnum.PENDING, cv_id=cv, job_id=job.id)
+        db.session.add(applycation)
+        db.session.commit()
+        print(applycation)
+        return jsonify({"message":"You have successfully applied"}), 200
+    else:
+        return jsonify({"message":"You are not a job seeker!"}), 403
+
+
+@app.route("/applications")
+@login_required
+def application():
+    page = int(request.args.get("page",1))
+    per_page = 3
+
+    applies = dao.load_applications(current_user, page=page, per_page=per_page)
+
+    total_pages = applies.pages
+    for page in range(1, total_pages + 1):
+        page_data = dao.load_applications(current_user, page=page, per_page=per_page)
+        for a in page_data.items:
+            print(f"Trang {page}: {a.cover_letter}")
+
+    return render_template("applications.html",title="Applications", subtitle="Welcome to your applications" , applies=applies)
 
 # Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
