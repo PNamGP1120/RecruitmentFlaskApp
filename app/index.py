@@ -5,9 +5,7 @@ from flask import redirect, url_for, flash, session
 from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 
-from app import app
-from app import dao
-from app import login
+from app import app, dao, login
 from app.models import EmploymentEnum, JobStatusEnum, ApplicationStatusEnum, RoleEnum
 from app.models import EmploymentEnum, RoleEnum
 from app.models import Resume
