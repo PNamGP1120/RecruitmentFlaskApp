@@ -185,6 +185,7 @@ class Tag(BaseModel):
 
 if __name__ == '__main__':
     with app.app_context():
+        db.drop_all()
         db.create_all()
         # c1 = Category(name="Front-end")
         # c2 = Category(name="Back-end")

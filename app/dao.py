@@ -408,6 +408,7 @@ def count_jobs():
     return db.session.query(Job).filter(Job.status == JobStatusEnum.POSTED).count()
 
 def count_candidates():
+    print(User.role)
     return db.session.query(User).filter(User.role == RoleEnum.JOBSEEKER, User.is_active == True).count()
 
 def count_companies():
@@ -446,9 +447,11 @@ def load_applications(current_user, page=None, per_page=None):
 
     return apps_pagination
 
+
+
+
+
+
 if __name__ == "__main__":
     with app.app_context():
-        u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
-        for i in u:
-            print(i.title)
-        # print(u.items.employment_type)
+        print(count_candidates())
