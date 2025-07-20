@@ -446,11 +446,6 @@ def load_applications(current_user, page=None, per_page=None):
 
     return apps_pagination
 
-
-
-
-
-
 if __name__ == "__main__":
     with app.app_context():
         u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

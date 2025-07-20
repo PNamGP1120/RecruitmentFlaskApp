@@ -1,5 +1,4 @@
 # from sqlalchemy.sql.functions import current_user
-import dbm.sqlite3
 
 from flask import redirect, url_for, flash, session
 from flask import render_template, request, jsonify
@@ -158,7 +157,8 @@ def profile_process():
                                 success = dao.update_cv(
                                     cv=cv_to_update,
                                     title=title,
-                                    file=file if file and file.filename else None,  # Pass file only if a new one is selected
+                                    file=file if file and file.filename else None,
+                                    # Pass file only if a new one is selected
                                     is_default=is_default,
                                     resume_id=resume.id if resume else None
                                 )
