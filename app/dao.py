@@ -369,8 +369,10 @@ def count_jobs():
 def count_candidates():
     print(User.role)
     return db.session.query(User).filter(User.role == RoleEnum.JOBSEEKER, User.is_active == True).count()
+    # return True
 
 def count_companies():
+    # return True
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
 
