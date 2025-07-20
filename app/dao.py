@@ -177,7 +177,6 @@ def add_resume(resume):
         print(f"Error adding resume: {e}")
         return False
 
-
 def update_resume(resume, data):
     """
     Update an existing Resume object in the database.
@@ -236,6 +235,60 @@ def add_cv(title, file, is_default, resume_id=None):
     except Exception as e:
         db.session.rollback()
         print(f"Error adding CV: {e}")
+        return False
+
+def update_cv(cv, title, file, is_default, resume_id=None):
+    """
+    Update an existing CV in the database and optionally upload a new file to Cloudinary.
+
+    Args:
+        cv (CV): The CV object to update.
+        title (str): The new title of the CV.
+        file: FileStorage object containing the new CV file (optional).
+        is_default (bool): Whether this CV should be set as default.
+        resume_id (int, optional): The ID of the associated resume.
+
+    Returns:
+        bool: True if the CV was updated successfully, False otherwise.
+    """
+    try:
+        cv.title = title
+        cv.updated_date = datetime.now()
+
+        # If a new file is provided, upload it
+        if file:
+            upload_result = cloudinary.uploader.upload(file.stream)
+            cv.file_path = upload_result['secure_url']
+
+        # If this CV is set as default, unset others for the same resume
+        if is_default and resume_id:
+            CV.query.filter_by(resume_id=resume_id, is_default=True).filter(CV.id != cv.id).update({'is_default': False})
+        cv.is_default = is_default
+
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating CV: {e}")
+        return False
+
+def delete_cv(cv):
+    """
+    Delete a CV from the database.
+
+    Args:
+        cv (CV): The CV object to delete.
+
+    Returns:
+        bool: True if the CV was deleted successfully, False otherwise.
+    """
+    try:
+        db.session.delete(cv)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting CV: {e}")
         return False
 
 def get_user_by_id(user_id):

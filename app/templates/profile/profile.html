@@ -2,22 +2,9 @@
 
 {% block title %}Resume & CV Management{% endblock %}
 
-{% block css %}
-<style>
-    /* Keep the same styling for the form wrapper as register, but rename the class for clarity */
-    .resume-form-wrapper {
-        background-color: #edf8f6;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
 {% include 'layout/hero_section.html'%}
-
 <section class="py-5">
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -95,20 +82,49 @@
                 {% if rows %}
                 <table>
                     <thead>
-                    <td><h3>Title</h3></td>
-                    <td><h3>File Path</h3></td>
-                    <td><h3>Is Default</h3></td>
-                    <td><h3>Created Date</h3></td>
-                    <td><h3>Updated Date</h3></td>
+                        <td><h3>Title</h3></td>
+                        <td><h3>File Path</h3></td>
+                        <td><h3>Is Default</h3></td>
+                        <td><h3>Created Date</h3></td>
+                        <td><h3>Updated Date</h3></td>
+                        <td><h3>Action</h3></td>
                     </thead>
 
                     {% for row in rows%}
                     <tr>
                         <td>{{ row.title }}</td>
-                            <td><a href="{{ row.file_path }}" target="_blank">View CV</a></td>
-                            <td>{{ 'Yes' if row.is_default else 'No' }}</td>
-                            <td>{{ row.created_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                            <td>{{ row.updated_date.strftime('%Y-%m-%d %H:%M:%S') if row.updated_date else 'N/A' }}</td>
+                        <td><a href="{{ row.file_path }}" target="_blank">View CV</a></td>
+                        <td>{{ 'Yes' if row.is_default else 'No' }}</td>
+                        <td>{{ row.created_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ row.updated_date.strftime('%Y-%m-%d %H:%M:%S') if row.updated_date else 'N/A' }}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm update-cv-btn" data-cv-id="{{ row.id }}">Update</button>
+                            <form action="{{ url_for('delete_cv') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="cv_id" value="{{ row.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this CV?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr id="update-form-{{ row.id }}" class="update-cv-form">
+                        <td colspan="6">
+                            <h5>Update CV: {{ row.title }}</h5>
+                            <form action="{{ url_for('profile_process') }}" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="update_cv_form" value="1">
+                                <input type="hidden" name="cv_id" value="{{ row.id }}">
+                                <label>
+                                    Title
+                                    <input type="text" name="title" value="{{ row.title }}" required>
+                                </label><br>
+                                <label>File CV (Leave blank to keep current file)</label>
+                                <input type="file" name="file" accept=".pdf"><br>
+                                <label>
+                                    Set default
+                                    <input type="checkbox" name="default" {% if row.is_default %}checked{% endif %}>
+                                </label><br>
+                                <input type="submit" value="Save Changes">
+                                <button type="button" class="btn btn-secondary cancel-update-btn" data-cv-id="{{ row.id }}">Cancel</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </table>
@@ -120,5 +136,4 @@
         </div>
     </div>
 </section>
-
 {% endblock %}

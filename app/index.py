@@ -84,9 +84,62 @@ def profile_process():
                     else:
                         flash('Error uploading CV', 'danger')
 
+        elif 'update_cv_form' in request.form:  # Handle CV update form submission
+            cv_id = request.form['cv_id']
+            title = request.form['title']
+            file = request.files['file']  # This will be an empty FileStorage object if no file is selected
+            is_default = 'default' in request.form
+
+            if not cv_id or not title:
+                flash('CV ID and title are required for update', 'danger')
+            else:
+                cv_to_update = CV.query.get(cv_id)
+                if not cv_to_update or cv_to_update.resume.user_id != current_user.id:
+                    flash('Invalid CV or unauthorized access', 'danger')
+                else:
+                    # Validate file type if a new file is provided
+                    if file and file.filename and not file.filename.lower().endswith('.pdf'):
+                        flash('Only PDF files are allowed for CV updates', 'danger')
+                    else:
+                        success = dao.update_cv(
+                            cv=cv_to_update,
+                            title=title,
+                            file=file if file and file.filename else None,  # Pass file only if a new one is selected
+                            is_default=is_default,
+                            resume_id=resume.id if resume else None
+                        )
+                        if success:
+                            flash('CV was successfully updated', 'success')
+                        else:
+                            flash('Error updating CV', 'danger')
+
         return redirect(url_for('profile_process'))
 
     return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume, rows=cv_list)
+
+@app.route('/delete_cv', methods=['POST'])
+def delete_cv():
+    cv_id = request.form.get('cv_id')
+    if not cv_id:
+        flash('CV ID is required', 'danger')
+        return redirect(url_for('profile_process'))
+
+    cv = CV.query.get(cv_id)
+    if not cv or cv.resume.user_id != current_user.id:
+        flash('Invalid CV or unauthorized access', 'danger')
+        return redirect(url_for('profile_process'))
+
+    # Check if CV is used in any applications
+    if cv.applications:
+        flash('Cannot delete CV because it is used in one or more applications', 'danger')
+        return redirect(url_for('profile_process'))
+
+    success = dao.delete_cv(cv)
+    if success:
+        flash('CV was successfully deleted', 'success')
+    else:
+        flash('Error deleting CV', 'danger')
+    return redirect(url_for('profile_process'))
 
 @app.route('/company')
 def company():
@@ -190,7 +243,6 @@ def job_detail(job_id):
     job = Job.query.get(job_id)
 
     return render_template("job_detail.html", job=job)
-
 
 
 if __name__ == '__main__':
