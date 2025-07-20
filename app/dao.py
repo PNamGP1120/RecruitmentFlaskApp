@@ -139,6 +139,19 @@ def add_job(company_id, **job_data):
         return None
 
 
+# def load_applications(job_id, page=None, per_page=None):
+#     """
+#     Tải danh sách các ứng viên đã nộp đơn cho một công việc cụ thể.
+#     :param job_id: ID của công việc.
+#     :param page: Số trang hiện tại (mặc định 1).
+#     :param per_page: Số lượng ứng viên trên mỗi trang (mặc định 10).
+#     :return: Đối tượng phân trang (Pagination object) chứa các ứng viên.
+#     """
+#     query = Application.query.filter(Application.job_id == job_id).order_by(Application.applied_date.desc())
+#     applications_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+#     print("Applications Query:", query.statement.compile(compile_kwargs={"literal_binds": True}))
+#     return applications_pagination
+
 
 
 def add_user(avatar_file, **user_data):
@@ -408,6 +421,7 @@ def count_jobs():
     return db.session.query(Job).filter(Job.status == JobStatusEnum.POSTED).count()
 
 def count_candidates():
+    print(User.role)
     return db.session.query(User).filter(User.role == RoleEnum.JOBSEEKER, User.is_active == True).count()
 
 def count_companies():
@@ -446,9 +460,11 @@ def load_applications(current_user, page=None, per_page=None):
 
     return apps_pagination
 
+
+
+
+
+
 if __name__ == "__main__":
     with app.app_context():
-        u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
-        for i in u:
-            print(i.title)
-        # print(u.items.employment_type)
+        print(count_candidates())
