@@ -1,5 +1,5 @@
-# from sqlalchemy.sql.functions import current_user
 
+# from sqlalchemy.sql.functions import current_user
 
 from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
