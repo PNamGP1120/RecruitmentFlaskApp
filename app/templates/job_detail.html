@@ -92,8 +92,7 @@
     </div>
 </div>
 
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+{% if is_job_seeker %}
 
 <div class="container my-5">
     <h4>Related Jobs</h4>
@@ -165,6 +164,15 @@
         </div>
     </div>
 </div>
+{% endif %}
+
+
+{% if is_recruiter %}
+{% for application in applications %}
+{% include 'recruiter/application_card.html' %}
+{% endfor %}
+{% endif %}
+
 
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">

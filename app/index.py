@@ -263,8 +263,11 @@ def job():
 @app.route("/job-detail/<int:job_id>", methods=["get"])
 def job_detail(job_id):
     job = Job.query.get(job_id)
+    page = int(request.args.get('page', 1))
+    page_size = 5
+    applications = dao.load_applications(job_id=job_id, page=page, per_page=page_size)
 
-    return render_template("job_detail.html", job=job)
+    return render_template("job_detail.html", job=job, applications=applications)
 
 
 # Recruiter
