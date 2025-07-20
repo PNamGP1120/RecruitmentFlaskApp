@@ -20,6 +20,11 @@
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/jobs' %}active{% endif %}" href="/jobs">Jobs</a>
             </li>
+            {% if is_recruiter %}
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/job-posting' %}active{% endif %}" href="{{url_for('job_posting')}}">Job Posting</a>
+            </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">About Us</a>
             </li>
@@ -45,6 +50,8 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                     <li><a class="dropdown-item" href="{{url_for('profile_process')}}">Profile</a></li>
                     <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    <li><a class="dropdown-item" href="/applications">Applications</a></li>
+
                     <li>
                         <hr class="dropdown-divider">
                     </li>

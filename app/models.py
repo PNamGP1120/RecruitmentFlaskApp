@@ -52,6 +52,7 @@ class User(BaseModel, UserMixin):
     phone = Column(String(20))
     last_login = Column(DateTime)
     is_active = Column(Boolean, default=True)
+    is_recruiter = Column(Boolean, default=False)
 
     conversation = relationship("Conversation", secondary='conversation_user', lazy='subquery', backref=backref('users', lazy=True))
 
@@ -67,7 +68,7 @@ class Resume(BaseModel):
     user = relationship("User", backref=backref("resume", uselist=False))
 
 class Company(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'), unique=True)
     website = Column(String(255))
     introduction = Column(Text)
     company_name = Column(String(255))
@@ -160,6 +161,10 @@ conversation_user = db.Table(
     Column('conversation_id', Integer, ForeignKey('conversation.id'))
 )
 
+tag_job = db.Table("tag_job",
+                   Column("tag_id", Integer, ForeignKey('tag.id')),
+                   Column("job_id", Integer, ForeignKey('job.id')))
+
 # ========== NOTIFICATION ==========
 class Notification(BaseModel):
     content = Column(Text)
@@ -168,6 +173,14 @@ class Notification(BaseModel):
     user_id = Column(Integer, ForeignKey('user.id'))
 
     user = relationship("User", backref="notifications", lazy=True)
+
+
+class Tag(BaseModel):
+    name = Column(String(50))
+    jobs = relationship("Job", secondary="tag_job", backref="tags", lazy=True)
+    def __str__(self):
+        return self.name
+
 
 
 if __name__ == '__main__':
@@ -190,11 +203,11 @@ if __name__ == '__main__':
         # u4 = User(username="Recruiter2", password=str(hashlib.md5("123456".encode('utf-8')).hexdigest()), role=RoleEnum.RECRUITER.value, email="recruiter2@gmail.com" )
         # db.session.add(u4)
         # db.session.commit()
-
+        #
         # print("Role: ", RoleEnum.JOBSEEKER)
         # print("Role.value: ", type(RoleEnum.JOBSEEKER.value))
 
-        # ===== COMPANY =====
+        # # ===== COMPANY =====
         # company = Company(
         #     user_id=3,
         #     website="https://example.com",
@@ -206,8 +219,8 @@ if __name__ == '__main__':
         # )
         # db.session.add(company)
         # db.session.commit()
-
-        # ===== JOB =====
+        #
+        # # ===== JOB =====
         # job = Job(
         #     title="React Developer",
         #     description="Develop modern front-end apps",
@@ -282,7 +295,7 @@ if __name__ == '__main__':
         # )
         # db.session.add_all([job, job1,job2,job3,job4,job5])
         # db.session.commit()
-
+        #
         # job6 = Job(
         #     title="Django Developer",
         #     description="Develop modern front-end apps",
@@ -297,7 +310,7 @@ if __name__ == '__main__':
         # )
         # db.session.add(job6)
         # db.session.commit()
-
+        #
         # # ===== RESUME & CV =====
         # resume = Resume(
         #     user_id=2,

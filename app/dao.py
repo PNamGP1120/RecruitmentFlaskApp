@@ -27,6 +27,7 @@ def load_jobs(
     min_salary=None,
     max_salary=None,
     status=JobStatusEnum.POSTED,
+    exclude_job=None
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
@@ -45,7 +46,10 @@ def load_jobs(
     """
 
 
-    query = Job.query.filter(Job.status == status)
+    query = Job.query.filter()
+
+    if status:
+        query = query.filter(Job.status == status)
 
     if keyword:
         query = query.filter( Job.title.contains(keyword))
@@ -77,12 +81,64 @@ def load_jobs(
         except KeyError:
             pass  # không lọc nếu sai
 
+    if exclude_job:
+        query = query.filter(Job.id != exclude_job)
 
+
+    query = query.order_by(Job.created_date.desc())
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     print("a",jobs_pagination.items)
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
+
+def add_job(company_id, **job_data):
+    """
+    Thêm một công việc mới vào cơ sở dữ liệu.
+    :param job_data: Dictionary chứa các dữ liệu công việc từ form, bao gồm:
+                    title, description, requirements, location, employment_type (chuỗi),
+                    category_id, company_id, salary, và bất kỳ trường nào khác bạn đã thêm vào form.
+    :return: Đối tượng Job nếu thêm thành công, ngược lại là None.
+    """
+    title = job_data.get('title')
+    description = job_data.get('description')
+    requirements = job_data.get('requirements')
+    location = job_data.get('location')
+    salary = job_data.get('salary', 0)
+    employment_type = job_data.get('employment_type', 'FULLTIME')
+    status = job_data.get('status', JobStatusEnum.POSTED)
+    category_id = job_data.get('category_id')
+    is_active = job_data.get('is_active', True)
+
+    job = Job(
+        title=title,
+        description=description,
+        requirements=requirements,
+        location=location,
+        salary=salary,
+        employment_type=employment_type,
+        status=status,
+        created_date=datetime.now(),
+        updated_date=datetime.now(),
+        category_id=int(category_id),
+        company_id=company_id
+
+
+    )
+    print(category_id)
+    print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
+    try:
+        job.company_id = company_id
+        db.session.add(job)
+        db.session.commit()
+        print(f"Đã thêm công việc: {title} thành công.")
+        return job
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi thêm công việc vào DB: {e}")
+        return None
+
+
 
 
 def add_user(avatar_file, **user_data):
@@ -175,6 +231,7 @@ def add_resume(resume):
         db.session.rollback()
         print(f"Error adding resume: {e}")
         return False
+
 
 def update_resume(resume, data):
     """
@@ -290,6 +347,44 @@ def delete_cv(cv):
         print(f"Error deleting CV: {e}")
         return False
 
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
+
+def is_company_exist(user_id):
+    return Company.query.filter_by(user_id=user_id).first() is not None
+
+def add_company(data_company):
+    company = Company(**data_company)
+    db.session.add(company)
+    db.session.commit()
+    return company
+
+def update_company(company, data):
+    for key, value in data.items():
+        print(key,value)
+        setattr(company, key, value)
+    db.session.commit()
+    return True
+
+def load_company_by_id(user_id):
+    return Company.query.filter_by(user_id=user_id).first()
+
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
@@ -317,6 +412,43 @@ def count_candidates():
 
 def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
+
+
+def load_cv_by_id(current_user):
+    resume = db.session.query(Resume).filter(Resume.user_id==current_user.id).first()
+    if not resume:
+        return None
+    else:
+        cvs = CV.query.filter(CV.resume_id==resume.id).all()
+        if not cvs:
+            return None
+        return cvs
+
+
+def load_applications(current_user, page=None, per_page=None):
+
+    # Lấy Resume của user
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    if not resume:
+        return []
+
+    # Lấy danh sách CV thuộc resume đó
+    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume.id).all()
+    if not cv_ids:
+        return []
+
+    # cv_ids là list các tuple (id,), cần chuyển thành list đơn
+    cv_ids = [id for (id,) in cv_ids]
+
+    # Lấy các đơn ứng tuyển thuộc các CV đó
+    applications = Application.query.filter(Application.cv_id.in_(cv_ids))
+    apps_pagination = applications.paginate(page=page, per_page=per_page)
+
+    return apps_pagination
+
+
+
+
 
 
 if __name__ == "__main__":
