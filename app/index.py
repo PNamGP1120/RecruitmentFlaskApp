@@ -196,9 +196,9 @@ def login_process():
     if request.method.__eq__('POST'):
         username = request.form.get('username')
         password = request.form.get('password')
-        print(username, password)
+        # print(username, password)
         u = dao.auth_user(username=username, password=password)
-        print(u)
+        # print(u)
         if u:
             login_user(u)
             next = request.args.get('next')
@@ -275,7 +275,7 @@ def job_detail(job_id):
     jobs = dao.load_jobs(page=page, per_page=page_size, location=job.location, exclude_job=job.id)
     cvs = []
     if current_user.is_authenticated:
-        cvs = dao.load_cv_by_id(current_user)
+        cvs = dao.load_cv_by_id(current_user.id)
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum)
 
 
@@ -311,16 +311,17 @@ def apply_job(job_id):
 @app.route("/applications")
 @login_required
 def application():
-    page = int(request.args.get("page",1))
+    page = max(1, int(request.args.get("page", 1)))
     per_page = 3
 
-    applies = dao.load_applications(current_user, page=page, per_page=per_page)
-
+    applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page)
+    print(applies.pages)
     total_pages = applies.pages
-    for page in range(1, total_pages + 1):
-        page_data = dao.load_applications(current_user, page=page, per_page=per_page)
-        for a in page_data.items:
-            print(f"Trang {page}: {a.cover_letter}")
+    print(total_pages)
+    for p in range(1, total_pages + 1):
+        for a in applies.items:
+            print(f"Trang {p}: {a.cover_letter}")
+
 
     return render_template("applications.html",title="Applications", subtitle="Welcome to your applications" , applies=applies)
 
