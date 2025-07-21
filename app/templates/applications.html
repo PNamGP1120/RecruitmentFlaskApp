@@ -4,7 +4,7 @@
 {% include 'layout/hero_section.html' %}
 <div class="container-fluid py-4">
     <div class="row">
-        {% if not applies %}
+        {% if not applies.items %}
         <div class="alert alert-warning text-center">You have no applicationsw!</div>
         {% else %}
         <div>
@@ -14,7 +14,7 @@
                     <div>
                         <span class="badge bg-success mb-2 p-2">Sent date: {{a.applied_date}}</span>
                         <span class="badge bg-warning mb-2 p-2">Status: {{a.status.value}}</span>
-                        <h5 class="mb-1">{{ a.job.title }} <a href="#">[{{a.job.company.company_name}}]</a> </h5>
+                        <h5 class="mb-1"><a class="title-color" href="/job-detail/{{a.job_id}}">{{ a.job.title }}</a>  <a class="title-color" href="#">[{{a.job.company.company_name}}]</a> </h5>
                         <div class="text-muted mb-1">{{ a.job.category }}</div>
                         <div class="mb-1">
                             <span class="me-2"><i class="bi bi-briefcase"></i> {{ a.job.requirements }}</span>
@@ -43,7 +43,6 @@
 
                                     <!-- Modal body -->
                                     <div class="modal-body">
-                                        Modal body..
                                         <p>{{a.cover_letter}}</p>
                                     </div>
 

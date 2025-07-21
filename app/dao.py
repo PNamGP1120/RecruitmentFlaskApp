@@ -376,8 +376,8 @@ def update_company(company, data):
     db.session.commit()
     return True
 
-def load_company_by_id(user_id):
-    return Company.query.filter_by(user_id=user_id).first()
+# def load_company_by_id(user_id):
+#     return Company.query.filter_by(user_id=user_id).first()
 
 def is_company_exist(user_id):
     return Company.query.filter_by(user_id=user_id).first() is not None
@@ -428,43 +428,89 @@ def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
 
-def load_cv_by_id(current_user):
-    resume = db.session.query(Resume).filter(Resume.user_id==current_user.id).first()
+def load_cv_by_id(user_id):
+    resume = Resume.query.filter_by(user_id=user_id).first()
     if not resume:
         return None
-    else:
-        cvs = CV.query.filter(CV.resume_id==resume.id).all()
-        if not cvs:
-            return None
-        return cvs
+    return CV.query.filter_by(resume_id=resume.id).all()
 
 
-def load_applications(current_user, page=None, per_page=None):
-
-    # Lấy Resume của user
-    resume = Resume.query.filter_by(user_id=current_user.id).first()
-    if not resume:
-        return []
-
-    # Lấy danh sách CV thuộc resume đó
-    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume.id).all()
-    if not cv_ids:
-        return []
-
-    # cv_ids là list các tuple (id,), cần chuyển thành list đơn
-    cv_ids = [id for (id,) in cv_ids]
-
-    # Lấy các đơn ứng tuyển thuộc các CV đó
-    applications = Application.query.filter(Application.cv_id.in_(cv_ids))
-    apps_pagination = applications.paginate(page=page, per_page=per_page)
-
-    return apps_pagination
+def get_resume_by_user(user_id):
+    return Resume.query.filter_by(user_id=user_id).first()
 
 
+def get_cv_ids_by_resume(resume_id):
+    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume_id).all()
+    return [id for (id,) in cv_ids]
 
 
+def get_applications_by_cv_ids(cv_ids):
+    return Application.query.filter(Application.cv_id.in_(cv_ids))
+
+
+# Load cac don ung tuyen cua nguoi dung
+def load_applications_for_user(current_user, page=None, per_page=None):
+    if page and per_page:
+        resume = get_resume_by_user(current_user.id)
+        if not resume:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        cv_ids = get_cv_ids_by_resume(resume.id)
+        if not cv_ids:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        applications = get_applications_by_cv_ids(cv_ids)
+        return applications.paginate(page=page, per_page=per_page)
+    return None
+
+
+#load job cua cong ty
+def get_job_by_company_id(company_id):
+    job_ids = db.session.query(Job.id).filter_by(company_id=company_id).all()
+    return [id for (id,) in job_ids]
+
+#Lay danh sach cac don ung tuyen cua 1 job
+def get_application_by_job(job_id):
+    return Application.query.filter_by(job_id=job_id).all()
+
+#lay danh sach cua tat ca job
+def get_applications_by_job_ids(job_ids):
+    return Application.query.filter(Application.job_id.in_(job_ids))
+
+
+
+# load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
+def load_applications_for_company(user_id=None, page=None, per_page=None):
+    if page and per_page:
+        #lay thong tin cong ty
+        company = load_company_by_id(user_id)
+        if not company:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        #lat job cua cong ty
+        jobs = get_job_by_company_id(company.id)
+        print(jobs)
+        if not jobs:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        applications = get_applications_by_job_ids(job_ids=jobs)
+        print(applications)
+        return applications.paginate(page=page, per_page=per_page)
+    return None
 
 
 if __name__ == "__main__":
     with app.app_context():
+        # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
+        # for i in u:
+        #     print(i.title)
+        # print(u.items.employment_type)
+        a = get_application_by_job(2)
+        print(a)
+        # ap = load_applications_for_company(3, page=1,per_page=3)
+        # for p in  range (1, ap.pages+1):
+        #     app = load_applications_for_company(3,page=p, per_page=3)
+        #     for a in app.items:
+        #         print(a)
+
         print(count_candidates())
