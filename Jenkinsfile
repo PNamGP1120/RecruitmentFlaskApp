@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        VENV_DIR = 'venv'
-    }
-
     stages {
         stage('Clone project') {
             steps {
@@ -14,10 +10,9 @@ pipeline {
 
         stage('Setup Python & Virtualenv') {
             steps {
-                sh '''
-                    python3 -m venv $VENV_DIR
-                    source $VENV_DIR/bin/activate
-                    pip install --upgrade pip
+                sh '''#!/bin/bash
+                    python3 -m venv venv
+                    source venv/bin/activate
                     pip install -r requirements.txt
                 '''
             }
@@ -25,30 +20,29 @@ pipeline {
 
         stage('Run Unit Tests') {
             steps {
-                sh '''
-                    source $VENV_DIR/bin/activate
-                    pytest tests/
+                sh '''#!/bin/bash
+                    source venv/bin/activate
+                    pytest
                 '''
             }
         }
 
         stage('Deploy (Optional)') {
             when {
-                branch 'main'  // chỉ deploy khi push lên nhánh main
+                branch 'main'
             }
             steps {
-                echo 'Đang deploy...'
-                // ví dụ: copy file lên server, restart service,...
+                echo "Triển khai nếu cần."
             }
         }
     }
 
     post {
-        success {
-            echo '🎉 Pipeline chạy thành công!'
-        }
         failure {
-            echo '❌ Có lỗi trong Pipeline!'
+            echo 'Có lỗi trong Pipeline!'
+        }
+        success {
+            echo 'Build & test thành công!'
         }
     }
 }
