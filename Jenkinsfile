@@ -1,48 +1,34 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Clone project') {
-            steps {
-                git branch: 'main', url: 'https://github.com/PNamGP1120/RecruitmentFlaskApp.git'
-            }
-        }
-
-        stage('Setup Python & Virtualenv') {
-            steps {
-                sh '''#!/bin/bash
-                    python3 -m venv venv
-                    source venv/bin/activate
-                    pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Run Unit Tests') {
-            steps {
-                sh '''#!/bin/bash
-                    source venv/bin/activate
-                    pytest
-                '''
-            }
-        }
-
-        stage('Deploy (Optional)') {
-            when {
-                branch 'main'
-            }
-            steps {
-                echo "Triển khai nếu cần."
-            }
-        }
+    environment {
+        VENV_DIR = '.venv'
     }
 
-    post {
-        failure {
-            echo 'Có lỗi trong Pipeline!'
+    stages {
+        stage('Clone') {
+            steps {
+                git branch: 'develop', url: 'https://github.com/PNamGP1120/RecruitmentFlaskApp.git'
+            }
         }
-        success {
-            echo 'Build & test thành công!'
+
+        stage('Setup Virtualenv') {
+            steps {
+                sh 'python3 -m venv .venv'
+                sh '.venv/bin/pip install -r requirements.txt'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '.venv/bin/python -m unittest discover'
+            }
+        }
+
+        stage('Deploy (Dev only)') {
+            steps {
+                echo 'Deployment step here (e.g., run script, restart server)'
+            }
         }
     }
 }
