@@ -65,7 +65,6 @@ def profile_process():
 
             data_company = dao.load_company_by_id(current_user.id)
 
-
             if not data_company:
                 data_company = {
                     'website': '',
