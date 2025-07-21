@@ -326,6 +326,7 @@ def application():
 
 # Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
+@login_required
 def job_posting():
     title = "Job Posting"
     subtitle = "Post your job here"
@@ -389,4 +390,4 @@ if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
 
-        app.run(debug=True)
+        app.run(host='0.0.0.0', port=5000, debug=True)
