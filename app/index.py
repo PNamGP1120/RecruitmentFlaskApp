@@ -313,17 +313,28 @@ def apply_job(job_id):
 def application():
     page = max(1, int(request.args.get("page", 1)))
     per_page = 3
-
-    applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page)
-    print(applies.pages)
-    total_pages = applies.pages
-    print(total_pages)
-    for p in range(1, total_pages + 1):
-        for a in applies.items:
-            print(f"Trang {p}: {a.cover_letter}")
-
-
-    return render_template("applications.html",title="Applications", subtitle="Welcome to your applications" , applies=applies)
+    if current_user.role == RoleEnum.JOBSEEKER:
+        applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page)
+        print("apply of jobseeker",applies.pages)
+        total_pages = applies.pages
+        print(total_pages)
+        for p in range(1, total_pages + 1):
+            for a in applies.items:
+                print(f"Trang {p}: {a.cover_letter}")
+        return render_template("applications.html",title="Applications",
+                               subtitle="List of your applications" , applies=applies)
+    elif current_user.role == RoleEnum.RECRUITER:
+        applies = dao.load_applications_for_company(current_user.id, page=page, per_page=per_page)
+        print("apply of Company", applies.pages)
+        total_pages = applies.pages
+        print(total_pages)
+        for p in range(1, total_pages + 1):
+            for a in applies.items:
+                print(f"Trang {p}: {a.cover_letter}")
+        return render_template("applications.html", title="Applications",
+                               subtitle="List of applications for your company", applies=applies)
+    return render_template("applications.html", title="Applications",
+                               subtitle="List of applications for your company")
 
 # Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])

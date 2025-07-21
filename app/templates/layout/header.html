@@ -50,7 +50,9 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                     <li><a class="dropdown-item" href="{{url_for('profile_process')}}">Profile</a></li>
                     <li><a class="dropdown-item" href="/settings">Settings</a></li>
-                    <li><a class="dropdown-item" href="/applications">Applications</a></li>
+                    {% if is_recruiter or is_jobSeeker  %}
+                        <li><a class="dropdown-item" href="/applications">Applications</a></li>
+                    {% endif %}
 
                     <li>
                         <hr class="dropdown-divider">

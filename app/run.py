@@ -46,6 +46,20 @@ def populate_sample_data():
             )
             db.session.add(recruiter_user)
 
+        recruiter_user2 = User.query.filter_by(username='recruiter2').first()
+        if not recruiter_user2:
+            recruiter_user2 = User(
+                username='recruiter2',
+                password=hash_md5_password('123456'),
+                first_name='Pham',
+                last_name='TuyenDung',
+                email='recruiter2@example.com',
+                role=RoleEnum.RECRUITER,
+                joined_date=datetime.now() - timedelta(days=100)
+            )
+            db.session.add(recruiter_user2)
+        db.session.commit()
+
         jobseeker_user = User.query.filter_by(username='jobseeker1').first()
         if not jobseeker_user:
             jobseeker_user = User(
@@ -90,7 +104,7 @@ def populate_sample_data():
         company2 = Company.query.filter_by(company_name='VinGroup').first()
         if not company2:
             company2 = Company(
-                user_id=recruiter_user.id,
+                user_id=recruiter_user2.id,
                 company_name='VinGroup',
                 website='https://vingroup.net',
                 introduction='Diversified conglomerate in Vietnam.',
