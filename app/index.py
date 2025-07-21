@@ -84,7 +84,6 @@ def profile_process():
                                    subtitle=subtitle)
 
 
-
         elif current_user.role == RoleEnum.JOBSEEKER :
 
             title = "Resume & CV Management"
