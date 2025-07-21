@@ -1,0 +1,81 @@
+<div class="list-group-item mb-3 ">
+    <div class="d-flex justify-content-between job-item--detail ">
+        <div>
+            <span class="badge text-primary mb-2 p-2">Sent date: {{a.applied_date}}</span>
+            <span id="status-{{a.id}}" class="badge
+                        {% if a.status == ApplicationStatusEnum.PENDING %}
+                        bg-warning text-danger
+                        {% elif a.status == ApplicationStatusEnum.REJECTED %}
+                        bg-danger
+                        {% elif a.status == ApplicationStatusEnum.ACCEPTED %}
+                        bg-success
+                        {% else %}
+                        bg-info text-danger
+                        {% endif%}
+                         mb-2 p-2">Status: {{a.status.value}}</span>
+            <h5 class="mb-1"><a class="title-color" href="/job-detail/{{a.job_id}}">{{ a.job.title }}</a> <a
+                    class="title-color" href="#">[{{a.job.company.company_name}}]</a></h5>
+            <div class="text-muted mb-1">{{ a.job.category }}</div>
+            <div class="mb-1">
+                <span class="me-2"><i class="bi bi-briefcase"></i> {{ a.job.requirements }}</span>
+                <span class="me-2"><i class="bi bi-clock"></i> {{ a.job.employment_type.value }}</span>
+                <span class="me-2"><i class="bi bi-cash"></i> {{ a.job.salary }}</span>
+                <span class="me-2"><i class="bi bi-geo-alt"></i> {{ a.job.location }}</span>
+            </div>
+        </div>
+        <div class="d-flex flex-row align-items-start card-job-item">
+
+            <!-- Button to Open the Modal -->
+            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#modal{{a.id}}">
+                View
+            </button>
+
+            <!-- The Modal -->
+            <div class="modal" id="modal{{a.id}}">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Apply for job {{ a.job.title}}</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <p>{{a.cover_letter}}</p>
+                            <div id="message-verified-apply-{{a.id}}" class="mt-2 text-success"></div>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
+                            </button>
+                            {% if is_Jobseeker %}
+                            {% elif is_recruiter %}
+                            <form id="verify-apply-form-{{a.id}}">
+                                <input type="hidden" name="med" id="med-action-{{a.id}}">
+                                <button type="button" class="btn btn-success"
+                                        onclick="verifiedApply({{ a.id }}, 'Confirm')">Confirm
+                                </button>
+
+                                <button type="button" class="btn btn-danger"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+
+                                <button type="button" class="btn btn-primary"
+                                        onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
+                                </button>
+                            </form>
+
+
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -168,7 +168,6 @@
     </div>
 </div>
 
-{% if is_job_seeker %}
 
 {% if current_user.role == RoleEnum.JOBSEEKER%}
 <div class="container my-5 ">
@@ -186,35 +185,38 @@
 </div>
 {% endif%}
 
-    <!-- Job Item 3 -->
-    <div class="card mb-3 p-3">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <p class="text-muted small mb-1">24 min ago</p>
-                <h6 class="mb-1">Corporate Tactics Facilitator</h6>
-                <p class="text-muted small">Conner, Turner and Hurley Inc</p>
-                <div class="d-flex flex-wrap gap-3 text-muted small">
-                    <span><i class="bi bi-building"></i> Commerce</span>
-                    <span><i class="bi bi-clock"></i> Full time</span>
-                    <span><i class="bi bi-currency-dollar"></i> $38000 - $40000</span>
-                    <span><i class="bi bi-geo-alt"></i> New York, USA</span>
-                </div>
-            </div>
-            <div class="text-end">
-                <button class="btn btn-outline-success mb-2">Job Details</button>
-                <br>
-                <i class="bi bi-bookmark"></i>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-
 {% if is_recruiter %}
-{% for application in applications %}
-{% include 'recruiter/application_card.html' %}
+{% if not applies %}
+<div class="alert alert-info text-center"> There are no applications yet!</div>
+{% else %}
+{% for a in applies %}
+{% include 'layout/cardapply.html' %}
 {% endfor %}
+<!-- Pagination -->
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if applies.has_prev %}
+        <li class="page-item"><a class="page-link"
+                                 href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.prev_num)}}">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if applies.pages > 1 %}
+        {% for p in range(1, applies.pages+1) %}
+        <li id="page{{p}}" class="page-item"><a class="page-link"
+                                                href="{{ url_for('job_detail',job_id=jobDetail.id, page=p) }}">{{p}}</a>
+        </li>
+        {% endfor %}
+        {% endif %}
+
+        {% if applies.has_next %}
+        <li class="page-item"><a class="page-link"
+                                 href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.next_num) }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{%endif%}
 {% endif %}
 
 

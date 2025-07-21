@@ -19,6 +19,12 @@ def inject_user():
 
     return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
 
+
+@app.context_processor
+def inject_enums():
+    return dict(ApplicationStatusEnum=ApplicationStatusEnum)
+
+
 @app.route('/')
 def index():
 
@@ -301,9 +307,13 @@ def job_detail(job_id):
     page_size = 3
     jobs = dao.load_jobs(page=page, per_page=page_size, location=job.location, exclude_job=job.id)
     cvs = []
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role==RoleEnum.JOBSEEKER :
         cvs = dao.load_cv_by_id(current_user.id)
-    return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum)
+
+    applications = []
+    if current_user.is_authenticated and current_user.role==RoleEnum.RECRUITER and job.company_id==current_user.company.id :
+        applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
+    return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum, applies=applications)
 
 
 @app.route("/api/apply/<int:job_id>", methods=["POST"])
@@ -340,24 +350,18 @@ def apply_job(job_id):
 def application():
     page = max(1, int(request.args.get("page", 1)))
     per_page = 3
+    status = request.args.get("status")
+
     if current_user.role == RoleEnum.JOBSEEKER:
-        applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page)
-        print("apply of jobseeker",applies.pages)
-        total_pages = applies.pages
-        print(total_pages)
-        for p in range(1, total_pages + 1):
-            for a in applies.items:
-                print(f"Trang {p}: {a.cover_letter}")
+        if status == "All" or status == "Choose Status":
+            status = None
+        applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page, status=status)
         return render_template("applications.html",title="Applications",
                                subtitle="List of your applications" , applies=applies)
     elif current_user.role == RoleEnum.RECRUITER:
-        applies = dao.load_applications_for_company(current_user.id, page=page, per_page=per_page)
-        print("apply of Company", applies.pages)
-        total_pages = applies.pages
-        print(total_pages)
-        for p in range(1, total_pages + 1):
-            for a in applies.items:
-                print(f"Trang {p}: {a.cover_letter}")
+        if status == "All" or status == "Choose Status":
+            status = None
+        applies = dao.load_applications_for_company(current_user.id, page=page, per_page=per_page, status=status)
         return render_template("applications.html", title="Applications",
                                subtitle="List of applications for your company", applies=applies)
     return render_template("applications.html", title="Applications",
@@ -415,14 +419,35 @@ def job_posting():
         flash('Job was successfully added', 'success')
         return redirect(url_for('job_posting'))
 
-
-
     return render_template('recruiter/job_posting.html',
                             title=title,
                            subtitle=subtitle,
                            jobs=jobs,
                            categories=cates,
                            employment_types=employment_enum,)
+
+
+@app.route("/api/verified-apply/<int:apply_id>", methods=['POST'])
+def verified_apply(apply_id):
+    apply = dao.get_application_by_id(apply_id)
+    if not apply:
+        return jsonify({"error": "Application not found"}), 404
+
+    med = request.form.get("med")
+    if med == "Confirm":
+        apply.status = ApplicationStatusEnum.CONFIRMED
+    elif med == "Reject":
+        apply.status = ApplicationStatusEnum.REJECTED
+    elif med == "Accept":
+        apply.status = ApplicationStatusEnum.ACCEPTED
+    else:
+        return jsonify({"error": "Invalid value for med"}), 400
+
+    db.session.commit()
+    return jsonify({"message": f"{med} successfully"}), 200
+
+
+
 
 if __name__ == '__main__':
     with app.app_context():

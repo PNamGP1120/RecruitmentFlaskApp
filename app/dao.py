@@ -8,7 +8,7 @@ from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
 
 
 def load_cate():
@@ -449,7 +449,7 @@ def get_applications_by_cv_ids(cv_ids):
 
 
 # Load cac don ung tuyen cua nguoi dung
-def load_applications_for_user(current_user, page=None, per_page=None):
+def load_applications_for_user(current_user, page=None, per_page=None, status=None):
     if page and per_page:
         resume = get_resume_by_user(current_user.id)
         if not resume:
@@ -460,6 +460,8 @@ def load_applications_for_user(current_user, page=None, per_page=None):
             return Application.query.filter(False).paginate(page=page, per_page=per_page)
 
         applications = get_applications_by_cv_ids(cv_ids)
+        if status:
+            applications = applications.filter_by(status=status)
         return applications.paginate(page=page, per_page=per_page)
     return None
 
@@ -480,7 +482,7 @@ def get_applications_by_job_ids(job_ids):
 
 
 # load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
-def load_applications_for_company(user_id=None, page=None, per_page=None):
+def load_applications_for_company(user_id=None, page=None, per_page=None, status=None):
     if page and per_page:
         #lay thong tin cong ty
         company = load_company_by_id(user_id)
@@ -494,9 +496,16 @@ def load_applications_for_company(user_id=None, page=None, per_page=None):
             return Application.query.filter(False).paginate(page=page, per_page=per_page)
 
         applications = get_applications_by_job_ids(job_ids=jobs)
+        if status:
+            applications = applications.filter_by(status=status)
         print(applications)
         return applications.paginate(page=page, per_page=per_page)
     return None
+
+
+def get_application_by_id(apply_id):
+    return Application.query.get(apply_id)
+
 
 
 if __name__ == "__main__":
@@ -505,12 +514,13 @@ if __name__ == "__main__":
         # for i in u:
         #     print(i.title)
         # print(u.items.employment_type)
-        a = get_application_by_job(2)
-        print(a)
-        # ap = load_applications_for_company(3, page=1,per_page=3)
+        # a = get_application_by_job(2)
+        # print(a)
+        # ap = load_applications_for_company(2, page=1,per_page=3, status=ApplicationStatusEnum.PENDING)
         # for p in  range (1, ap.pages+1):
         #     app = load_applications_for_company(3,page=p, per_page=3)
         #     for a in app.items:
         #         print(a)
+        # print("ap.itmes",ap.items)
 
         print(count_candidates())
