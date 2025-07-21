@@ -445,12 +445,24 @@ def verified_apply(apply_id):
     return jsonify({"message": f"{med} successfully"}), 200
 
 
-@app.route('/webhook', methods=['POST'])
+
+@app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json()
-    print(f"[Webhook received]: {data}")
-    # TODO: Tùy bạn xử lý gì với code, VD: chạy pull, build lại app, gọi Jenkins, v.v.
-    return '', 204
+    try:
+        data = request.get_json(force=True)
+        print("🔔 Webhook received:", data)
+
+        if data.get("ref") == "refs/heads/develop":
+            print("✅ Đúng nhánh develop - bắt đầu xử lý...")
+            # Gọi script hoặc hành động CICD ở đây
+        else:
+            print("⚠️ Webhook không đến từ nhánh develop")
+
+        return "", 204
+
+    except Exception as e:
+        print("❌ Error in webhook:", str(e))
+        return jsonify({"error": str(e)}), 400
 
 
 if __name__ == '__main__':
