@@ -4,13 +4,13 @@
             <span class="badge text-primary mb-2 p-2">Sent date: {{a.applied_date}}</span>
             <span id="status-{{a.id}}" class="badge
                         {% if a.status == ApplicationStatusEnum.PENDING %}
-                        bg-warning text-danger
+                        bg-warning text-dark
                         {% elif a.status == ApplicationStatusEnum.REJECTED %}
                         bg-danger
                         {% elif a.status == ApplicationStatusEnum.ACCEPTED %}
                         bg-success
                         {% else %}
-                        bg-info text-danger
+                        bg-info text-dark
                         {% endif%}
                          mb-2 p-2">Status: {{a.status.value}}</span>
             <h5 class="mb-1"><a class="title-color" href="/job-detail/{{a.job_id}}">{{ a.job.title }}</a> <a
@@ -38,14 +38,32 @@
 
                         <!-- Modal Header -->
                         <div class="modal-header">
-                            <h4 class="modal-title">Apply for job {{ a.job.title}}</h4>
+                            <h4 class="modal-title ">Apply for job {{ a.job.title}}</h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
                         <!-- Modal body -->
-                        <div class="modal-body">
-                            <p>{{a.cover_letter}}</p>
-                            <div id="message-verified-apply-{{a.id}}" class="mt-2 text-success"></div>
+                        <div class="modal-body row">
+                             <div class="col-4">
+                                 <img class="rounded" src="{{a.cv.resume.user.avatar}}" alt="Avatar" width="100%">
+                                 <h4 class="text-center">{{a.cv.resume.user.first_name}} {{ a.cv.resume.user.last_name}} </h4>
+                                 <div>
+                                     <h5 >Information</h5>
+                                     <p><strong>Skill: </strong> {{ a.cv.resume.skill}}</p>
+                                     <p><strong>experience: </strong> {{ a.cv.resume.experience}}</p>
+                                     <p><strong>education: </strong> {{ a.cv.resume.education}}</p>
+                                     <p><strong>preferred_locations: </strong> {{ a.cv.resume.preferred_locations}}</p>
+                                     <p><strong>preferred_job_types: </strong> {{ a.cv.resume.preferred_job_types}}</p>
+                                     <p><strong>linkedin: </strong> <a class="text-info" href="{{ a.cv.resume.linkedin_url}}">{{ a.cv.resume.linkedin_url}}</a></p>
+                                 </div>
+                             </div>
+                            <div class="col">
+                                <p><span class="bg-info text-dark m-2 p-2 rounded">Cover letter: </span>{{a.cover_letter}}</p>
+                                <iframe src="{{a.cv.file_path}}" width="100%" height="650px">
+
+                                </iframe>
+                                <div id="message-verified-apply-{{a.id}}" class="mt-2 text-success"></div>
+                            </div>
                         </div>
 
                         <!-- Modal footer -->

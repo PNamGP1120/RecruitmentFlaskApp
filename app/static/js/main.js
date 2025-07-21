@@ -86,7 +86,7 @@ function verifiedApply(applyId, action) {
         switch (action) {
             case "Confirm":
                 text = "Status: Confirmed";
-                classList.push("bg-info", "text-danger");
+                classList.push("bg-info", "text-dark");
                 break;
             case "Reject":
                 text = "Status: Rejected";
