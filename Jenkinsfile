@@ -19,15 +19,10 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                    # Cài đặt pip và virtualenv ở user level
                     python3 -m pip install --user --upgrade pip
                     python3 -m pip install --user virtualenv
-
-                    # Tạo và kích hoạt virtual environment
                     python3 -m virtualenv ${VENV_NAME}
                     . ${VENV_NAME}/bin/activate
-
-                    # Cài đặt các dependencies
                     pip install -r requirements.txt
                 '''
             }
@@ -47,12 +42,8 @@ pipeline {
                 sh '''
                     . ${VENV_NAME}/bin/activate
                     mkdir -p reports
-
-                    # Chạy flake8
                     python -m pip install flake8
                     flake8 app/ tests/ --output-file=reports/flake8.txt || true
-
-                    # Chạy pylint
                     python -m pip install pylint
                     pylint app/ tests/ --output-format=text --output=reports/pylint.txt || true
                 '''
