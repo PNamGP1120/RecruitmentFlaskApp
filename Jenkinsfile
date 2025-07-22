@@ -18,14 +18,23 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                    python3 -m pip install --upgrade pip
-                    python3 -m pip install virtualenv
+                    # Cài đặt pip nếu chưa có
+                    sudo apt-get update
+                    sudo apt-get install -y python3-pip
+
+                    # Upgrade pip và cài đặt virtualenv
+                    python3 -m pip install --user --upgrade pip
+                    python3 -m pip install --user virtualenv
+
+                    # Tạo và kích hoạt virtual environment
                     python3 -m virtualenv ${VENV_NAME}
                     . ${VENV_NAME}/bin/activate
+
+                    # Cài đặt các dependencies
                     pip install -r requirements.txt
                 '''
             }
-        }
+}
 
         stage('Run Unit Tests') {
             steps {
