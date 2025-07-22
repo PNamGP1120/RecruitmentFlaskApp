@@ -446,26 +446,6 @@ def verified_apply(apply_id):
 
 
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    try:
-        data = request.get_json(force=True)
-        print("🔔 Webhook received:", data)
-
-        if data.get("ref") == "refs/heads/develop":
-            print("✅ Đúng nhánh develop - bắt đầu xử lý...")
-            # Gọi script hoặc hành động CICD ở đây
-        else:
-            print("⚠️ Webhook không đến từ nhánh develop")
-
-        return "", 204
-
-    except Exception as e:
-        print("❌ Error in webhook:", str(e))
-        return jsonify({"error": str(e)}), 400
-
-
-
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
