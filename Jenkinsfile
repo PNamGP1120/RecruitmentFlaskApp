@@ -6,7 +6,6 @@ pipeline {
         VENV_NAME = 'venv'
         FLASK_ENV = 'testing'
         PYTHONPATH = "${WORKSPACE}"
-        PATH = "/var/lib/jenkins/.local/bin:${env.PATH}"
     }
 
     stages {
@@ -16,14 +15,16 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment') {
+       stage('Setup Python Environment') {
             steps {
                 sh '''
-                    python3 -m pip install --user --upgrade pip
-                    python3 -m pip install --user virtualenv
-                    python3 -m virtualenv ${VENV_NAME}
+                    # Create virtual environment
+                    python3 -m venv ${VENV_NAME}
+
+                    # Activate virtual environment and install packages
                     . ${VENV_NAME}/bin/activate
-                    pip install -r requirements.txt
+                    ${VENV_NAME}/bin/python -m pip install --upgrade pip
+                    ${VENV_NAME}/bin/pip install -r requirements.txt
                 '''
             }
         }
@@ -42,9 +43,7 @@ pipeline {
                 sh '''
                     . ${VENV_NAME}/bin/activate
                     mkdir -p reports
-                    python -m pip install flake8
                     flake8 app/ tests/ --output-file=reports/flake8.txt || true
-                    python -m pip install pylint
                     pylint app/ tests/ --output-format=text --output=reports/pylint.txt || true
                 '''
             }
