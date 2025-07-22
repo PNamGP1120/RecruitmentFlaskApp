@@ -457,7 +457,7 @@ WEBHOOK_SECRET = "your-secret-key-here"
 
 
 
-@app.route("/webhook", methods=["POST"])
+@app.route("/github-webhook", methods=["POST"])
 def webhook():
     try:
         # Log headers để debug
