@@ -452,9 +452,9 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
 # Thêm secret key cho webhook (tạo một string ngẫu nhiên)
 WEBHOOK_SECRET = "your-secret-key-here"
-
 
 @app.route("/github-webhook", methods=["POST"])
 def webhook():
