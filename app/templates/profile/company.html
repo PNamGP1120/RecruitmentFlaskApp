@@ -1,0 +1,166 @@
+{% extends 'layout/base.html'%}
+
+{% block title %}Recruiter Registration{% endblock %}
+
+{% block css %}
+<style>
+    .info-box {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        height: 100%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .info-icon {
+        font-size: 1.5rem;
+        color: #20c997;
+        flex-shrink: 0;
+    }
+
+    .register-form-wrapper {
+        background-color: #edf8f6;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .form-group-inline {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        min-width: 130px;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .form-control,
+    .form-select {
+        flex: 1;
+    }
+
+    .btn-custom {
+        background-color: #20c997;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #17a589;
+    }
+
+    @media (max-width: 768px) {
+        .form-group-inline {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .form-label {
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+{% include 'layout/hero_section.html'%}
+<!-- Main Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- LEFT: Form -->
+            <div class="col-md-6">
+                <div class="register-form-wrapper">
+                    <h4 class="fw-bold mb-3">Recruiter Company Registration</h4>
+                    <p class="text-muted mb-4">Complete the form below to register your company and start posting jobs.</p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data">
+
+                        {% set fields = [
+                            {'id': 'company_name', 'label': 'Company Name', 'type': 'text', 'placeholder': 'e.g. ABC Tech Ltd.', 'value': data_company.company_name},
+                            {'id': 'website', 'label': 'Website', 'type': 'text', 'placeholder': 'e.g. https://abc-tech.com', 'value': data_company.website},
+                            {'id': 'industry', 'label': 'Industry Sector', 'type': 'text', 'placeholder': 'e.g. Information Technology', 'value': data_company.industry},
+                            {'id': 'company_size', 'label': 'Company Size', 'type': 'text', 'placeholder': 'e.g. 100-500 employees', 'value': data_company.company_size},
+                            {'id': 'address', 'label': 'Company Address', 'type': 'text', 'placeholder': 'e.g. 123 Le Loi, HCMC', 'value': data_company.address},
+                            {'id': 'introduction', 'label': 'About Company', 'type': 'text', 'placeholder': 'Brief introduction about your company', 'value': data_company.introduction}
+                        ] %}
+
+                        {% for field in fields %}
+                        <div class="form-group-inline">
+                            <label class="form-label" for="{{ field.id }}">{{ field.label }}</label>
+                            <input
+                                type="{{ field.type }}"
+                                class="form-control"
+                                id="{{ field.id }}"
+                                name="{{ field.id }}"
+                                placeholder="{{ field.placeholder }}"
+                                {% if field.value is defined %} value="{{ field.value }}" {% endif %}
+                                required
+                            >
+                        </div>
+                        {% endfor %}
+
+                        {% if is_recruiter %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-custom btn-lg">Register Company</button>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: Info -->
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3">Connect Talent to Your Team</h2>
+                <p class="text-muted mb-4">
+                    Join thousands of companies using our platform to recruit top talent quickly and efficiently.
+                </p>
+
+                <div class="row row-cols-2 g-3">
+                    {% set infos = [
+                        {'icon': 'bi-telephone', 'title': 'Recruiter Support', 'value': '+84 089-45765'},
+                        {'icon': 'bi-envelope', 'title': 'Contact Us', 'value': 'recruit@oujob.vn'},
+                        {'icon': 'bi-clock', 'title': 'Working Hours', 'value': 'Mon - Fri: 9AM - 6PM'},
+                        {'icon': 'bi-geo-alt', 'title': 'Head Office', 'value': 'OU Campus, HCMC'}
+                    ] %}
+
+                    {% for info in infos %}
+                    <div class="col">
+                        <div class="info-box">
+                            <i class="bi {{ info.icon }} info-icon"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ info.title }}</h6>
+                                <p class="mb-0">{{ info.value }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
