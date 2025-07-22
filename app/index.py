@@ -456,7 +456,6 @@ logger = logging.getLogger(__name__)
 WEBHOOK_SECRET = "your-secret-key-here"
 
 
-
 @app.route("/github-webhook", methods=["POST"])
 def webhook():
     try:
