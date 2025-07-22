@@ -445,10 +445,70 @@ def verified_apply(apply_id):
     return jsonify({"message": f"{med} successfully"}), 200
 
 
+import hmac
+import hashlib
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Thêm secret key cho webhook (tạo một string ngẫu nhiên)
+WEBHOOK_SECRET = "your-secret-key-here"
+
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    try:
+        # Log headers để debug
+        logger.info(f"Headers: {dict(request.headers)}")
+
+        # Lấy event type
+        event_type = request.headers.get('X-GitHub-Event')
+        logger.info(f"Event Type: {event_type}")
+
+        # Verify signature (bảo mật)
+        signature = request.headers.get('X-Hub-Signature-256')
+        if signature:
+            # Verify webhook secret
+            expected_signature = "sha256=" + hmac.new(
+                WEBHOOK_SECRET.encode(),
+                request.get_data(),
+                hashlib.sha256
+            ).hexdigest()
+
+            if not hmac.compare_digest(signature, expected_signature):
+                logger.error("Invalid signature")
+                return jsonify({"error": "Invalid signature"}), 401
+
+        # Xử lý event ping
+        if event_type == 'ping':
+            return jsonify({'message': 'pong'}), 200
+
+        # Xử lý event push
+        if event_type == 'push':
+            data = request.get_json()
+
+            # Log thông tin push
+            logger.info(f"Push to branch: {data.get('ref')}")
+            logger.info(f"Commits: {len(data.get('commits', []))}")
+
+            # Xử lý theo branch
+            if data.get("ref") == "refs/heads/main":  # hoặc branch khác
+                # Thực hiện các action khi có push vào main
+                logger.info("Push to main branch detected")
+                # Thêm logic xử lý ở đây
+
+            return "", 204
+
+        return jsonify({"message": "Event not handled"}), 200
+
+    except Exception as e:
+        logger.error(f"Error in webhook: {str(e)}")
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
 
-        app.run(host="0.0.0.0", port=3000)
+        app.run(host="0.0.0.0", port=3000, debug=True)
 
