@@ -426,14 +426,21 @@ def job_posting():
 
 
 @app.route("/api/verified-apply/<int:apply_id>", methods=['POST'])
+@login_required
 def verified_apply(apply_id):
+    if not current_user.is_recruiter:
+        return jsonify({"message": "You are not a recruiter"}), 403
     apply = dao.get_application_by_id(apply_id)
     if not apply:
         return jsonify({"error": "Application not found"}), 404
+    if apply.job.company_id != current_user.company.id:
+        print(apply.job.company_id,current_user.company.id, current_user.username)
+        return jsonify({"message": "You are not the owner of this job posting"}), 403
 
     med = request.form.get("med")
     if med == "Confirm":
         apply.status = ApplicationStatusEnum.CONFIRMED
+        #con xu ly tao lich phong van
     elif med == "Reject":
         apply.status = ApplicationStatusEnum.REJECTED
     elif med == "Accept":
