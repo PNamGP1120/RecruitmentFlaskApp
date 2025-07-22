@@ -92,7 +92,7 @@ class Category(BaseModel):
 
 
 class Job(BaseModel):
-    title = Column(String(100))
+    title = Column(String(100), nullable=False)
     description = Column(Text)
     requirements = Column(Text)
     location = Column(String(100))

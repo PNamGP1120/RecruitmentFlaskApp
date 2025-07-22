@@ -32,6 +32,7 @@ def load_jobs(
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
 
+    :param exclude_job:
     :param page: Số trang hiện tại (mặc định 1).
     :param per_page: Số lượng công việc trên mỗi trang (mặc định 10)
     :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
