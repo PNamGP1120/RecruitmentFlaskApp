@@ -22,6 +22,7 @@ class TestJobPosting(unittest.TestCase):
         db.session.add(self.recruiter)
         db.session.commit()
 
+
         # Tạo company
         self.company = Company(
             user_id=self.recruiter.id,
