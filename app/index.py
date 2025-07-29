@@ -4,35 +4,70 @@
 from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
-from flask_socketio import send, SocketIO
-from pyexpat.errors import messages
 
-from app import app, dao, login
-from app.models import EmploymentEnum, RoleEnum
+from flask_socketio import join_room, leave_room, emit
+from app import app, dao, login, socketio, db
+from app.models import EmploymentEnum, RoleEnum, Resume, CV, Job, Application
 from app.models import JobStatusEnum, ApplicationStatusEnum
-from app.models import Resume
 
-socketio = SocketIO(app, cors_allowed_origins="*")
 
-@socketio.on('connect')
-def handle_connect():
-    print("Client connected!")
+@app.route('/chat/start/<int:recipient_id>')
+@login_required
+def start_chat(recipient_id):
+    """Finds or creates a conversation and redirects to the chat page."""
+    recipient = dao.get_user_by_id(recipient_id)
+    if not recipient:
+        flash("User not found.", "danger")
+        return redirect(request.referrer or url_for('index'))
 
-@socketio.on('message')
-def handle_message(message):
-    print("Received message: " + message)
-    # This broadcasts any message received to all clients
-    send(message, broadcast=True)
+    conversation = dao.get_or_create_conversation(current_user, recipient)
 
-# @socketio.on('connect')
-# def handle_message(message):
-#     print("Received message: " + message)
-#     if message != "User connected":
-#         send(message, broadcast=True)
+    return redirect(url_for('chat_page', conversation_id=conversation.id))
 
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
+
+@app.route('/chat/<int:conversation_id>')
+@login_required
+def chat_page(conversation_id):
+    """Renders the main chat page for a specific conversation."""
+    conversation = dao.get_conversation_by_id(conversation_id)
+
+    if current_user not in conversation.users:
+        return "Unauthorized", 403
+
+    return render_template('chat.html', conversation=conversation)
+
+
+# ========== SOCKET.IO HANDLERS ==========
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    """Client joins a specific conversation room."""
+    room = data['room']
+    join_room(room)
+    print(f"{current_user.username} has entered room: {room}")
+
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    """Client sends a message. Server saves it and broadcasts to the room."""
+    room = data['room']
+    message_content = data['message']
+
+    new_message = dao.create_message(
+        content=message_content,
+        conversation_id=room,
+        sender_id=current_user.id
+    )
+
+    message_data = {
+        'sender_id': current_user.id,
+        'username': current_user.username,
+        'avatar': current_user.avatar,
+        'content': new_message.content,
+        'timestamp': new_message.timestamp.strftime('%I:%M %p')
+    }
+
+    emit('receive_message', message_data, to=room)
 
 @app.context_processor
 def inject_user():
@@ -435,9 +470,4 @@ def job_posting():
                            employment_types=employment_enum,)
 
 if __name__ == '__main__':
-    # with app.app_context():
-        from app.admin import *
-
-        # app.run(debug=True)
-
-        socketio.run(app, debug=True, host='192.168.80.1', allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

@@ -8,8 +8,50 @@ from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum, Conversation, Message, conversation_user
 
+
+def get_or_create_conversation(user1, user2):
+    """
+    Finds an existing conversation between two users or creates a new one.
+    """
+    # Query for a conversation that involves both users
+    conversation = db.session.query(Conversation).join(
+        conversation_user
+    ).filter(
+        conversation_user.c.user_id.in_([user1.id, user2.id])
+    ).group_by(
+        Conversation.id
+    ).having(
+        db.func.count(conversation_user.c.user_id) == 2
+    ).first()
+
+    if not conversation:
+        # Create a new one if it doesn't exist
+        conversation = Conversation()
+        conversation.users.append(user1)
+        conversation.users.append(user2)
+        db.session.add(conversation)
+        db.session.commit()
+
+    return conversation
+
+
+def get_conversation_by_id(conversation_id):
+    """Fetches a single conversation by its ID."""
+    return db.session.get(Conversation, conversation_id)
+
+
+def create_message(content, conversation_id, sender_id):
+    """Saves a new message to the database."""
+    message = Message(
+        content=content,
+        conversation_id=conversation_id,
+        sender_id=sender_id
+    )
+    db.session.add(message)
+    db.session.commit()
+    return message
 
 def load_cate():
     cates = Category.query.order_by("id").all()

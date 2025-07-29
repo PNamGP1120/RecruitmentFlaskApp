@@ -1,36 +1,74 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
-</head>
-<body>
+{% block title %}Chat{% endblock %}
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        var socket = io.connect("http://192.168.80.1:5000")
-        socket.on('connect', function () {
-            socket.send("User connected!");
+{% block content %}
+<div class="chat-container" style="max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 1rem;">
+    <h2>Chat with {% for user in conversation.users %}{% if user != current_user %}{{ user.username }}{% endif %}{% endfor %}</h2>
+    
+    <div id="message-area" style="height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px;">
+        {% for msg in conversation.messages|sort(attribute='timestamp') %}
+            <div class="message {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                <p><strong>{{ msg.sender.username }}:</strong> {{ msg.content }}</p>
+                <small>{{ msg.timestamp.strftime('%I:%M %p') }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required style="width: 85%; padding: 8px;">
+        <button type="submit" style="width: 13%; padding: 8px;">Send</button>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Establishes connection with the server
+        const socket = io();
+
+        // Get conversation ID from the template context
+        const conversationId = "{{ conversation.id }}";
+        const currentUserId = {{ current_user.id }};
+
+        // 1. Join the conversation room upon connection
+        socket.on('connect', () => {
+            console.log('Connected to server!');
+            socket.emit('join', { room: conversationId });
         });
 
-        socket.on('message', function (data) {
-            $('#messages').append($('<p>').text(data));
+        const messageArea = document.getElementById('message-area');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+
+        // Scroll to the bottom of the message area
+        messageArea.scrollTop = messageArea.scrollHeight;
+
+        // 2. Listen for the 'submit' event on the form
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                // Emit the message to the server
+                socket.emit('send_message', {
+                    room: conversationId,
+                    message: message
+                });
+                messageInput.value = ''; // Clear the input field
+            }
         });
 
-        $('#sendBtn').on('click', function () {
-            socket.send($('#username').val() + ': ' + $('#message').val());
-            $('#message').val('');
+        // 3. Listen for incoming messages from the server
+        socket.on('receive_message', (data) => {
+            const messageDiv = document.createElement('div');
+            // Determine if the message was sent by the current user
+            const messageType = data.sender_id === currentUserId ? 'sent' : 'received';
+
+            messageDiv.className = `message ${messageType}`;
+            messageDiv.innerHTML = `<p><strong>${data.username}:</strong> ${data.content}</p><small>${data.timestamp}</small>`;
+
+            messageArea.appendChild(messageDiv);
+            messageArea.scrollTop = messageArea.scrollHeight; // Auto-scroll to the latest message
         });
-    })
+    });
 </script>
 
-<div id="messages">
-
-</div>
-<input type="text" id="username" placeholder="Username" required>
-<input type="text" id="message" placeholder="Message" required>
-<button id="sendBtn">Send</button>
-</body>
-</html>
+{% endblock %}
