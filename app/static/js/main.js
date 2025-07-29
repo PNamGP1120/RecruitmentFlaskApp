@@ -112,5 +112,38 @@ function verifiedApply(applyId, action) {
 }
 
 
+async function verifiedRecruiter(userId) {
+    fetch(`/api/verified-recruiter/${userId}`,{
+    method: "POST"
+    }).then(res => res.json()).then(data => {
+    if (data.status === 200){
+        alert("verified successful");
+        location.reload();
+    }
+    else{
+        alert("Verified successful");
+        location.reload();
+    }
+    })
+}
+
+async function cancelRecruiter(userId) {
+    if(confirm("Are you sure you want to cancel this employer's permission?") == true){
+    fetch(`/api/cancel-recruiter/${userId}`,{
+    method: "POST"
+    }).then(res => res.json()).then(data => {
+    if (data.status === 200){
+        alert("Cancel successful");
+        location.reload();
+    }
+    else{
+        alert("Cancel Failed");
+        location.reload();
+    }
+    })
+    }
+
+}
+
 
 
