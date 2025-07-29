@@ -1,73 +1,84 @@
+{% extends 'layout/base.html' %}
+
 {% block title %}Chat{% endblock %}
 
 {% block content %}
-<div class="chat-container" style="max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 1rem;">
-    <h2>Chat with {% for user in conversation.users %}{% if user != current_user %}{{ user.username }}{% endif %}{% endfor %}</h2>
-    
-    <div id="message-area" style="height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px;">
-        {% for msg in conversation.messages|sort(attribute='timestamp') %}
-            <div class="message {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
-                <p><strong>{{ msg.sender.username }}:</strong> {{ msg.content }}</p>
-                <small>{{ msg.timestamp.strftime('%I:%M %p') }}</small>
-            </div>
-        {% endfor %}
-    </div>
-
-    <form id="chat-form">
-        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required style="width: 85%; padding: 8px;">
-        <button type="submit" style="width: 13%; padding: 8px;">Send</button>
-    </form>
+<div class="chat-container" id="chat-container">
+    {% for message in conversation.messages %}
+        <div class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+            <strong>{{ message.sender.username }}</strong>
+            <p>{{ message.content }}</p>
+            <div class="message-info">{{ message.timestamp.strftime('%I:%M %p') }}</div>
+        </div>
+    {% endfor %}
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+<div class="input-area">
+    <input type="text" id="message-input" placeholder="Type a message...">
+    <button id="send-button">Send</button>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Establishes connection with the server
+        // Connect to the Socket.IO server
         const socket = io();
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
 
-        // Get conversation ID from the template context
         const conversationId = "{{ conversation.id }}";
-        const currentUserId = {{ current_user.id }};
+        const currentUserId = "{{ current_user.id }}";
 
-        // 1. Join the conversation room upon connection
+        // Function to scroll to the bottom of the chat
+        const scrollToBottom = () => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        // 1. Join the specific conversation room once connected
         socket.on('connect', () => {
             console.log('Connected to server!');
-            socket.emit('join', { room: conversationId });
+            socket.emit('join_room', { room: conversationId });
         });
 
-        const messageArea = document.getElementById('message-area');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
+        // 2. Listen for incoming messages
+        socket.on('receive_message', (data) => {
+            const messageDiv = document.createElement('div');
+            // Determine if the message was sent by the current user or received from another
+            const messageClass = parseInt(data.sender_id) === parseInt(currentUserId) ? 'sent' : 'received';
+            messageDiv.classList.add('message', messageClass);
 
-        // Scroll to the bottom of the message area
-        messageArea.scrollTop = messageArea.scrollHeight;
+            messageDiv.innerHTML = `
+                <strong>${data.username}</strong>
+                <p>${data.content}</p>
+                <div class="message-info">${data.timestamp}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            scrollToBottom();
+        });
 
-        // 2. Listen for the 'submit' event on the form
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        // 3. Send a message on button click
+        const sendMessage = () => {
             const message = messageInput.value.trim();
             if (message) {
-                // Emit the message to the server
                 socket.emit('send_message', {
                     room: conversationId,
                     message: message
                 });
-                messageInput.value = ''; // Clear the input field
+                messageInput.value = ''; // Clear input field
+            }
+        };
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
             }
         });
 
-        // 3. Listen for incoming messages from the server
-        socket.on('receive_message', (data) => {
-            const messageDiv = document.createElement('div');
-            // Determine if the message was sent by the current user
-            const messageType = data.sender_id === currentUserId ? 'sent' : 'received';
-
-            messageDiv.className = `message ${messageType}`;
-            messageDiv.innerHTML = `<p><strong>${data.username}:</strong> ${data.content}</p><small>${data.timestamp}</small>`;
-
-            messageArea.appendChild(messageDiv);
-            messageArea.scrollTop = messageArea.scrollHeight; // Auto-scroll to the latest message
-        });
+        // Scroll to the bottom on initial page load
+        scrollToBottom();
     });
 </script>
 

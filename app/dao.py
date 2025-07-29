@@ -4,7 +4,7 @@ from datetime import datetime
 import cloudinary.uploader
 from flask_login import current_user
 
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
@@ -13,28 +13,27 @@ from app.models import User, Resume, Company, CV, Job, Application, Interview, C
 
 def get_or_create_conversation(user1, user2):
     """
-    Finds an existing conversation between two users or creates a new one.
+    Finds an existing 1-on-1 conversation between two users or creates a new one.
     """
-    # Query for a conversation that involves both users
-    conversation = db.session.query(Conversation).join(
-        conversation_user
-    ).filter(
-        conversation_user.c.user_id.in_([user1.id, user2.id])
-    ).group_by(
-        Conversation.id
-    ).having(
-        db.func.count(conversation_user.c.user_id) == 2
-    ).first()
+    # Query for a conversation that has exactly 2 users and both users are the ones specified.
+    conversation = db.session.query(Conversation).join(conversation_user).join(User) \
+        .group_by(Conversation.id) \
+        .having(func.count(User.id) == 2) \
+        .filter(Conversation.users.contains(user1)) \
+        .filter(Conversation.users.contains(user2)) \
+        .first()
 
-    if not conversation:
-        # Create a new one if it doesn't exist
-        conversation = Conversation()
-        conversation.users.append(user1)
-        conversation.users.append(user2)
-        db.session.add(conversation)
+    if conversation:
+        # If found, return the existing conversation
+        return conversation
+    else:
+        # Otherwise, create a new conversation
+        new_conversation = Conversation()
+        new_conversation.users.append(user1)
+        new_conversation.users.append(user2)
+        db.session.add(new_conversation)
         db.session.commit()
-
-    return conversation
+        return new_conversation
 
 
 def get_conversation_by_id(conversation_id):
