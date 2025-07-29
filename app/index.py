@@ -4,12 +4,35 @@
 from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_socketio import send, SocketIO
+from pyexpat.errors import messages
 
 from app import app, dao, login
 from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
 
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+@socketio.on('connect')
+def handle_connect():
+    print("Client connected!")
+
+@socketio.on('message')
+def handle_message(message):
+    print("Received message: " + message)
+    # This broadcasts any message received to all clients
+    send(message, broadcast=True)
+
+# @socketio.on('connect')
+# def handle_message(message):
+#     print("Received message: " + message)
+#     if message != "User connected":
+#         send(message, broadcast=True)
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
 
 @app.context_processor
 def inject_user():
@@ -18,7 +41,6 @@ def inject_user():
     is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
 
     return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
-
 @app.route('/')
 def index():
 
@@ -413,7 +435,9 @@ def job_posting():
                            employment_types=employment_enum,)
 
 if __name__ == '__main__':
-    with app.app_context():
+    # with app.app_context():
         from app.admin import *
 
-        app.run(debug=True)
+        # app.run(debug=True)
+
+        socketio.run(app, debug=True, host='192.168.80.1', allow_unsafe_werkzeug=True)
