@@ -507,7 +507,6 @@ def get_application_by_id(apply_id):
     return Application.query.get(apply_id)
 
 
-
 if __name__ == "__main__":
     with app.app_context():
         # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

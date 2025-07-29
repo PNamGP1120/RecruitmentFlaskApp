@@ -1,0 +1,37 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
+<div class="container">
+    {% if not listRecruiter %}
+    <div class="alert alert-info">There are no users</div>
+    {% else %}
+    {% for user in listRecruiter %}
+    <div class="card mb-3 shadow-sm border-0">
+        <div class="card-body d-flex justify-content-between align-items-start p-3">
+            <div class="m-2">
+                <img src="{{ user.avatar if user.avatar else '' }}" class="rounded" alt="avatar of {{user.last_name}}" width="100" height="100">
+            </div>
+            <div class="flex-grow-1 me-3 ml-2">
+                    <span class="badge bg-success text-white mb-2 fs-7"> Date join:
+                        {{ user.joined_date.strftime('%d %b %Y') }}
+                    </span>
+                <h5 class="card-title fw-bold text-dark mb-1">Name: {{ user.last_name }} {{user.first_name}}</h5>
+                <div class="d-flex flex-wrap gap-3 text-secondary">
+                    <span class="d-flex align-items-center"><i class="bi bi-briefcase me-2 text-primary"></i> Phone number: {{ user.phone if user.phone else "None" }}</span>
+                    <span class="d-flex align-items-center"><i class="bi bi-clock me-2 text-primary"></i> Email: {{ user.email }}</span>
+
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-end justify-content-between">
+            <a href="/#" class="btn btn-primary btn-sm mb-2">View user detail</a>
+        </div>
+
+        </div>
+    </div>
+    {% endfor %}
+    {% endif%}
+
+</div>
+{% endblock %}
