@@ -52,6 +52,7 @@ async function apply(jobId) {
     } catch (err) {
         console.error("Lỗi khi gửi form:", err);
         message.innerText = "Không thể kết nối đến server.";
+
     }
 }
 

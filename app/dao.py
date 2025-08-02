@@ -494,6 +494,14 @@ def get_application_by_id(apply_id):
     return Application.query.get(apply_id)
 
 
+def get_list_recruiter(page=None, per_page=None):
+
+    query = User.query.filter_by(role=RoleEnum.RECRUITER, is_active=True)
+    print("query:", query)
+    listRecruiter_pagination = query.paginate(page=page, per_page=per_page)
+    print(listRecruiter_pagination)
+    return listRecruiter_pagination
+
 if __name__ == "__main__":
     with app.app_context():
         # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

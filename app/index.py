@@ -457,10 +457,16 @@ def verified_apply(apply_id):
 
 
 @app.route("/verified", methods=['get'])
+@login_required
 def verified_user():
-    listCreruiter = User.query.filter(User.is_active == True, User.role == RoleEnum.RECRUITER).all()
-    print("listUser", listCreruiter)
-    return render_template("verified_user.html", title="Verified recruiter", subtitle="Welcome admin", listRecruiter=listCreruiter)
+    if current_user.role != RoleEnum.ADMIN:
+        return jsonify({"message": "You are not an admin!"}, 403)
+    else:
+        page = int(request.args.get("page", 1))
+        per_page = 2
+        listRecruiter = dao.get_list_recruiter(page=page, per_page=per_page)
+        print("listUser", listRecruiter)
+        return render_template("verified_user.html", title="Verified recruiter", subtitle="Welcome admin", listRecruiter=listRecruiter)
 
 
 @app.route("/api/verified-recruiter/<int:user_id>", methods=["POST"])
