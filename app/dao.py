@@ -32,6 +32,7 @@ def load_jobs(
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
 
+    :param exclude_job:
     :param page: Số trang hiện tại (mặc định 1).
     :param per_page: Số lượng công việc trên mỗi trang (mặc định 10)
     :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
@@ -95,6 +96,7 @@ def load_jobs(
 def add_job(company_id, **job_data):
     """
     Thêm một công việc mới vào cơ sở dữ liệu.
+    :param company_id:
     :param job_data: Dictionary chứa các dữ liệu công việc từ form, bao gồm:
                     title, description, requirements, location, employment_type (chuỗi),
                     category_id, company_id, salary, và bất kỳ trường nào khác bạn đã thêm vào form.
@@ -224,6 +226,7 @@ def add_user(avatar_file, **user_data):
         db.session.rollback()
         print(f"Lỗi khi thêm người dùng vào DB: {e}")
         return None
+
 
 def add_resume(resume):
     """
@@ -506,6 +509,61 @@ def load_applications_for_company(user_id=None, page=None, per_page=None, status
 def get_application_by_id(apply_id):
     return Application.query.get(apply_id)
 
+
+class NotificationDAO:
+    @staticmethod
+    def create(user_id: int, content: str) -> Notification:
+        new_notification = Notification(
+            user_id = user_id,
+            content = content,
+            created_date = datetime.now()
+        )
+        db.session.add(new_notification)
+        db.session.commit()
+        return new_notification
+
+    @staticmethod
+    def get_all(user_id: int, page: int = 1, per_page: int = 10):
+        return Notification.query.filter_by(user_id=user_id) \
+            .order_by(Notification.created_date.desc()) \
+            .paginate(page=page, per_page=per_page, error_out=False)
+
+    @staticmethod
+    def get_by_id(notification_id):
+        return Notification.query.filter_by(id=notification_id).first()
+
+    @staticmethod
+    def get_unread(user_id: int) -> int:
+        return Notification.query.filter_by(user_id=user_id, is_read = False).count()
+
+    @staticmethod
+    def mark_all_as_read(user_id: int) -> None:
+        Notification.query.filter_by(user_id=user_id, is_read=False).update({
+            "is_read": True
+        })
+        db.session.commit()
+
+    @staticmethod
+    def delete(notification_id: int) -> bool:
+        noti = Notification.query.get(notification_id)
+        if noti:
+            db.session.delete(noti)
+            db.session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def delete_all_by_user(user_id: int) -> int:
+        count = Notification.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+        return count
+
+    @staticmethod
+    def mark_as_read(notification_id, user_id):
+        notify = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+        if notify and not notify.is_read:
+            notify.is_read = True
+            db.session.commit()
 
 
 if __name__ == "__main__":

@@ -2,11 +2,13 @@
 
 {% extends 'layout/base.html' %}
 
-{% block title %}Trang chủ{% endblock %}
+{% block title %}
+Trang chủ
+{% endblock %}
 
 {% block content %}
 <section class="hero-section position-relative bg-dark text-white rounded-4 mx-2 my-3 overflow-hidden"
-    style="background: linear-gradient(120deg, rgba(30,30,60,0.85) 60%, rgba(0,180,150,0.7)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat; min-height: 520px;">
+         style="background: linear-gradient(120deg, rgba(30,30,60,0.85) 60%, rgba(0,180,150,0.7)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat; min-height: 520px;">
     <div class="container py-5">
         <div class="row justify-content-center align-items-center" style="min-height: 420px;">
             <div class="col-lg-10 text-center">
@@ -18,29 +20,31 @@
 
                 {# FORM TÌM KIẾM #}
                 <form action="{{ url_for('index') }}" method="get"
-                    class="bg-white rounded-pill shadow-lg d-flex flex-column flex-md-row align-items-stretch mx-auto mb-5"
-                    style="max-width: 900px; border: 0px solid rgba(0, 0, 0, 0.08);">
+                      class="bg-white rounded-pill shadow-lg d-flex flex-column flex-md-row align-items-stretch mx-auto mb-5"
+                      style="max-width: 900px; border: 0px solid rgba(0, 0, 0, 0.08);">
                     <div class="d-flex flex-fill align-items-center">
                         <input type="text" class="form-control border-0 bg-transparent flex-fill fs-5 p-3"
-                            placeholder="Job Title or Company" name="q" value="{{ current_q if current_q }}">
+                               placeholder="Job Title or Company" name="q" value="{{ current_q if current_q }}">
                         <div class="vertical-divider mx-2 d-none d-md-block"></div>
                         <select class="form-select border-0 bg-transparent flex-fill fs-5 p-3" name="location">
                             <option value="">Select Location</option>
-                            <option value="Hanoi" {% if current_location == 'Hanoi' %}selected{% endif %}>Hanoi</option>
-                            <option value="Ho Chi Minh City" {% if current_location == 'Ho Chi Minh City' %}selected{% endif %}>Ho Chi Minh City</option>
-                            <option value="Remote" {% if current_location == 'Remote' %}selected{% endif %}>Remote</option>
+                            <option value="Hanoi" {% if current_location=='Hanoi' %}selected{% endif %}>Hanoi</option>
+                            <option value="Ho Chi Minh City" {% if current_location== 'Ho Chi Minh City' %}selected{% endif %}>Ho Chi Minh City</option>
+                            <option value="Remote" {% if current_location=='Remote' %}selected{% endif %}>Remote</option>
                             {# Thêm các địa điểm khác nếu cần #}
                         </select>
                         <div class="vertical-divider mx-2 d-none d-md-block"></div>
                         <select class="form-select border-0 bg-transparent flex-fill fs-5 p-3" name="category_id">
                             <option value="">Select Category</option>
                             {% for category in categories %}
-                                <option value="{{ category.id }}" {% if current_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            <option value="{{ category.id }}" {% if current_category_id== category.id %}selected{% endif
+                                    %}>{{ category.name }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
                     <button type="submit"
-                        class="btn btn-teal-custom btn-lg d-flex align-items-center justify-content-center flex-shrink-0">
+                            class="btn btn-teal-custom btn-lg d-flex align-items-center justify-content-center flex-shrink-0">
                         <i class="bi bi-search me-2"></i> Search Job
                     </button>
                 </form>
@@ -109,41 +113,51 @@
 
         <div class="row gy-4">
             {% if job_postings %}
-                {% for job in job_postings %}
-                <div class="col-12">
-                    <div class="job-card rounded-4 shadow-sm p-3 p-md-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3 rounded-pill">{{ job.created_date.strftime('%d %b %Y') }}</span>
-                            <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+            {% for job in job_postings %}
+            <div class="col-12">
+                <div class="job-card rounded-4 shadow-sm p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis fw-normal py-2 px-3 rounded-pill">{{ job.created_date.strftime('%d %b %Y') }}</span>
+                        <div><i class="bi bi-bookmark fs-5 text-muted"></i></div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="{{ job.recruiter.user.get_avatar_url() if job.recruiter and job.recruiter.user and job.recruiter.user.avatar else 'https://via.placeholder.com/40' }}"
+                                 alt="Company Logo" height="40" width="40"
+                                 class="rounded-circle border border-1 border-light">
                         </div>
-
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <img src="{{ job.recruiter.user.get_avatar_url() if job.recruiter and job.recruiter.user and job.recruiter.user.avatar else 'https://via.placeholder.com/40' }}"
-                                     alt="Company Logo" height="40" width="40" class="rounded-circle border border-1 border-light">
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-0">{{ job.title }}</h6>
-                                <p class="mb-0 text-muted small">{{ job.recruiter.company_name if job.recruiter else 'N/A' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-center flex-wrap gap-3">
-                            <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> {{ job.category.name if job.category else 'N/A' }}</div>
-                            <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> {{ job.employment_type }}</div>
-                            <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> ${{ '{:,.0f}'.format(job.salary) }}</div>
-                            <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ job.location }}</div>
-
-                            <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                        <div>
+                            <h6 class="fw-bold mb-0">{{ job.title }}</h6>
+                            <p class="mb-0 text-muted small">{{ job.recruiter.company_name if job.recruiter else 'N/A'
+                                }}</p>
                         </div>
                     </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-building me-1"></i> {{
+                            job.category.name if job.category else 'N/A' }}
+                        </div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-briefcase me-1"></i> {{
+                            job.employment_type }}
+                        </div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-cash-coin me-1"></i> ${{
+                            '{:,.0f}'.format(job.salary) }}
+                        </div>
+                        <div class="d-flex align-items-center text-muted small"><i class="bi bi-geo-alt me-1"></i> {{
+                            job.location }}
+                        </div>
+
+                        <a href="#" class="btn-job-details ms-auto">Job Details</a>
+                    </div>
                 </div>
-                {% endfor %}
+            </div>
+            {% endfor %}
             {% else %}
-                <div class="col-12 text-center text-muted mt-5">
-                    <p>Không tìm thấy công việc nào phù hợp với các tiêu chí tìm kiếm của bạn.</p>
-                    <p>Hãy thử thay đổi từ khóa hoặc bộ lọc.</p>
-                </div>
+            <div class="col-12 text-center text-muted mt-5">
+                <p>Không tìm thấy công việc nào phù hợp với các tiêu chí tìm kiếm của bạn.</p>
+                <p>Hãy thử thay đổi từ khóa hoặc bộ lọc.</p>
+            </div>
             {% endif %}
         </div>
 
@@ -152,21 +166,27 @@
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('index', page=pagination.prev_num, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}" aria-label="Previous">
+                    <a class="page-link"
+                       href="{{ url_for('index', page=pagination.prev_num, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}"
+                       aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
                 {% for p in pagination.iter_pages() %}
-                    {% if p %}
-                        <li class="page-item {% if p == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('index', page=p, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}">{{ p }}</a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled"><span class="page-link">...</span></li>
-                    {% endif %}
+                {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link"
+                       href="{{ url_for('index', page=p, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}">{{
+                        p }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
                 {% endfor %}
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('index', page=pagination.next_num, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}" aria-label="Next">
+                    <a class="page-link"
+                       href="{{ url_for('index', page=pagination.next_num, q=current_q, location=current_location, category_id=current_category_id, employment_type=current_employment_type) }}"
+                       aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>

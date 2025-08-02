@@ -83,15 +83,16 @@
             <div class="col-md-6">
                 <h2 class="fw-bold mb-3">You Will Grow, You Will Succeed. We Promise That</h2>
                 <p class="text-muted mb-4">
-                    Build a professional profile in just a few steps. Get access to thousands of jobs daily and grow your career with us.
+                    Build a professional profile in just a few steps. Get access to thousands of jobs daily and grow
+                    your career with us.
                 </p>
 
                 <div class="row row-cols-2 g-3">
                     {% set infos = [
-                        {'icon': 'bi-telephone', 'title': 'Call for inquiry', 'value': '+84 089-45765'},
-                        {'icon': 'bi-envelope', 'title': 'Send us email', 'value': 'ou.job@gmail.com'},
-                        {'icon': 'bi-clock', 'title': 'Opening hours', 'value': 'Mon - Fri: 10AM - 10PM'},
-                        {'icon': 'bi-geo-alt', 'title': 'Office', 'value': 'Nha Be, HCM'}
+                    {'icon': 'bi-telephone', 'title': 'Call for inquiry', 'value': '+84 089-45765'},
+                    {'icon': 'bi-envelope', 'title': 'Send us email', 'value': 'ou.job@gmail.com'},
+                    {'icon': 'bi-clock', 'title': 'Opening hours', 'value': 'Mon - Fri: 10AM - 10PM'},
+                    {'icon': 'bi-geo-alt', 'title': 'Office', 'value': 'Nha Be, HCM'}
                     ] %}
                     {% for info in infos %}
                     <div class="col">
@@ -114,38 +115,43 @@
                     <p class="text-muted mb-4">Fill in the form below to create your account.</p>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
                     {% endwith %}
 
                     <form method="POST" action="{{ url_for('register_process') }}" enctype="multipart/form-data">
 
                         {% set fields = [
-                            {'id': 'first_name', 'label': 'First Name', 'type': 'text', 'placeholder': 'Your name', 'value': request.form.first_name},
-                            {'id': 'last_name', 'label': 'Last Name', 'type': 'text', 'placeholder': 'Your surname', 'value': request.form.last_name},
-                            {'id': 'username', 'label': 'Username', 'type': 'text', 'placeholder': 'Choose a username', 'value': request.form.username},
-                            {'id': 'email', 'label': 'Email', 'type': 'email', 'placeholder': 'your@email.com', 'value': request.form.email},
-                            {'id': 'password', 'label': 'Password', 'type': 'password', 'placeholder': 'Enter password'},
-                            {'id': 'confirm_password', 'label': 'Confirm', 'type': 'password', 'placeholder': 'Repeat password'},
+                        {'id': 'first_name', 'label': 'First Name', 'type': 'text', 'placeholder': 'Your name', 'value':
+                        request.form.first_name},
+                        {'id': 'last_name', 'label': 'Last Name', 'type': 'text', 'placeholder': 'Your surname',
+                        'value': request.form.last_name},
+                        {'id': 'username', 'label': 'Username', 'type': 'text', 'placeholder': 'Choose a username',
+                        'value': request.form.username},
+                        {'id': 'email', 'label': 'Email', 'type': 'email', 'placeholder': 'your@email.com', 'value':
+                        request.form.email},
+                        {'id': 'password', 'label': 'Password', 'type': 'password', 'placeholder': 'Enter password'},
+                        {'id': 'confirm_password', 'label': 'Confirm', 'type': 'password', 'placeholder': 'Repeat
+                        password'},
                         ] %}
 
                         {% for field in fields %}
                         <div class="form-group-inline">
                             <label class="form-label" for="{{ field.id }}">{{ field.label }}</label>
                             <input
-                                type="{{ field.type }}"
-                                class="form-control"
-                                id="{{ field.id }}"
-                                name="{{ field.id }}"
-                                placeholder="{{ field.placeholder }}"
-                                {% if field.value is defined %} value="{{ field.value }}" {% endif %}
-                                required
+                                    type="{{ field.type }}"
+                                    class="form-control"
+                                    id="{{ field.id }}"
+                                    name="{{ field.id }}"
+                                    placeholder="{{ field.placeholder }}"
+                                    {% if field.value is defined %} value="{{ field.value }}" {% endif %}
+                                    required
                             >
                         </div>
                         {% endfor %}
@@ -159,8 +165,10 @@
                             <label class="form-label" for="role">Role</label>
                             <select class="form-select" id="role" name="role" required>
                                 <option value="" disabled selected>Select your role</option>
-                                <option value="JOBSEEKER" {% if request.form.role == 'JOBSEEKER' %}selected{% endif %}>Job Seeker</option>
-                                <option value="RECRUITER" {% if request.form.role == 'RECRUITER' %}selected{% endif %}>Recruiter</option>
+                                <option value="JOBSEEKER" {% if request.form.role==
+                                'JOBSEEKER' %}selected{% endif %}>Job Seeker</option>
+                                <option value="RECRUITER" {% if request.form.role==
+                                'RECRUITER' %}selected{% endif %}>Recruiter</option>
                             </select>
                         </div>
 
@@ -171,7 +179,8 @@
 
                     <div class="text-center mt-4">
                         Already have an account?
-                        <a href="{{ url_for('login_process') }}" class="text-decoration-none fw-semibold text-primary">Login now</a>
+                        <a href="{{ url_for('login_process') }}" class="text-decoration-none fw-semibold text-primary">Login
+                            now</a>
                     </div>
                 </div>
             </div>

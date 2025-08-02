@@ -1,7 +1,6 @@
-
 # from sqlalchemy.sql.functions import current_user
 
-from flask import redirect, url_for, flash
+from flask import redirect, url_for, flash, abort
 from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 
@@ -25,9 +24,24 @@ def inject_enums():
     return dict(ApplicationStatusEnum=ApplicationStatusEnum)
 
 
+@app.context_processor
+def inject_notifications():
+    if current_user.is_authenticated:
+        page = int(request.args.get('page', 1))
+        per_page = 5
+
+        pagination = dao.NotificationDAO.get_all(current_user.id, page=page, per_page=per_page)
+        notis = pagination.items
+        unread_notifications = dao.NotificationDAO.get_unread(current_user.id)
+
+        return dict(notifications=notis,
+                    unread_notifications=unread_notifications,
+                    notification_pagination=pagination)
+    return {}
+
+
 @app.route('/')
 def index():
-
     total_jobs = dao.count_jobs()
     total_candidates = dao.count_candidates()
     total_companies = dao.count_companies()
@@ -43,11 +57,11 @@ def index():
 @login_required
 def profile_process():
     if current_user.is_authenticated:
-        if current_user.role == RoleEnum.RECRUITER :
+        if current_user.role == RoleEnum.RECRUITER:
             data_company = dao.load_company_by_id(current_user.id)
 
             if request.method == 'POST':
-                form_data ={
+                form_data = {
                     'website': request.form.get('website', ''),
                     'introduction': request.form.get('introduction', ''),
                     'company_name': request.form.get('company_name', ''),
@@ -58,10 +72,14 @@ def profile_process():
                 if data_company:
                     dao.update_company(data_company, form_data)
                     flash('Company was successfully updated', 'success')
+                    dao.NotificationDAO.create(user_id=current_user.id,
+                                               content="Your company profile has been updated.")
                 else:
                     form_data['user_id'] = current_user.id
                     dao.add_company(form_data)
                     flash('Company was successfully added', 'success')
+                    dao.NotificationDAO.create(user_id=current_user.id,
+                                               content="You have successfully created your company profile.")
 
             data_company = dao.load_company_by_id(current_user.id)
 
@@ -83,7 +101,7 @@ def profile_process():
                                    title=title,
                                    subtitle=subtitle)
 
-        elif current_user.role == RoleEnum.JOBSEEKER :
+        elif current_user.role == RoleEnum.JOBSEEKER:
 
             title = "Resume & CV Management"
             subtitle = "Edit your resume & CV"
@@ -112,11 +130,14 @@ def profile_process():
                             # Update existing resume
                             dao.update_resume(resume, resume_data)
                             flash('Resume was successfully updated', 'success')
+                            dao.NotificationDAO.create(user_id=current_user.id, content="Your resume has been updated.")
                         else:
                             # Create new resume
                             resume = Resume(**resume_data)
                             dao.add_resume(resume)
                             flash('Resume was successfully added', 'success')
+                            dao.NotificationDAO.create(user_id=current_user.id,
+                                                       content="You have successfully created your resume.")
 
                 elif 'cv_form' in request.form:  # Handle CV form submission
                     title = request.form['title']
@@ -140,6 +161,8 @@ def profile_process():
                             )
                             if success:
                                 flash('CV was successfully uploaded', 'success')
+                                dao.NotificationDAO.create(user_id=current_user.id,
+                                                           content=f'Your CV "{title}" has been uploaded.')
                             else:
                                 flash('Error uploading CV', 'danger')
 
@@ -170,12 +193,16 @@ def profile_process():
                                 )
                                 if success:
                                     flash('CV was successfully updated', 'success')
+                                    dao.NotificationDAO.create(user_id=current_user.id,
+                                                               content=f'Your CV "{title}" has been updated.')
+
                                 else:
                                     flash('Error updating CV', 'danger')
 
                 return redirect(url_for('profile_process'))
 
     return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume, rows=cv_list)
+
 
 @app.route('/delete_cv', methods=['POST'])
 def delete_cv():
@@ -197,6 +224,10 @@ def delete_cv():
     success = dao.delete_cv(cv)
     if success:
         flash('CV was successfully deleted', 'success')
+        dao.NotificationDAO.create(
+            user_id=current_user.id,
+            content=f'Your CV "{cv.title}" was successfully deleted.'
+        )
     else:
         flash('Error deleting CV', 'danger')
     return redirect(url_for('profile_process'))
@@ -258,18 +289,20 @@ def about():
                            title=title,
                            subtitle=subtitle)
 
+
 @app.route('/contact')
 def contact():
     title = "Contact Us"
     subtitle = "Get in touch with us for any questions or inquiries."
-    return  render_template('contact_us.html',
-                            title=title,
-                            subtitle=subtitle)
+    return render_template('contact_us.html',
+                           title=title,
+                           subtitle=subtitle)
+
 
 @app.route("/jobs", methods=["GET"])
 def job():
     title = "JOB"
-    subtitle="Welcome to Job"
+    subtitle = "Welcome to Job"
     cates = dao.load_cate()
     page = int(request.args.get('page', 1))
     page_size = 3
@@ -277,7 +310,7 @@ def job():
     keyword = request.args.get("keyword")
     locate = request.args.get("location")
     jobType = request.args.get("jobType")
-    category= request.args.get('category')
+    category = request.args.get('category')
 
     if not locate or locate == "Choose city":
         locate = None
@@ -293,9 +326,11 @@ def job():
             job_type_enum = EmploymentEnum[jobType]  # vi du "FULLTIME" -> EmploymentEnum.FULLTIME
         except KeyError:
             print(f"[!] jobType không hợp lệ: {jobType}")
-    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum, category_id=category)
+    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum,
+                         category_id=category)
     locations = [loc[0] for loc in db.session.query(Job.location).distinct().all()]
-    return render_template("jobs.html", title=title, subtitle=subtitle,cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
+    return render_template("jobs.html", title=title, subtitle=subtitle, cates=cates, jobs=jobs, locations=locations,
+                           EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
 
 
 @app.route("/job-detail/<int:job_id>", methods=["get"])
@@ -305,13 +340,17 @@ def job_detail(job_id):
     page_size = 3
     jobs = dao.load_jobs(page=page, per_page=page_size, location=job.location, exclude_job=job.id)
     cvs = []
-    if current_user.is_authenticated and current_user.role==RoleEnum.JOBSEEKER :
+    if current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER:
         cvs = dao.load_cv_by_id(current_user.id)
 
     applications = []
-    if current_user.is_authenticated and current_user.role==RoleEnum.RECRUITER and job.company_id==current_user.company.id :
+    if current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER and job.company_id == current_user.company.id:
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
-    return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum, applies=applications)
+        content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
+        dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
+
+    return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
+                           applies=applications)
 
 
 @app.route("/api/apply/<int:job_id>", methods=["POST"])
@@ -321,26 +360,32 @@ def apply_job(job_id):
         coverLetter = request.form.get("coverLetter")
         cv = request.form.get("cv")
         if not coverLetter or not cv:
-            return jsonify({"message":"Please fill in all information"}), 400
+            return jsonify({"message": "Please fill in all information"}), 400
         cv_obj = CV.query.get(cv)
-        if not cv_obj or cv_obj.resume.user_id!= current_user.id:
+        if not cv_obj or cv_obj.resume.user_id != current_user.id:
             return jsonify({"message": "Invalid CV"}), 400
 
         job = Job.query.get(job_id)
         if not job or job.status != JobStatusEnum.POSTED:
-            return jsonify({"message":"The job does not exist or has expired"}), 400
+            return jsonify({"message": "The job does not exist or has expired"}), 400
 
         applycation = Application.query.filter_by(cv_id=cv, job_id=job.id).first()
         if applycation:
             return jsonify({"message": "You have already applied for this job"}), 400
 
-        applycation = Application(cover_letter=coverLetter, status=ApplicationStatusEnum.PENDING, cv_id=cv, job_id=job.id)
+        applycation = Application(cover_letter=coverLetter, status=ApplicationStatusEnum.PENDING, cv_id=cv,
+                                  job_id=job.id)
         db.session.add(applycation)
         db.session.commit()
         print(applycation)
-        return jsonify({"message":"You have successfully applied"}), 200
+
+        recruiter_id = job.company.user_id
+        content = f"{current_user.user_name} has just applied for your job: {job.title}"
+        dao.NotificationDAO.create(user_id=recruiter_id, content=content)
+
+        return jsonify({"message": "You have successfully applied"}), 200
     else:
-        return jsonify({"message":"You are not a job seeker!"}), 403
+        return jsonify({"message": "You are not a job seeker!"}), 403
 
 
 @app.route("/applications")
@@ -354,8 +399,8 @@ def application():
         if status == "All" or status == "Choose Status":
             status = None
         applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page, status=status)
-        return render_template("applications.html",title="Applications",
-                               subtitle="List of your applications" , applies=applies)
+        return render_template("applications.html", title="Applications",
+                               subtitle="List of your applications", applies=applies)
     elif current_user.role == RoleEnum.RECRUITER:
         if status == "All" or status == "Choose Status":
             status = None
@@ -363,7 +408,8 @@ def application():
         return render_template("applications.html", title="Applications",
                                subtitle="List of applications for your company", applies=applies)
     return render_template("applications.html", title="Applications",
-                               subtitle="List of applications for your company")
+                           subtitle="List of applications for your company")
+
 
 # Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
@@ -376,10 +422,7 @@ def job_posting():
     company = dao.load_company_by_id(current_user.id)
     jobs = dao.load_jobs(company_id=company.id, page=page, per_page=page_size, status=None)
 
-
     cates = dao.load_cate()
-
-
 
     print(dao.load_company_by_id(current_user.id).id)
     employment_enum = EmploymentEnum
@@ -413,16 +456,20 @@ def job_posting():
             expiration_date=expiration_date,
             category_id=category_id,
         )
+        dao.NotificationDAO.create(
+            user_id=current_user.id,
+            content=f"You successfully {'saved a draft' if status == 'DRAFT' else 'posted'} the job: {title}"
+        )
 
         flash('Job was successfully added', 'success')
         return redirect(url_for('job_posting'))
 
     return render_template('recruiter/job_posting.html',
-                            title=title,
+                           title=title,
                            subtitle=subtitle,
                            jobs=jobs,
                            categories=cates,
-                           employment_types=employment_enum,)
+                           employment_types=employment_enum, )
 
 
 @app.route("/api/verified-apply/<int:apply_id>", methods=['POST'])
@@ -434,23 +481,68 @@ def verified_apply(apply_id):
     if not apply:
         return jsonify({"error": "Application not found"}), 404
     if apply.job.company_id != current_user.company.id:
-        print(apply.job.company_id,current_user.company.id, current_user.username)
+        print(apply.job.company_id, current_user.company.id, current_user.username)
         return jsonify({"message": "You are not the owner of this job posting"}), 403
 
     med = request.form.get("med")
     if med == "Confirm":
         apply.status = ApplicationStatusEnum.CONFIRMED
-        #con xu ly tao lich phong van
+        # con xu ly tao lich phong van
+        dao.NotificationDAO.create(user_id=apply.cv.resume.user_id,
+                                   content=f"Your application for {apply.job.title} has been confirmed.")
     elif med == "Reject":
         apply.status = ApplicationStatusEnum.REJECTED
+        dao.NotificationDAO.create(user_id=apply.cv.resume.user_id,
+                                   content=f"Your application for {apply.job.title} has been rejected.")
     elif med == "Accept":
         apply.status = ApplicationStatusEnum.ACCEPTED
+        dao.NotificationDAO.create(user_id=apply.cv.resume.user_id,
+                                   content=f"Your application for {apply.job.title} has been accepted.")
     else:
         return jsonify({"error": "Invalid value for med"}), 400
 
     db.session.commit()
     return jsonify({"message": f"{med} successfully"}), 200
 
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    title = 'Your notifications'
+    subtitle = 'All your important updates appear here'
+
+    return render_template('notifications.html',
+                           title=title,
+                           subtitle=subtitle,
+                           )
+
+
+@app.route('/notifications/mark-all-read', methods=['POST'])
+@login_required
+def mark_all_notifications_read():
+    dao.NotificationDAO.mark_all_as_read(current_user.id)
+    return redirect(request.referrer or url_for('index'))
+
+
+@app.route('/notifications/<int:notification_id>')
+@login_required
+def notification_detail(notification_id):
+    notification = dao.NotificationDAO.get_by_id(notification_id)
+
+    if notification is None or notification.user_id != current_user.id:
+        abort(404)
+
+    if not notification.is_read:
+        dao.NotificationDAO.mark_as_read(notification_id, current_user.id)
+
+    return render_template('notification_detail.html', notification=notification)
+
+
+@app.route('/notification/<int:notification_id>/mark-read', methods=['POST'])
+def mark_notification_as_read(notification_id):
+    # Example: mark notification as read in the database
+    dao.NotificationDAO.mark_as_read(notification_id, current_user.id)
+    return redirect(url_for('notifications'))
 
 
 @app.route("/webhook", methods=["POST"])
@@ -460,7 +552,7 @@ def webhook():
         print("Webhook received:", data)
 
         if data.get("ref") == "refs/heads/develop":
-            print("✅ Đúng nhánh develop - bắt đầu xử lý...")
+            print("Đúng nhánh develop - bắt đầu xử lý...")
             # Gọi script hoặc hành động CICD ở đây
         else:
             print("Webhook không đến từ nhánh develop")
@@ -471,9 +563,9 @@ def webhook():
         print("Error in webhook:", str(e))
         return jsonify({"error": str(e)}), 400
 
+
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
 
-        app.run(host="0.0.0.0", port=5000)
-
+        app.run(host="0.0.0.0", port=5000, debug=True)
