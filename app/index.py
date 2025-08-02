@@ -347,7 +347,7 @@ def job_detail(job_id):
     if current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER and job.company_id == current_user.company.id:
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
         content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
-        dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
+        dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
                            applies=applications)
@@ -380,7 +380,8 @@ def apply_job(job_id):
         print(applycation)
 
         recruiter_id = job.company.user_id
-        content = f"{current_user.user_name} has just applied for your job: {job.title}"
+        content = f"{current_user.username} has just applied for your job: {job.title}"
+        dao.NotificationDAO.create(user_id=current_user.id, content=content)
         dao.NotificationDAO.create(user_id=recruiter_id, content=content)
 
         return jsonify({"message": "You have successfully applied"}), 200
