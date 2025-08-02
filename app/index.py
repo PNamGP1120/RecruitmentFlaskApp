@@ -4,20 +4,21 @@
 from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
+from pyexpat.errors import messages
 
 from app import app, dao, login
 from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
 
-
 @app.context_processor
 def inject_user():
     is_recruiter = current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER
     is_jobSeeker = current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER
     is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
+    is_verified_recruiter = current_user.is_authenticated and current_user.is_recruiter == True
 
-    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
+    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin, is_verified_recruiter=is_verified_recruiter)
 
 
 @app.context_processor
@@ -374,6 +375,9 @@ def job_posting():
     page_size = 5
 
     company = dao.load_company_by_id(current_user.id)
+    # if not company:
+    #     return jsonify({"message": "You don't have a company yet"})
+    print("company id", company.id)
     jobs = dao.load_jobs(company_id=company.id, page=page, per_page=page_size, status=None)
 
 
@@ -452,6 +456,51 @@ def verified_apply(apply_id):
     return jsonify({"message": f"{med} successfully"}), 200
 
 
+@app.route("/verified", methods=['get'])
+@login_required
+def verified_user():
+    if current_user.role != RoleEnum.ADMIN:
+        return jsonify({"message": "You are not an admin!"}, 403)
+    else:
+        page = int(request.args.get("page", 1))
+        per_page = 2
+        listRecruiter = dao.get_list_recruiter(page=page, per_page=per_page)
+        print("listUser", listRecruiter)
+        return render_template("verified_user.html", title="Verified recruiter", subtitle="Welcome admin", listRecruiter=listRecruiter)
+
+
+@app.route("/api/verified-recruiter/<int:user_id>", methods=["POST"])
+@login_required
+def verified_recruiter(user_id):
+    if current_user.role != RoleEnum.ADMIN:
+        return jsonify({"status": 403})
+    user = dao.get_user_by_id(user_id)
+    if user.role == RoleEnum.RECRUITER:
+        user.is_recruiter = True
+        db.session.commit()
+        print("success")
+        return jsonify({"status": 200})
+    else:
+        return jsonify({"status": 400})
+
+
+
+@app.route("/api/cancel-recruiter/<int:user_id>", methods=["POST"])
+@login_required
+def cancel_recruiter(user_id):
+    print("hello")
+    if current_user.role != RoleEnum.ADMIN:
+        jsonify({"status": 403})
+    user = dao.get_user_by_id(user_id)
+    if user.role == RoleEnum.RECRUITER:
+        user.is_recruiter = False
+        db.session.commit()
+        return jsonify({"status": 200})
+    else:
+        return jsonify({"status": 400})
+
+
+
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -472,8 +521,7 @@ def webhook():
         return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
-    with app.app_context():
+    # with app.app_context():
         from app.admin import *
-
-        app.run(host="0.0.0.0", port=5000)
-
+        app.run(debug=True)
+        # app.run(host="0.0.0.0", port=5000)
