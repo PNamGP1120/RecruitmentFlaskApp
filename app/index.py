@@ -1,7 +1,6 @@
-# from sqlalchemy.sql.functions import current_user
-
 from flask import redirect, url_for, flash, abort
 from flask import render_template, request, jsonify
+from flask_dance.contrib.google import google
 from flask_login import login_user, logout_user, current_user, login_required
 
 from app import app, dao, login
@@ -270,6 +269,33 @@ def login_process():
     return render_template('login.html', title=title, subtitle=subtitle)
 
 
+
+@app.route("/login/google")
+def google_login():
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+
+    resp = google.get("/oauth2/v2/userinfo")
+    if resp.ok:
+        info = resp.json()
+        email = info["email"]
+        name = info["name"]
+
+        # Tìm hoặc tạo user
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(email=email, name=name)
+            db.session.add(user)
+            db.session.commit()
+
+        login_user(user)
+        flash("Đăng nhập bằng Google thành công!", "success")
+        return redirect("/")
+
+    flash("Đăng nhập bằng Google thất bại", "danger")
+    return redirect(url_for("login"))
+
+
 @app.route("/logout")
 def logout_process():
     logout_user()
@@ -318,7 +344,6 @@ def job():
     if not category or category == "Choose Category":
         category = None
 
-    # chuyen chuoi thanh enum
     job_type_enum = None
 
     if jobType:
