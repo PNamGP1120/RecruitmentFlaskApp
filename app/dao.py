@@ -4,9 +4,8 @@ from datetime import datetime
 import cloudinary.uploader
 from flask_login import current_user
 
-from sqlalchemy import or_, func
-
 from app import db, app
+from sqlalchemy import func
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
     JobStatusEnum, Category, EmploymentEnum, RoleEnum, Conversation, Message, conversation_user
 
@@ -35,7 +34,6 @@ def get_or_create_conversation(user1, user2):
         db.session.commit()
         return new_conversation
 
-
 def get_conversation_by_id(conversation_id):
     """Fetches a single conversation by its ID."""
     return db.session.get(Conversation, conversation_id)
@@ -52,10 +50,18 @@ def create_message(content, conversation_id, sender_id):
     db.session.commit()
     return message
 
+def get_user_conversations(user_id):
+    """Fetches all conversations for a given user."""
+    user = get_user_by_id(user_id)
+    if user:
+        # Chỉ lấy các cuộc trò chuyện đã có tin nhắn và sắp xếp theo tin nhắn mới nhất
+        convs = [c for c in user.conversation if c.messages]
+        return sorted(convs, key=lambda c: max(m.timestamp for m in c.messages), reverse=True)
+    return []
+
 def load_cate():
     cates = Category.query.order_by("id").all()
     return cates
-
 
 def load_jobs(
     page=None,
@@ -85,8 +91,6 @@ def load_jobs(
     :param status: Trạng thái công việc (mặc định là 'Posted').
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
-
-
     query = Job.query.filter()
 
     if status:
@@ -163,8 +167,6 @@ def add_job(company_id, **job_data):
         updated_date=datetime.now(),
         category_id=int(category_id),
         company_id=company_id
-
-
     )
     print(category_id)
     print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
@@ -178,9 +180,6 @@ def add_job(company_id, **job_data):
         db.session.rollback()
         print(f"Lỗi khi thêm công việc vào DB: {e}")
         return None
-
-
-
 
 def add_user(avatar_file, **user_data):
     """
@@ -487,11 +486,6 @@ def load_applications(current_user, page=None, per_page=None):
     apps_pagination = applications.paginate(page=page, per_page=per_page)
 
     return apps_pagination
-
-
-
-
-
 
 if __name__ == "__main__":
     with app.app_context():

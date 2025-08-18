@@ -1,0 +1,33 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}My Conversations{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Conversations</h2>
+    <div class="list-group">
+        {% if conversations %}
+            {% for conv in conversations %}
+                {% set other_user = (conv.users|rejectattr('id', 'equalto', current_user.id)|first) %}
+                <a href="{{ url_for('chat_page', conversation_id=conv.id) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Chat with {{ other_user.username }}</h5>
+                        {% if conv.messages %}
+                            <small>{{ (conv.messages|sort(attribute='timestamp', reverse=True)|first).timestamp.strftime('%b %d, %Y') }}</small>
+                        {% endif %}
+                    </div>
+                    <p class="mb-1">
+                        {% if conv.messages %}
+                           {{ (conv.messages|sort(attribute='timestamp', reverse=True)|first).sender.username }}: {{ (conv.messages|sort(attribute='timestamp', reverse=True)|first).content|truncate(80) }}
+                        {% else %}
+                           No messages yet.
+                        {% endif %}
+                    </p>
+                </a>
+            {% endfor %}
+        {% else %}
+            <p>You have no conversations yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

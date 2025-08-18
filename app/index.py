@@ -1,4 +1,3 @@
-
 # from sqlalchemy.sql.functions import current_user
 
 from flask import redirect, url_for, flash
@@ -10,6 +9,17 @@ from app import app, dao, login, socketio, db
 from app.models import EmploymentEnum, RoleEnum, Resume, CV, Job, Application
 from app.models import JobStatusEnum, ApplicationStatusEnum
 
+@app.route('/')
+def index():
+    total_jobs = dao.count_jobs()
+    total_candidates = dao.count_candidates()
+    total_companies = dao.count_companies()
+
+    return render_template('index.html',
+                           total_jobs=total_jobs,
+                           total_candidates=total_candidates,
+                           total_companies=total_companies,
+                           )
 
 @app.route('/chat/start/<int:recipient_id>')
 @login_required
@@ -69,6 +79,7 @@ def handle_send_message(data):
 
     emit('receive_message', message_data, to=room)
 
+
 @app.context_processor
 def inject_user():
     is_recruiter = current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER
@@ -76,29 +87,24 @@ def inject_user():
     is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
 
     return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
-@app.route('/')
-def index():
 
-    total_jobs = dao.count_jobs()
-    total_candidates = dao.count_candidates()
-    total_companies = dao.count_companies()
-
-    return render_template('index.html',
-                           total_jobs=total_jobs,
-                           total_candidates=total_candidates,
-                           total_companies=total_companies,
-                           )
+@app.route('/chat/conversations')
+@login_required
+def list_conversations():
+    """Displays a list of the current user's conversations."""
+    conversations = dao.get_user_conversations(current_user.id)
+    return render_template('conversations.html', conversations=conversations)
 
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
 def profile_process():
     if current_user.is_authenticated:
-        if current_user.role == RoleEnum.RECRUITER :
+        if current_user.role == RoleEnum.RECRUITER:
             data_company = dao.load_company_by_id(current_user.id)
 
             if request.method == 'POST':
-                form_data ={
+                form_data = {
                     'website': request.form.get('website', ''),
                     'introduction': request.form.get('introduction', ''),
                     'company_name': request.form.get('company_name', ''),
@@ -134,9 +140,7 @@ def profile_process():
                                    title=title,
                                    subtitle=subtitle)
 
-
-
-        elif current_user.role == RoleEnum.JOBSEEKER :
+        elif current_user.role == RoleEnum.JOBSEEKER:
 
             title = "Resume & CV Management"
             subtitle = "Edit your resume & CV"
@@ -230,6 +234,7 @@ def profile_process():
 
     return render_template('profile/profile.html', title=title, subtitle=subtitle, resume=resume, rows=cv_list)
 
+
 @app.route('/delete_cv', methods=['POST'])
 def delete_cv():
     cv_id = request.form.get('cv_id')
@@ -311,18 +316,20 @@ def about():
                            title=title,
                            subtitle=subtitle)
 
+
 @app.route('/contact')
 def contact():
     title = "Contact Us"
     subtitle = "Get in touch with us for any questions or inquiries."
-    return  render_template('contact_us.html',
-                            title=title,
-                            subtitle=subtitle)
+    return render_template('contact_us.html',
+                           title=title,
+                           subtitle=subtitle)
+
 
 @app.route("/jobs", methods=["GET"])
 def job():
     title = "JOB"
-    subtitle="Welcome to Job"
+    subtitle = "Welcome to Job"
     cates = dao.load_cate()
     page = int(request.args.get('page', 1))
     page_size = 3
@@ -330,7 +337,7 @@ def job():
     keyword = request.args.get("keyword")
     locate = request.args.get("location")
     jobType = request.args.get("jobType")
-    category= request.args.get('category')
+    category = request.args.get('category')
 
     if not locate or locate == "Choose city":
         locate = None
@@ -346,9 +353,11 @@ def job():
             job_type_enum = EmploymentEnum[jobType]  # vi du "FULLTIME" -> EmploymentEnum.FULLTIME
         except KeyError:
             print(f"[!] jobType không hợp lệ: {jobType}")
-    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum, category_id=category)
+    jobs = dao.load_jobs(page=page, per_page=page_size, keyword=keyword, location=locate, employment_type=job_type_enum,
+                         category_id=category)
     locations = [loc[0] for loc in db.session.query(Job.location).distinct().all()]
-    return render_template("jobs.html", title=title, subtitle=subtitle,cates=cates,jobs=jobs,locations=locations,EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
+    return render_template("jobs.html", title=title, subtitle=subtitle, cates=cates, jobs=jobs, locations=locations,
+                           EmploymentEnum=EmploymentEnum, selected_job_type=jobType)
 
 
 @app.route("/job-detail/<int:job_id>", methods=["get"])
@@ -370,32 +379,33 @@ def apply_job(job_id):
         coverLetter = request.form.get("coverLetter")
         cv = request.form.get("cv")
         if not coverLetter or not cv:
-            return jsonify({"message":"Please fill in all information"}), 400
+            return jsonify({"message": "Please fill in all information"}), 400
         cv_obj = CV.query.get(cv)
-        if not cv_obj or cv_obj.resume.user_id!= current_user.id:
+        if not cv_obj or cv_obj.resume.user_id != current_user.id:
             return jsonify({"message": "Invalid CV"}), 400
 
         job = Job.query.get(job_id)
         if not job or job.status != JobStatusEnum.POSTED:
-            return jsonify({"message":"The job does not exist or has expired"}), 400
+            return jsonify({"message": "The job does not exist or has expired"}), 400
 
         applycation = Application.query.filter_by(cv_id=cv, job_id=job.id).first()
         if applycation:
             return jsonify({"message": "You have already applied for this job"}), 400
 
-        applycation = Application(cover_letter=coverLetter, status=ApplicationStatusEnum.PENDING, cv_id=cv, job_id=job.id)
+        applycation = Application(cover_letter=coverLetter, status=ApplicationStatusEnum.PENDING, cv_id=cv,
+                                  job_id=job.id)
         db.session.add(applycation)
         db.session.commit()
         print(applycation)
-        return jsonify({"message":"You have successfully applied"}), 200
+        return jsonify({"message": "You have successfully applied"}), 200
     else:
-        return jsonify({"message":"You are not a job seeker!"}), 403
+        return jsonify({"message": "You are not a job seeker!"}), 403
 
 
 @app.route("/applications")
 @login_required
 def application():
-    page = int(request.args.get("page",1))
+    page = int(request.args.get("page", 1))
     per_page = 3
 
     applies = dao.load_applications(current_user, page=page, per_page=per_page)
@@ -406,7 +416,9 @@ def application():
         for a in page_data.items:
             print(f"Trang {page}: {a.cover_letter}")
 
-    return render_template("applications.html",title="Applications", subtitle="Welcome to your applications" , applies=applies)
+    return render_template("applications.html", title="Applications", subtitle="Welcome to your applications",
+                           applies=applies)
+
 
 # Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
@@ -419,10 +431,7 @@ def job_posting():
     company = dao.load_company_by_id(current_user.id)
     jobs = dao.load_jobs(company_id=company.id, page=page, per_page=page_size, status=None)
 
-
     cates = dao.load_cate()
-
-
 
     print(dao.load_company_by_id(current_user.id).id)
     employment_enum = EmploymentEnum
@@ -460,14 +469,13 @@ def job_posting():
         flash('Job was successfully added', 'success')
         return redirect(url_for('job_posting'))
 
-
-
     return render_template('recruiter/job_posting.html',
-                            title=title,
+                           title=title,
                            subtitle=subtitle,
                            jobs=jobs,
                            categories=cates,
-                           employment_types=employment_enum,)
+                           employment_types=employment_enum, )
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

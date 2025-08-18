@@ -8,7 +8,8 @@
         </svg>
         &nbsp;Job Portal
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -22,11 +23,21 @@
             </li>
             {% if is_recruiter %}
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/job-posting' %}active{% endif %}" href="{{url_for('job_posting')}}">Job Posting</a>
+                <a class="nav-link {% if request.path == '/job-posting' %}active{% endif %}"
+                   href="{{url_for('job_posting')}}">Job Posting</a>
             </li>
             {% endif %}
+
+            {% if current_user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">About Us</a>
+                <a class="nav-link {% if request.path == url_for('list_conversations') %}active{% endif %}"
+                   href="{{ url_for('list_conversations') }}">Conversations</a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">About
+                    Us</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">Contact Us</a>
@@ -59,25 +70,25 @@
                 </ul>
             </div>
             {% else %}
-                {# Login Link #}
-                <a class="nav-link text-white me-2
+            {# Login Link #}
+            <a class="nav-link text-white me-2
                    {% if request.path == url_for('login_process') %}
                        btn btn-primary active-auth-btn
                    {% else %}
                        btn-outline-primary
                    {% endif %}"
-                   href="{{ url_for('login_process') }}">Login
-                </a>
+               href="{{ url_for('login_process') }}">Login
+            </a>
 
-                {# Register Link #}
-                <a class="btn ms-2
+            {# Register Link #}
+            <a class="btn ms-2
                    {% if request.path == url_for('register_process') %}
                        btn-primary active-auth-btn
                    {% else %}
                        btn-outline-primary
                    {% endif %}"
-                   href="{{ url_for('register_process') }}">Register
-                </a>
+               href="{{ url_for('register_process') }}">Register
+            </a>
             {% endif %}
         </div>
     </div>
@@ -88,12 +99,15 @@
     .dropdown-menu {
         margin-top: 0.5rem;
     }
+
     .dropdown-toggle::after {
         display: none;
     }
+
     .dropdown-toggle {
         color: white !important;
     }
+
     .dropdown-toggle:hover {
         color: rgba(255, 255, 255, 0.75) !important;
     }
@@ -121,6 +135,7 @@
         border-color: #20c997 !important;
         color: white !important;
     }
+
     .nav-link.btn-primary, .nav-link.btn-outline-primary {
         padding: 0.5rem 1rem !important;
     }
@@ -131,6 +146,7 @@
         font-weight: bold; /* Make active link bold */
         color: #20c997 !important; /* Change color to your teal */
     }
+
     /* Adjust hover for nav-links to match active color or keep standard */
     .navbar-nav .nav-item .nav-link:hover {
         color: #20c997 !important; /* Example: make them teal on hover too */
