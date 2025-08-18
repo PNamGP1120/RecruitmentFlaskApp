@@ -141,19 +141,6 @@ def add_job(company_id, **job_data):
         return None
 
 
-# def load_applications(job_id, page=None, per_page=None):
-#     """
-#     Tải danh sách các ứng viên đã nộp đơn cho một công việc cụ thể.
-#     :param job_id: ID của công việc.
-#     :param page: Số trang hiện tại (mặc định 1).
-#     :param per_page: Số lượng ứng viên trên mỗi trang (mặc định 10).
-#     :return: Đối tượng phân trang (Pagination object) chứa các ứng viên.
-#     """
-#     query = Application.query.filter(Application.job_id == job_id).order_by(Application.applied_date.desc())
-#     applications_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-#     print("Applications Query:", query.statement.compile(compile_kwargs={"literal_binds": True}))
-#     return applications_pagination
-
 
 
 def add_user(avatar_file, **user_data):
@@ -565,6 +552,13 @@ class NotificationDAO:
             notify.is_read = True
             db.session.commit()
 
+def get_list_recruiter(page=None, per_page=None):
+
+    query = User.query.filter_by(role=RoleEnum.RECRUITER, is_active=True)
+    print("query:", query)
+    listRecruiter_pagination = query.paginate(page=page, per_page=per_page)
+    print(listRecruiter_pagination)
+    return listRecruiter_pagination
 
 if __name__ == "__main__":
     with app.app_context():
