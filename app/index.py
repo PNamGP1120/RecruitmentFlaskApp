@@ -270,31 +270,60 @@ def login_process():
     return render_template('login.html', title=title, subtitle=subtitle)
 
 
-
 @app.route("/login/google")
-def google_login():
+def google_initiate_login():
     if not google.authorized:
         return redirect(url_for("google.login"))
+    # Nếu đã được ủy quyền (authorized) rồi, chuyển hướng về trang chính.
+    return redirect(url_for("index"))
+
+
+@app.route("/login/google/callback")
+def google_authorized():
+    if not google.authorized:
+        flash("Đăng nhập bằng Google thất bại: Người dùng chưa cấp quyền.", "danger")
+        return redirect(url_for("login_process"))
 
     resp = google.get("/oauth2/v2/userinfo")
     if resp.ok:
         info = resp.json()
-        email = info["email"]
-        name = info["name"]
+        email = info.get("email")
+        name = info.get("name")
+        avatar_url = info.get("picture")
 
-        # Tìm hoặc tạo user
-        user = User.query.filter_by(email=email).first()
+        if not email:
+            flash("Đăng nhập bằng Google thất bại: Không lấy được email.", "danger")
+            return redirect(url_for("login_process"))
+
+        # Tìm người dùng theo email
+        user = dao.get_user_by_email(email)  # Giả sử bạn đã có hàm này trong dao.py
+
         if not user:
-            user = User(email=email, name=name)
-            db.session.add(user)
-            db.session.commit()
+            # GỌI HÀM DAO VÀ GÁN KẾT QUẢ VÀO BIẾN 'user'
+            user = dao.add_user_google(
+                username=email.split('@')[0],
+                email=email,
+                first_name=name.split(' ')[0] if name else '',
+                last_name=' '.join(name.split(' ')[1:]) if name else '',
+                avatar=avatar_url,
+                role='JOBSEEKER',  # Truyền chuỗi, không phải enum
+                password='google_user_password_placeholder'
+            )
+            flash("Tạo tài khoản thành công!", "success")
 
-        login_user(user)
-        flash("Đăng nhập bằng Google thành công!", "success")
-        return redirect("/")
+        # Sau khi đảm bảo biến 'user' đã có giá trị
+        if user:
+            login_user(user)
+            flash("Đăng nhập bằng Google thành công!", "success")
+            return redirect(url_for("index"))
+        else:
+            # Xử lý trường hợp add_user_google thất bại
+            flash("Đăng nhập bằng Google thất bại", "danger")
+            return redirect(url_for("login_process"))
 
+    # Trường hợp resp.ok == False
     flash("Đăng nhập bằng Google thất bại", "danger")
-    return redirect(url_for("login"))
+    return redirect(url_for("login_process"))
 
 
 @app.route("/logout")
@@ -373,7 +402,9 @@ def job_detail(job_id):
     if current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER and job.company_id == current_user.company.id:
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
         content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
-        dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
+        # dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
+        for app in applications.items:
+            dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
                            applies=applications)

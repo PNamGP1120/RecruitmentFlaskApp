@@ -215,6 +215,68 @@ def add_user(avatar_file, **user_data):
         return None
 
 
+def add_user_google(**user_data):
+    """
+    Thêm một người dùng mới vào cơ sở dữ liệu từ dữ liệu đăng nhập Google.
+
+    Hàm này không yêu cầu file upload và xử lý avatar_url trực tiếp.
+    :param user_data: Dictionary chứa các dữ liệu người dùng:
+                      username, email, first_name, last_name, role, password, avatar.
+    :return: Đối tượng User nếu thêm thành công, ngược lại là None.
+    """
+    username = user_data.get('username')
+    email = user_data.get('email')
+    first_name = user_data.get('first_name')
+    last_name = user_data.get('last_name')
+    role_str = user_data.get('role', 'JOBSEEKER')
+    password = user_data.get('password')
+    avatar_url = user_data.get('avatar')
+
+    # Xử lý mật khẩu
+    # Sử dụng một placeholder an toàn vì người dùng Google không có mật khẩu
+    hashed_password = hashlib.md5(password.encode()).hexdigest()
+
+    # Chuyển chuỗi role thành đối tượng enum
+    role_enum_value = RoleEnum.JOBSEEKER
+    if role_str and isinstance(role_str, str):
+        try:
+            role_enum_value = RoleEnum[role_str.upper()]
+        except KeyError:
+            # Giữ giá trị mặc định nếu chuỗi không hợp lệ
+            pass
+
+    new_user = User(
+        username=username,
+        password=hashed_password,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        role=role_enum_value,
+        joined_date=datetime.now(),
+        avatar=avatar_url,
+        is_active=True
+    )
+
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+        print(f"Đã thêm người dùng Google: {username} thành công.")
+        return new_user
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi thêm người dùng Google vào DB: {e}")
+        return None
+
+
+
+def get_user_by_email(email):
+    """
+    Tìm và trả về một đối tượng User dựa trên email của họ.
+    :param email: Địa chỉ email của người dùng.
+    :return: Đối tượng User nếu tìm thấy, ngược lại là None.
+    """
+    return User.query.filter_by(email=email).first()
+
 def add_resume(resume):
     """
     Add a Resume object to the database.
