@@ -9,7 +9,7 @@ from pyexpat.errors import messages
 
 from flask_socketio import join_room, leave_room, emit
 from app import app, dao, login, socketio, db
-from app.models import EmploymentEnum, RoleEnum, Resume, CV, Job, Application
+from app.models import EmploymentEnum, RoleEnum, Resume, CV, Job, Application, User
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
 
@@ -519,6 +519,7 @@ def application():
 
 
 # Recruiter
+# Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
 def job_posting():
     title = "Job Posting"
@@ -580,7 +581,6 @@ def job_posting():
                            jobs=jobs,
                            categories=cates,
                            employment_types=employment_enum, )
-
 
 @app.route("/api/verified-apply/<int:apply_id>", methods=['POST'])
 @login_required

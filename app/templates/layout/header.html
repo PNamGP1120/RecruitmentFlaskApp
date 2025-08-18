@@ -141,9 +141,6 @@
                        btn btn-primary active-auth-btn
                    {% else %}
                        btn-outline-primary
-                   {% endif %}"
-               href="{{ url_for('login_process') }}">Login
-            </a>
                    {% endif %}" href="{{ url_for('login_process') }}">Login
             </a>
 
@@ -165,12 +162,15 @@
     .dropdown-menu {
         margin-top: 0.5rem;
     }
+
     .dropdown-toggle::after {
         display: none;
     }
+
     .dropdown-toggle {
         color: white !important;
     }
+
     .dropdown-toggle:hover {
         color: rgba(255, 255, 255, 0.75) !important;
     }
