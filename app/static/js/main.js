@@ -52,7 +52,99 @@ async function apply(jobId) {
     } catch (err) {
         console.error("Lỗi khi gửi form:", err);
         message.innerText = "Không thể kết nối đến server.";
+
     }
 }
+
+function verifiedApply(applyId, action) {
+    const form = document.getElementById(`verify-apply-form-${applyId}`);
+    const formData = new FormData(form);
+    const messagebox = document.getElementById(`message-verified-apply-${applyId}`);
+
+    formData.set("med", action); // set thủ công thay vì rely vào hidden input
+
+    fetch(`/api/verified-apply/${applyId}`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("Dữ liệu trả về:", data.message);
+        messagebox.innerText = data.message;
+
+        alert(data.message);
+
+        const modal = document.getElementById(`modal${applyId}`);
+         const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+        const spanStatus = document.getElementById(`status-${applyId}`);
+        let text = "";
+        let classList = ["badge", "mb-2", "p-2"];
+
+        switch (action) {
+            case "Confirm":
+                text = "Status: Confirmed";
+                classList.push("bg-info", "text-dark");
+                break;
+            case "Reject":
+                text = "Status: Rejected";
+                classList.push("bg-danger");
+                break;
+            case "Accept":
+                text = "Status: Accepted";
+                classList.push("bg-success");
+                break;
+            default:
+                text = "Status: Unknown";
+                classList.push("bg-secondary");
+                break;
+        }
+
+        spanStatus.className = classList.join(" ");
+        spanStatus.innerText = text;
+    })
+    .catch(err => {
+        console.error("Lỗi khi xác nhận:", err);
+        messagebox.innerText = "Đã xảy ra lỗi khi xác nhận.";
+    });
+}
+
+
+async function verifiedRecruiter(userId) {
+    fetch(`/api/verified-recruiter/${userId}`,{
+    method: "POST"
+    }).then(res => res.json()).then(data => {
+    if (data.status === 200){
+        alert("verified successful");
+        location.reload();
+    }
+    else{
+        alert("Verified successful");
+        location.reload();
+    }
+    })
+}
+
+async function cancelRecruiter(userId) {
+    if(confirm("Are you sure you want to cancel this employer's permission?") == true){
+    fetch(`/api/cancel-recruiter/${userId}`,{
+    method: "POST"
+    }).then(res => res.json()).then(data => {
+    if (data.status === 200){
+        alert("Cancel successful");
+        location.reload();
+    }
+    else{
+        alert("Cancel Failed");
+        location.reload();
+    }
+    })
+    }
+
+}
+
 
 

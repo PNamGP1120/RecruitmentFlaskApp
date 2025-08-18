@@ -390,7 +390,8 @@ table td a:hover {
     border-radius: 10px;
     padding: 15px;
     border-color: #1ab1ff;
-    margin-top: 5px
+    margin-top: 5px;
+    background-color: #ffffff
 }
 
 .card-job-item {
@@ -421,6 +422,11 @@ table td a:hover {
 .sidebar-detail div {
     padding: 20px;
     padding-top: 0px
+}
+
+.title-color {
+    color:#29008b;
+    text-decoration: none;
 }
 
 /*Chat*/

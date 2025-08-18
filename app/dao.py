@@ -7,7 +7,7 @@ from flask_login import current_user
 from app import db, app
 from sqlalchemy import func
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum, Conversation, Message, conversation_user
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
 
 
 def get_or_create_conversation(user1, user2):
@@ -79,6 +79,7 @@ def load_jobs(
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
 
+    :param exclude_job:
     :param page: Số trang hiện tại (mặc định 1).
     :param per_page: Số lượng công việc trên mỗi trang (mặc định 10)
     :param keyword: Từ khóa để tìm kiếm trong tiêu đề, mô tả, yêu cầu.
@@ -140,6 +141,7 @@ def load_jobs(
 def add_job(company_id, **job_data):
     """
     Thêm một công việc mới vào cơ sở dữ liệu.
+    :param company_id:
     :param job_data: Dictionary chứa các dữ liệu công việc từ form, bao gồm:
                     title, description, requirements, location, employment_type (chuỗi),
                     category_id, company_id, salary, và bất kỳ trường nào khác bạn đã thêm vào form.
@@ -403,8 +405,8 @@ def update_company(company, data):
     db.session.commit()
     return True
 
-def load_company_by_id(user_id):
-    return Company.query.filter_by(user_id=user_id).first()
+# def load_company_by_id(user_id):
+#     return Company.query.filter_by(user_id=user_id).first()
 
 def is_company_exist(user_id):
     return Company.query.filter_by(user_id=user_id).first() is not None
@@ -455,38 +457,161 @@ def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
 
 
-def load_cv_by_id(current_user):
-    resume = db.session.query(Resume).filter(Resume.user_id==current_user.id).first()
+def load_cv_by_id(user_id):
+    resume = Resume.query.filter_by(user_id=user_id).first()
     if not resume:
         return None
-    else:
-        cvs = CV.query.filter(CV.resume_id==resume.id).all()
-        if not cvs:
-            return None
-        return cvs
+    return CV.query.filter_by(resume_id=resume.id).all()
 
 
-def load_applications(current_user, page=None, per_page=None):
+def get_resume_by_user(user_id):
+    return Resume.query.filter_by(user_id=user_id).first()
 
-    # Lấy Resume của user
-    resume = Resume.query.filter_by(user_id=current_user.id).first()
-    if not resume:
-        return []
 
-    # Lấy danh sách CV thuộc resume đó
-    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume.id).all()
-    if not cv_ids:
-        return []
+def get_cv_ids_by_resume(resume_id):
+    cv_ids = db.session.query(CV.id).filter_by(resume_id=resume_id).all()
+    return [id for (id,) in cv_ids]
 
-    # cv_ids là list các tuple (id,), cần chuyển thành list đơn
-    cv_ids = [id for (id,) in cv_ids]
 
-    # Lấy các đơn ứng tuyển thuộc các CV đó
-    applications = Application.query.filter(Application.cv_id.in_(cv_ids))
-    apps_pagination = applications.paginate(page=page, per_page=per_page)
+def get_applications_by_cv_ids(cv_ids):
+    return Application.query.filter(Application.cv_id.in_(cv_ids))
 
-    return apps_pagination
+
+# Load cac don ung tuyen cua nguoi dung
+def load_applications_for_user(current_user, page=None, per_page=None, status=None):
+    if page and per_page:
+        resume = get_resume_by_user(current_user.id)
+        if not resume:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        cv_ids = get_cv_ids_by_resume(resume.id)
+        if not cv_ids:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        applications = get_applications_by_cv_ids(cv_ids)
+        if status:
+            applications = applications.filter_by(status=status)
+        return applications.paginate(page=page, per_page=per_page)
+    return None
+
+
+#load job cua cong ty
+def get_job_by_company_id(company_id):
+    job_ids = db.session.query(Job.id).filter_by(company_id=company_id).all()
+    return [id for (id,) in job_ids]
+
+#Lay danh sach cac don ung tuyen cua 1 job
+def get_application_by_job(job_id):
+    return Application.query.filter_by(job_id=job_id).all()
+
+#lay danh sach cua tat ca job
+def get_applications_by_job_ids(job_ids):
+    return Application.query.filter(Application.job_id.in_(job_ids))
+
+
+
+# load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
+def load_applications_for_company(user_id=None, page=None, per_page=None, status=None):
+    if page and per_page:
+        #lay thong tin cong ty
+        company = load_company_by_id(user_id)
+        if not company:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        #lat job cua cong ty
+        jobs = get_job_by_company_id(company.id)
+        print(jobs)
+        if not jobs:
+            return Application.query.filter(False).paginate(page=page, per_page=per_page)
+
+        applications = get_applications_by_job_ids(job_ids=jobs)
+        if status:
+            applications = applications.filter_by(status=status)
+        print(applications)
+        return applications.paginate(page=page, per_page=per_page)
+    return None
+
+
+def get_application_by_id(apply_id):
+    return Application.query.get(apply_id)
+
+
+class NotificationDAO:
+    @staticmethod
+    def create(user_id: int, content: str) -> Notification:
+        new_notification = Notification(
+            user_id = user_id,
+            content = content,
+            created_date = datetime.now()
+        )
+        db.session.add(new_notification)
+        db.session.commit()
+        return new_notification
+
+    @staticmethod
+    def get_all(user_id: int, page: int = 1, per_page: int = 10):
+        return Notification.query.filter_by(user_id=user_id) \
+            .order_by(Notification.created_date.desc()) \
+            .paginate(page=page, per_page=per_page, error_out=False)
+
+    @staticmethod
+    def get_by_id(notification_id):
+        return Notification.query.filter_by(id=notification_id).first()
+
+    @staticmethod
+    def get_unread(user_id: int) -> int:
+        return Notification.query.filter_by(user_id=user_id, is_read = False).count()
+
+    @staticmethod
+    def mark_all_as_read(user_id: int) -> None:
+        Notification.query.filter_by(user_id=user_id, is_read=False).update({
+            "is_read": True
+        })
+        db.session.commit()
+
+    @staticmethod
+    def delete(notification_id: int) -> bool:
+        noti = Notification.query.get(notification_id)
+        if noti:
+            db.session.delete(noti)
+            db.session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def delete_all_by_user(user_id: int) -> int:
+        count = Notification.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+        return count
+
+    @staticmethod
+    def mark_as_read(notification_id, user_id):
+        notify = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+        if notify and not notify.is_read:
+            notify.is_read = True
+            db.session.commit()
+
+def get_list_recruiter(page=None, per_page=None):
+
+    query = User.query.filter_by(role=RoleEnum.RECRUITER, is_active=True)
+    print("query:", query)
+    listRecruiter_pagination = query.paginate(page=page, per_page=per_page)
+    print(listRecruiter_pagination)
+    return listRecruiter_pagination
 
 if __name__ == "__main__":
     with app.app_context():
+        # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
+        # for i in u:
+        #     print(i.title)
+        # print(u.items.employment_type)
+        # a = get_application_by_job(2)
+        # print(a)
+        # ap = load_applications_for_company(2, page=1,per_page=3, status=ApplicationStatusEnum.PENDING)
+        # for p in  range (1, ap.pages+1):
+        #     app = load_applications_for_company(3,page=p, per_page=3)
+        #     for a in app.items:
+        #         print(a)
+        # print("ap.itmes",ap.items)
+
         print(count_candidates())

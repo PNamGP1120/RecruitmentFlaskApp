@@ -4,82 +4,61 @@
 {% include 'layout/hero_section.html' %}
 <div class="container-fluid py-4">
     <div class="row">
-        {% if not applies %}
+        {% if not applies.items %}
         <div class="alert alert-warning text-center">You have no applicationsw!</div>
         {% else %}
         <div>
-            {% for a in applies %}
-            <div class="list-group-item mb-3 ">
-                <div class="d-flex justify-content-between job-item--detail ">
-                    <div>
-                        <span class="badge bg-success mb-2 p-2">Sent date: {{a.applied_date}}</span>
-                        <span class="badge bg-warning mb-2 p-2">Status: {{a.status.value}}</span>
-                        <h5 class="mb-1">{{ a.job.title }} <a href="#">[{{a.job.company.company_name}}]</a> </h5>
-                        <div class="text-muted mb-1">{{ a.job.category }}</div>
-                        <div class="mb-1">
-                            <span class="me-2"><i class="bi bi-briefcase"></i> {{ a.job.requirements }}</span>
-                            <span class="me-2"><i class="bi bi-clock"></i> {{ a.job.employment_type.value }}</span>
-                            <span class="me-2"><i class="bi bi-cash"></i> {{ a.job.salary }}</span>
-                            <span class="me-2"><i class="bi bi-geo-alt"></i> {{ a.job.location }}</span>
-                        </div>
+            <form action="/applications">
+                <div class="d-flex justify-content-around" style="width: 25%">
+                    <div class="bg-light">
+                        <select name="status" class="form-select">
+                            <option> All</option>
+                            <option value="{{ApplicationStatusEnum.PENDING.value}}">
+                                {{ApplicationStatusEnum.PENDING.value}}
+                            </option>
+                            <option value="{{ApplicationStatusEnum.REJECTED.value}}">
+                                {{ApplicationStatusEnum.REJECTED.value}}
+                            </option>
+                            <option value="{{ApplicationStatusEnum.CONFIRMED.value}}">
+                                {{ApplicationStatusEnum.CONFIRMED.value}}
+                            </option>
+                            <option value="{{ApplicationStatusEnum.ACCEPTED.value}}">
+                                {{ApplicationStatusEnum.ACCEPTED.value}}
+                            </option>
+                        </select>
                     </div>
-                    <div class="d-flex flex-row align-items-start card-job-item">
-
-                        <!-- Button to Open the Modal -->
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal{{a.id}}">
-                            View
-                        </button>
-
-                        <!-- The Modal -->
-                        <div class="modal" id="modal{{a.id}}">
-                            <div class="modal-dialog modal-xl">
-                                <div class="modal-content">
-
-                                    <!-- Modal Header -->
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Apply for job {{ a.job.title}}</h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-
-                                    <!-- Modal body -->
-                                    <div class="modal-body">
-                                        Modal body..
-                                        <p>{{a.cover_letter}}</p>
-                                    </div>
-
-                                    <!-- Modal footer -->
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
-                                        </button>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <button type="submit" class="btn btn-info">Filter</button>
                     </div>
                 </div>
-            </div>
+            </form>
+            {% for a in applies %}
+            {% include 'layout/cardapply.html' %}
             {% endfor %}
             <!-- Pagination -->
-                <nav class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if applies.has_prev %}
-                        <li class="page-item"><a class="page-link" href="{{ url_for('application', page=applies.prev_num) }}">Previous</a>
-                        </li>
-                        {% endif %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if applies.has_prev %}
+                    <li class="page-item"><a class="page-link"
+                                             href="{{ url_for('application', page=applies.prev_num, status=request.args.get('status')) }}">Previous</a>
+                    </li>
+                    {% endif %}
 
-                        {% if applies.pages > 1 %}
-                        {% for p in range(1, applies.pages+1) %}
-                        <li id="page{{p}}" class="page-item"><a class="page-link" href="{{ url_for('application', page=p) }}">{{p}}</a>
-                        </li>
-                        {% endfor %}
-                        {% endif %}
+                    {% if applies.pages > 1 %}
+                    {% for p in range(1, applies.pages+1) %}
+                    <li id="page{{p}}" class="page-item"><a class="page-link"
+                                                            href="{{ url_for('application', page=p, status=request.args.get('status')) }}">{{p}}</a>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
 
-                        {% if applies.has_next %}
-                        <li class="page-item"><a class="page-link" href="{{ url_for('application', page=applies.next_num) }}">Next</a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                    {% if applies.has_next %}
+                    <li class="page-item"><a class="page-link"
+                                             href="{{ url_for('application', page=applies.next_num, status=request.args.get('status')) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
         {% endif %}
 
