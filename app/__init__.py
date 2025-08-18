@@ -1,3 +1,5 @@
+import os
+
 import cloudinary
 from flask import Flask
 from flask_mail import Mail
@@ -5,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import quote
 from flask_login import LoginManager
 from flask_dance.contrib.google import make_google_blueprint, google
+
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='jikagfvcuyidwsgvvudbsjahfduyjfvdguieygvsfuy'
@@ -14,13 +18,19 @@ app.config["PAGE_SIZE"] = 8
 
 app.config["GOOGLE_OAUTH_CLIENT_ID"] = "310143509450-erjdeni7iprik2u725hkil1i3a9dg9ud.apps.googleusercontent.com"
 app.config["GOOGLE_OAUTH_CLIENT_SECRET"] = "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"
+# app.config["GOOGLE_REDIRECT_URI"] = "http://localhost:5000/login/callback"
 
 google_bp = make_google_blueprint(
     client_id=app.config["GOOGLE_OAUTH_CLIENT_ID"],
     client_secret=app.config["GOOGLE_OAUTH_CLIENT_SECRET"],
-    redirect_to="google_login",  # tên hàm xử lý sau khi đăng nhập
-    scope=["profile", "email"]
+    redirect_to="google_login",
+    scope=[
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "openid"
+    ]
 )
+
 app.register_blueprint(google_bp, url_prefix="/login")
 
 
