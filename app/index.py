@@ -453,7 +453,7 @@ def job_detail(job_id):
     if current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER and job.company_id == current_user.company.id:
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
         content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
-        dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
+        # dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
                            applies=applications)

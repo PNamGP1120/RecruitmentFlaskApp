@@ -7,7 +7,7 @@ from flask_login import current_user
 from app import db, app
 from sqlalchemy import func
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum, conversation_user
 
 
 def get_or_create_conversation(user1, user2):
