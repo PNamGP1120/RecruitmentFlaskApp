@@ -23,11 +23,9 @@ def inject_user():
 
     return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin, is_verified_recruiter=is_verified_recruiter)
 
-
 @app.context_processor
 def inject_enums():
     return dict(ApplicationStatusEnum=ApplicationStatusEnum)
-
 
 @app.context_processor
 def inject_notifications():
@@ -43,8 +41,6 @@ def inject_notifications():
                     unread_notifications=unread_notifications,
                     notification_pagination=pagination)
     return {}
-
-
 
 @app.route('/')
 def index():
@@ -94,7 +90,6 @@ def handle_join_room(data):
     join_room(room)
     print(f"{current_user.username} has entered room: {room}")
 
-
 @socketio.on('send_message')
 def handle_send_message(data):
     """Client sends a message. Server saves it and broadcasts to the room."""
@@ -132,7 +127,6 @@ def list_conversations():
     """Displays a list of the current user's conversations."""
     conversations = dao.get_user_conversations(current_user.id)
     return render_template('conversations.html', conversations=conversations)
-
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
@@ -230,9 +224,9 @@ def profile_process():
                     elif not title or not file:
                         flash('Please provide a title and file for the CV', 'danger')
                     else:
-                        # Validate file type
-                        if not file.filename.lower().endswith('.pdf'):
-                            flash('Only PDF files are allowed', 'danger')
+                        allowed_extensions = ('.pdf', '.doc', '.docx')
+                        if not file.filename.lower().endswith(allowed_extensions):
+                            flash('Only PDF, DOC, and DOCX files are allowed', 'danger')
                         else:
                             success = dao.add_cv(
                                 title=title,
@@ -349,7 +343,6 @@ def login_process():
     title = "Account Login"
     subtitle = "Please enter your credentials to proceed."
     return render_template('login.html', title=title, subtitle=subtitle)
-
 
 
 @app.route("/login/google")
@@ -697,8 +690,6 @@ def cancel_recruiter(user_id):
         return jsonify({"status": 200})
     else:
         return jsonify({"status": 400})
-
-
 
 
 @app.route("/webhook", methods=["POST"])

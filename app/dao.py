@@ -494,7 +494,6 @@ def load_applications_for_user(current_user, page=None, per_page=None, status=No
         return applications.paginate(page=page, per_page=per_page)
     return None
 
-
 #load job cua cong ty
 def get_job_by_company_id(company_id):
     job_ids = db.session.query(Job.id).filter_by(company_id=company_id).all()
@@ -507,8 +506,6 @@ def get_application_by_job(job_id):
 #lay danh sach cua tat ca job
 def get_applications_by_job_ids(job_ids):
     return Application.query.filter(Application.job_id.in_(job_ids))
-
-
 
 # load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
 def load_applications_for_company(user_id=None, page=None, per_page=None, status=None):
