@@ -19,7 +19,8 @@ eventlet.monkey_patch()
 MESSAGE_QUEUE = 'redis://localhost:6379'
 app = Flask(__name__)
 app.config['SECRET_KEY']='jikagfvcuyidwsgvvudbsjahfduyjfvdguieygvsfuy'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:%s@localhost/recruitmentdb?charset=utf8mb4' % quote("Admin@123")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:%s@localhost/recruitmentdb?charset=utf8mb4' % quote(
+    "Admin@123")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config["PAGE_SIZE"] = 8
 

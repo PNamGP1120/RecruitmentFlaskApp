@@ -1,5 +1,6 @@
 from flask import redirect, url_for, flash, abort
-# from sqlalchemy.sql.functions import current_user
+import os
+from sqlalchemy.sql.functions import current_user
 
 from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
@@ -720,8 +721,10 @@ def webhook():
 
 
 if __name__ == '__main__':
-    # with app.app_context():
-    #     from app.admin import *
-    #
-    #     app.run(host="0.0.0.0", port=5000, debug=True)
-    socketio.run(app, debug=True)
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 5000)),
+        debug=True,
+        use_reloader=False
+    )
