@@ -95,6 +95,7 @@ def load_jobs(
 
     query = Job.query.filter()
 
+
     if status:
         query = query.filter(Job.status == status)
 
