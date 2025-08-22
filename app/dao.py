@@ -92,6 +92,7 @@ def load_jobs(
     :param status: Trạng thái công việc (mặc định là 'Posted').
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
+
     query = Job.query.filter()
 
     if status:
