@@ -9,6 +9,7 @@ from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
 
+
 @app.context_processor
 def inject_user():
     is_recruiter = current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER
@@ -16,7 +17,8 @@ def inject_user():
     is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
     is_verified_recruiter = current_user.is_authenticated and current_user.is_recruiter == True
 
-    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin, is_verified_recruiter=is_verified_recruiter)
+    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin,
+                is_verified_recruiter=is_verified_recruiter)
 
 
 @app.context_processor
@@ -403,8 +405,8 @@ def job_detail(job_id):
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
         content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
         # dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
-        for app in applications.items:
-            dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
+        # for app in applications.items:
+        #     dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
                            applies=applications)
@@ -605,6 +607,7 @@ def mark_notification_as_read(notification_id):
     dao.NotificationDAO.mark_as_read(notification_id, current_user.id)
     return redirect(url_for('notifications'))
 
+
 @app.route("/verified", methods=['get'])
 @login_required
 def verified_user():
@@ -615,7 +618,8 @@ def verified_user():
         per_page = 2
         listRecruiter = dao.get_list_recruiter(page=page, per_page=per_page)
         print("listUser", listRecruiter)
-        return render_template("verified_user.html", title="Verified recruiter", subtitle="Welcome admin", listRecruiter=listRecruiter)
+        return render_template("verified_user.html", title="Verified recruiter", subtitle="Welcome admin",
+                               listRecruiter=listRecruiter)
 
 
 @app.route("/api/verified-recruiter/<int:user_id>", methods=["POST"])
@@ -633,7 +637,6 @@ def verified_recruiter(user_id):
         return jsonify({"status": 400})
 
 
-
 @app.route("/api/cancel-recruiter/<int:user_id>", methods=["POST"])
 @login_required
 def cancel_recruiter(user_id):
@@ -647,8 +650,6 @@ def cancel_recruiter(user_id):
         return jsonify({"status": 200})
     else:
         return jsonify({"status": 400})
-
-
 
 
 @app.route("/webhook", methods=["POST"])
