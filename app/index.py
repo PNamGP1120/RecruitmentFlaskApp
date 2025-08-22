@@ -5,6 +5,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from pyexpat.errors import messages
 
 from app import app, dao, login
+from app.dao import StatsUtils
 from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
@@ -650,6 +651,32 @@ def cancel_recruiter(user_id):
         return jsonify({"status": 200})
     else:
         return jsonify({"status": 400})
+
+@app.route("/admin/statistics")
+@login_required
+def admin_statistics():
+
+    if current_user.role != RoleEnum.ADMIN:
+        flash("You do not have permission to access this page!", "danger")
+        return redirect(url_for("index"))
+
+    stats = {
+        "total_candidates": StatsUtils.total_users(RoleEnum.JOBSEEKER),
+        "total_recruiters": StatsUtils.total_users(RoleEnum.RECRUITER),
+        "total_jobs": StatsUtils.total_jobs(),
+        "total_applications": StatsUtils.total_applications(),
+        "applications_by_month": StatsUtils.applications_over_time("month"),
+        "jobs_by_company": StatsUtils.jobs_by_company(),
+        "jobs_by_category": StatsUtils.jobs_by_category(),
+        "candidates_with_resume": StatsUtils.candidates_with_resume()
+    }
+
+    return render_template(
+        "admin/statistics.html",
+        stats=stats,
+        title="Admin Statistics",
+        subtitle="Overview of users, jobs, and applications"
+    )
 
 
 @app.route("/webhook", methods=["POST"])

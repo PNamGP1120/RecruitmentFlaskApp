@@ -1,0 +1,138 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{% include 'layout/hero_section.html' %}
+
+<div class="container-fluid py-4">
+
+    <!-- Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Candidates</h5>
+                    <p class="card-text">{{ stats.total_candidates }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Recruiters</h5>
+                    <p class="card-text">{{ stats.total_recruiters }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Jobs</h5>
+                    <p class="card-text">{{ stats.total_jobs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Applications</h5>
+                    <p class="card-text">{{ stats.total_applications }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications by Month -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Applications by Month</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Number of Applications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month, count in stats.applications_by_month.items() %}
+                    <tr>
+                        <td>{{ month }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Jobs by Company -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Jobs by Company</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Number of Jobs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company, count in stats.jobs_by_company.items() %}
+                    <tr>
+                        <td>{{ company }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Jobs by Category -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Jobs by Category</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Number of Jobs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category, count in stats.jobs_by_category.items() %}
+                    <tr>
+                        <td>{{ category }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Candidates with Resumes -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Candidates with Resumes</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Number of Resumes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidate in stats.candidates_with_resume %}
+                    <tr>
+                        <td>{{ candidate.name }}</td>
+                        <td>{{ candidate.num_cvs }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

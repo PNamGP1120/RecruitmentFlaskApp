@@ -3,12 +3,12 @@ from datetime import datetime
 
 import cloudinary.uploader
 from flask_login import current_user
-
-from sqlalchemy import or_
+from sqlalchemy import extract, func
 
 from app import db, app
-from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
+from app.models import User, Resume, Company, CV, Job, Application, Notification, \
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum
+from app.utils import send_email_oauth2
 
 
 def load_cate():
@@ -569,6 +569,13 @@ class NotificationDAO:
         )
         db.session.add(new_notification)
         db.session.commit()
+
+        user = User.query.get(user_id)
+        if user and user.email:
+            subject = "New Notification from System"
+            body = f"Hi {user.username},\n\nYou have a new notification:\n\n{content}\n\nBest regards,\nYour System"
+            send_email_oauth2(to_email=user.email, subject=subject, body=body)
+
         return new_notification
 
     @staticmethod
@@ -622,19 +629,108 @@ def get_list_recruiter(page=None, per_page=None):
     print(listRecruiter_pagination)
     return listRecruiter_pagination
 
+class StatsUtils:
+
+    @staticmethod
+    def total_users(role=None):
+        query = User.query.filter_by(is_active=True)
+        if role:
+            query = query.filter(User.role == role)
+        return query.count()
+
+    @staticmethod
+    def total_jobs(status=JobStatusEnum.POSTED):
+        return Job.query.filter_by(status=status).count()
+
+    @staticmethod
+    def total_applications(status=None):
+        query = Application.query
+        if status:
+            query = query.filter_by(status=status)
+        return query.count()
+
+    @staticmethod
+    def applications_over_time(granularity="month"):
+        if granularity == "month":
+            result = db.session.query(
+                extract('year', Application.updated_date).label('year'),
+                extract('month', Application.updated_date).label('month'),
+                func.count(Application.id)
+            ).filter(Application.updated_date.isnot(None)) \
+             .group_by('year', 'month') \
+             .order_by('year', 'month') \
+             .all()
+            return {f"{int(y)}-{int(m):02d}": c for y, m, c in result}
+
+        elif granularity == "quarter":
+            result = db.session.query(
+                extract('year', Application.updated_date).label('year'),
+                ((extract('month', Application.updated_date)-1)/3+1).label('quarter'),
+                func.count(Application.id)
+            ).filter(Application.updated_date.isnot(None)) \
+             .group_by('year', 'quarter') \
+             .order_by('year', 'quarter') \
+             .all()
+            return {f"{int(y)}-Q{int(q)}": c for y, q, c in result}
+
+        elif granularity == "year":
+            result = db.session.query(
+                extract('year', Application.updated_date).label('year'),
+                func.count(Application.id)
+            ).filter(Application.updated_date.isnot(None)) \
+             .group_by('year') \
+             .order_by('year') \
+             .all()
+            return {str(int(y)): c for y, c in result}
+
+        return {}
+
+    @staticmethod
+    def jobs_by_company():
+        result = db.session.query(Company.company_name, func.count(Job.id)) \
+            .join(Job, Job.company_id == Company.id) \
+            .group_by(Company.company_name).all()
+        return {name: count for name, count in result}
+
+    @staticmethod
+    def jobs_by_category():
+        result = db.session.query(Category.name, func.count(Job.id)) \
+            .join(Job, Job.category_id == Category.id) \
+            .group_by(Category.name).all()
+        return {name: count for name, count in result}
+
+    @staticmethod
+    def candidates_with_resume():
+        result = db.session.query(
+            User.id, User.first_name, User.last_name, func.count(CV.id)
+        ).join(Resume, Resume.user_id == User.id) \
+         .join(CV, CV.resume_id == Resume.id) \
+         .filter(User.role == RoleEnum.JOBSEEKER) \
+         .group_by(User.id, User.first_name, User.last_name).all()
+        return [{"user_id": uid, "name": f"{fn} {ln}", "num_cvs": num} for uid, fn, ln, num in result]
+
+
 if __name__ == "__main__":
     with app.app_context():
-        # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
-        # for i in u:
-        #     print(i.title)
-        # print(u.items.employment_type)
-        # a = get_application_by_job(2)
-        # print(a)
-        # ap = load_applications_for_company(2, page=1,per_page=3, status=ApplicationStatusEnum.PENDING)
-        # for p in  range (1, ap.pages+1):
-        #     app = load_applications_for_company(3,page=p, per_page=3)
-        #     for a in app.items:
-        #         print(a)
-        # print("ap.itmes",ap.items)
+        print("=== Thống kê tổng quan ===")
+        print("Tổng số ứng viên:", StatsUtils.total_users(RoleEnum.JOBSEEKER))
+        print("Tổng số nhà tuyển dụng:", StatsUtils.total_users(RoleEnum.RECRUITER))
+        print("Tổng số công việc:", StatsUtils.total_jobs())
+        print("Tổng số đơn ứng tuyển:", StatsUtils.total_applications())
 
-        print(count_candidates())
+        print("\nỨng tuyển theo tháng:")
+        for month, count in StatsUtils.applications_over_time("month").items():
+            print(f"{month}: {count}")
+
+        print("\nSố công việc theo công ty:")
+        for company, count in StatsUtils.jobs_by_company().items():
+            print(f"{company}: {count}")
+
+        print("\nSố công việc theo danh mục:")
+        for category, count in StatsUtils.jobs_by_category().items():
+            print(f"{category}: {count}")
+
+        print("\nỨng viên với số CV:")
+        for candidate in StatsUtils.candidates_with_resume():
+            print(f"{candidate['name']} (ID: {candidate['user_id']}): {candidate['num_cvs']} CV(s)")
+
