@@ -2,11 +2,11 @@
 FROM python:3.12-slim
 
 # Cài các gói cần thiết để build mysqlclient và MySQL client
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
     pkg-config \
-    mysql-client \
+    mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Thư mục làm việc
