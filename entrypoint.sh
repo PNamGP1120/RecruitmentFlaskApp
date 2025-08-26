@@ -3,7 +3,8 @@ set -e
 
 # Đợi MySQL sẵn sàng
 echo "Waiting for MySQL to start..."
-while ! mysqladmin ping -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
+until mysqladmin ping -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
+    echo "MySQL is unavailable - sleeping"
     sleep 1
 done
 
