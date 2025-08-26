@@ -29,5 +29,3 @@ EXPOSE 5000
 
 # Command để chạy app
 CMD ["flask", "run"]
-
-
