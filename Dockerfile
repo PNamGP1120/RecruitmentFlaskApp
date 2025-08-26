@@ -1,11 +1,12 @@
 # Base image Python
 FROM python:3.12-slim
 
-# Cài các gói cần thiết để build mysqlclient
+# Cài các gói cần thiết để build mysqlclient và MySQL client
 RUN apt-get update && apt-get install -y \
     build-essential \
     default-libmysqlclient-dev \
     pkg-config \
+    default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Thư mục làm việc
@@ -27,5 +28,5 @@ ENV FLASK_RUN_PORT=5000
 # Expose port
 EXPOSE 5000
 
-# Command để chạy app
-CMD ["flask", "run"]
+# Command để chạy app (dùng entrypoint)
+ENTRYPOINT ["./entrypoint.sh"]
