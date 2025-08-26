@@ -1,18 +1,24 @@
 #!/bin/bash
 set -e
 
-# Đợi MySQL sẵn sàng
 echo "Waiting for MySQL to start..."
-until mysqladmin ping -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
+until python - <<EOF
+import pymysql
+try:
+    pymysql.connect(
+        host="$MYSQL_HOST",
+        user="$MYSQL_USER",
+        password="$MYSQL_PASSWORD",
+        database="$MYSQL_DATABASE"
+    )
+except Exception:
+    import sys, time
+    time.sleep(1)
+    sys.exit(1)
+EOF
+do
     echo "MySQL is unavailable - sleeping"
-    sleep 1
 done
-
-echo "MySQL started!"
-
-# Nếu muốn tạo database mặc định
-echo "Ensuring database exists..."
-mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\`;"
 
 # Chạy script init_db.py để tạo các bảng (nếu bạn muốn tự động)
 echo "Creating tables..."
