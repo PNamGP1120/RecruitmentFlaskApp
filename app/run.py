@@ -3,7 +3,7 @@
 import hashlib
 from datetime import datetime, timedelta
 from app import db, app
-from models import ( # Import tất cả các model và Enum cần thiết
+from app.models import ( # Import tất cả các model và Enum cần thiết
     User, Resume, Company, Category, Job, CV, Application,
     Interview, Conversation, Message, Notification,
     RoleEnum, EmploymentEnum, JobStatusEnum, ApplicationStatusEnum
