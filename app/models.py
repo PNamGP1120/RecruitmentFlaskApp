@@ -49,7 +49,7 @@ class User(BaseModel, UserMixin):
     last_name = Column(String(50))
     email = Column(String(100), unique=True, nullable=False)
     role = Column(Enum(RoleEnum), default=RoleEnum.JOBSEEKER.value)
-    avatar = Column(String(255), default='https://res.cloudinary.com/dqpu49bbo/image/upload/v1748718255/avatars/ecy9awxxse7npwq2sqwj.jpg')
+    avatar = Column(Text, default='https://res.cloudinary.com/dqpu49bbo/image/upload/v1748718255/avatars/ecy9awxxse7npwq2sqwj.jpg')
     joined_date = Column(DateTime, default=datetime.now())
     phone = Column(String(20))
     last_login = Column(DateTime)

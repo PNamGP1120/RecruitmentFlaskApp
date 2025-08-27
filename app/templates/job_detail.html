@@ -1,6 +1,5 @@
 {% extends 'layout/base.html' %}
 
-
 {% block title %}Job Detail{% endblock %}
 
 {% block content %}
@@ -31,7 +30,6 @@
                     </div>
                     {% endif %}
                 </div>
-
 
                 <!-- The Modal  Apply job -->
                 <div class="modal" id="myModal">
@@ -121,7 +119,6 @@
                 <span>not tag</span>
                 {% endif%}
 
-
             </div>
 
             <div class="mb-5">
@@ -154,25 +151,25 @@
                 </div>
             </div>
 
-            <div class="border--radius sidebar-detail">
+            <div class=" border--radius sidebar-detail">
                 <h6 class="fw-bold mb-3 text-center">Contact Recruiter</h6>
-
-                {% if current_user.is_authenticated %}
-                {# Đảm bảo người dùng không thể tự nhắn tin cho chính mình #}
-                {% if current_user.id != jobDetail.company.user.id %}
-                <a href="{{ url_for('start_chat', recipient_id=jobDetail.company.user.id) }}"
+                {% if current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER %}
+                <a href="{{ url_for('start_chat', recruiter_id=jobDetail.company.user.id) }}"
                    class="btn btn-register w-100">
-                    <i class="bi bi-chat-dots-fill"></i> Send Message
+                    Chat with Recruiter
                 </a>
+                {% elif current_user.is_authenticated %}
+                <p class="text-center text-muted">
+                    Only job seekers can start a chat.
+                </p>
                 {% else %}
-                <p class="text-center text-muted">This is your job posting.</p>
+                <p class="text-center text-muted">
+                    <a href="{{ url_for('login_process', next=request.path) }}">
+                        Login
+                    </a>
+                    to chat with the recruiter.
+                </p>
                 {% endif %}
-                {% else %}
-                <div class="alert alert-info text-center small p-2">
-                    Please <a href="{{ url_for('login_process', next=request.path) }}">log in</a> to send a message.
-                </div>
-                {% endif %}
-
             </div>
         </div>
     </div>
@@ -206,22 +203,25 @@
 <nav class="mt-4">
     <ul class="pagination justify-content-center">
         {% if applies.has_prev %}
-        <li class="page-item"><a class="page-link"
-                                 href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.prev_num)}}">Previous</a>
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.prev_num)}}">Previous</a>
         </li>
         {% endif %}
 
         {% if applies.pages > 1 %}
+
         {% for p in range(1, applies.pages+1) %}
-        <li id="page{{p}}" class="page-item"><a class="page-link"
-                                                href="{{ url_for('job_detail',job_id=jobDetail.id, page=p) }}">{{p}}</a>
+        <li id="page{{p}}" class="page-item">
+            <a class="page-link" href="{{ url_for('job_detail',job_id=jobDetail.id, page=p) }}">{{p}}</a>
         </li>
         {% endfor %}
+
         {% endif %}
 
         {% if applies.has_next %}
-        <li class="page-item"><a class="page-link"
-                                 href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.next_num) }}">Next</a>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.next_num) }}">Next</a>
         </li>
         {% endif %}
     </ul>

@@ -4,64 +4,17 @@ from datetime import datetime
 import cloudinary.uploader
 from flask_login import current_user
 
+from sqlalchemy import or_
+
 from app import db, app
-from sqlalchemy import func
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
-    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum, conversation_user
+    JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
 
-
-def get_or_create_conversation(user1, user2):
-    """
-    Finds an existing 1-on-1 conversation between two users or creates a new one.
-    """
-    # Query for a conversation that has exactly 2 users and both users are the ones specified.
-    conversation = db.session.query(Conversation).join(conversation_user).join(User) \
-        .group_by(Conversation.id) \
-        .having(func.count(User.id) == 2) \
-        .filter(Conversation.users.contains(user1)) \
-        .filter(Conversation.users.contains(user2)) \
-        .first()
-
-    if conversation:
-        # If found, return the existing conversation
-        return conversation
-    else:
-        # Otherwise, create a new conversation
-        new_conversation = Conversation()
-        new_conversation.users.append(user1)
-        new_conversation.users.append(user2)
-        db.session.add(new_conversation)
-        db.session.commit()
-        return new_conversation
-
-def get_conversation_by_id(conversation_id):
-    """Fetches a single conversation by its ID."""
-    return db.session.get(Conversation, conversation_id)
-
-
-def create_message(content, conversation_id, sender_id):
-    """Saves a new message to the database."""
-    message = Message(
-        content=content,
-        conversation_id=conversation_id,
-        sender_id=sender_id
-    )
-    db.session.add(message)
-    db.session.commit()
-    return message
-
-def get_user_conversations(user_id):
-    """Fetches all conversations for a given user."""
-    user = get_user_by_id(user_id)
-    if user:
-        # Chỉ lấy các cuộc trò chuyện đã có tin nhắn và sắp xếp theo tin nhắn mới nhất
-        convs = [c for c in user.conversation if c.messages]
-        return sorted(convs, key=lambda c: max(m.timestamp for m in c.messages), reverse=True)
-    return []
 
 def load_cate():
     cates = Category.query.order_by("id").all()
     return cates
+
 
 def load_jobs(
     page=None,
@@ -92,6 +45,8 @@ def load_jobs(
     :param status: Trạng thái công việc (mặc định là 'Posted').
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
+
+
     query = Job.query.filter()
 
     if status:
@@ -169,6 +124,8 @@ def add_job(company_id, **job_data):
         updated_date=datetime.now(),
         category_id=int(category_id),
         company_id=company_id
+
+
     )
     print(category_id)
     print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
@@ -182,6 +139,9 @@ def add_job(company_id, **job_data):
         db.session.rollback()
         print(f"Lỗi khi thêm công việc vào DB: {e}")
         return None
+
+
+
 
 def add_user(avatar_file, **user_data):
     """
@@ -253,6 +213,69 @@ def add_user(avatar_file, **user_data):
         db.session.rollback()
         print(f"Lỗi khi thêm người dùng vào DB: {e}")
         return None
+
+
+def add_user_google(**user_data):
+    """
+    Thêm một người dùng mới vào cơ sở dữ liệu từ dữ liệu đăng nhập Google.
+
+    Hàm này không yêu cầu file upload và xử lý avatar_url trực tiếp.
+    :param user_data: Dictionary chứa các dữ liệu người dùng:
+                      username, email, first_name, last_name, role, password, avatar.
+    :return: Đối tượng User nếu thêm thành công, ngược lại là None.
+    """
+    username = user_data.get('username')
+    email = user_data.get('email')
+    first_name = user_data.get('first_name')
+    last_name = user_data.get('last_name')
+    role_str = user_data.get('role', 'JOBSEEKER')
+    password = user_data.get('password')
+    avatar_url = user_data.get('avatar')
+
+    # Xử lý mật khẩu
+    # Sử dụng một placeholder an toàn vì người dùng Google không có mật khẩu
+    hashed_password = hashlib.md5(password.encode()).hexdigest()
+
+    # Chuyển chuỗi role thành đối tượng enum
+    role_enum_value = RoleEnum.JOBSEEKER
+    if role_str and isinstance(role_str, str):
+        try:
+            role_enum_value = RoleEnum[role_str.upper()]
+        except KeyError:
+            # Giữ giá trị mặc định nếu chuỗi không hợp lệ
+            pass
+
+    new_user = User(
+        username=username,
+        password=hashed_password,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        role=role_enum_value,
+        joined_date=datetime.now(),
+        avatar=avatar_url,
+        is_active=True
+    )
+
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+        print(f"Đã thêm người dùng Google: {username} thành công.")
+        return new_user
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi thêm người dùng Google vào DB: {e}")
+        return None
+
+
+
+def get_user_by_email(email):
+    """
+    Tìm và trả về một đối tượng User dựa trên email của họ.
+    :param email: Địa chỉ email của người dùng.
+    :return: Đối tượng User nếu tìm thấy, ngược lại là None.
+    """
+    return User.query.filter_by(email=email).first()
 
 def add_resume(resume):
     """
@@ -494,6 +517,7 @@ def load_applications_for_user(current_user, page=None, per_page=None, status=No
         return applications.paginate(page=page, per_page=per_page)
     return None
 
+
 #load job cua cong ty
 def get_job_by_company_id(company_id):
     job_ids = db.session.query(Job.id).filter_by(company_id=company_id).all()
@@ -506,6 +530,8 @@ def get_application_by_job(job_id):
 #lay danh sach cua tat ca job
 def get_applications_by_job_ids(job_ids):
     return Application.query.filter(Application.job_id.in_(job_ids))
+
+
 
 # load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
 def load_applications_for_company(user_id=None, page=None, per_page=None, status=None):
@@ -595,6 +621,46 @@ def get_list_recruiter(page=None, per_page=None):
     listRecruiter_pagination = query.paginate(page=page, per_page=per_page)
     print(listRecruiter_pagination)
     return listRecruiter_pagination
+
+def get_conversations_for_user(user_id):
+    """Lấy tất cả các cuộc trò chuyện của một người dùng."""
+    user = User.query.get(user_id)
+    if user:
+        return user.conversation
+    return []
+
+def get_conversation_by_id(conversation_id):
+    return Conversation.query.get(conversation_id)
+
+def get_or_create_conversation(user1_id, user2_id):
+    conv = db.session.query(Conversation).filter(
+        Conversation.users.any(id=user1_id),
+        Conversation.users.any(id=user2_id)
+    ).first()
+
+    if conv:
+        return conv
+    else:
+        user1 = User.query.get(user1_id)
+        user2 = User.query.get(user2_id)
+        if user1 and user2:
+            new_conv = Conversation()
+            new_conv.users.append(user1)
+            new_conv.users.append(user2)
+            db.session.add(new_conv)
+            db.session.commit()
+            return new_conv
+    return None
+
+def add_message(conversation_id, sender_id, content):
+    message = Message(
+        conversation_id=conversation_id,
+        sender_id=sender_id,
+        content=content
+    )
+    db.session.add(message)
+    db.session.commit()
+    return message
 
 if __name__ == "__main__":
     with app.app_context():

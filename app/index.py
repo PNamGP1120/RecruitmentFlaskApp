@@ -1,16 +1,14 @@
 from flask import redirect, url_for, flash, abort
-import os
-from sqlalchemy.sql.functions import current_user
-
-from flask import redirect, url_for, flash
 from flask import render_template, request, jsonify
 from flask_dance.contrib.google import google
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_socketio import join_room, leave_room, send
+from app import socketio
+from app.models import Conversation, Message
 from pyexpat.errors import messages
 
-from flask_socketio import join_room, leave_room, emit
-from app import app, dao, login, socketio, db
-from app.models import EmploymentEnum, RoleEnum, Resume, CV, Job, Application, User
+from app import app, dao, login
+from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
 
@@ -23,9 +21,11 @@ def inject_user():
 
     return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin, is_verified_recruiter=is_verified_recruiter)
 
+
 @app.context_processor
 def inject_enums():
     return dict(ApplicationStatusEnum=ApplicationStatusEnum)
+
 
 @app.context_processor
 def inject_notifications():
@@ -42,9 +42,9 @@ def inject_notifications():
                     notification_pagination=pagination)
     return {}
 
+
 @app.route('/')
 def index():
-
     total_jobs = dao.count_jobs()
     total_candidates = dao.count_candidates()
     total_companies = dao.count_companies()
@@ -55,78 +55,6 @@ def index():
                            total_companies=total_companies,
                            )
 
-@app.route('/chat/start/<int:recipient_id>')
-@login_required
-def start_chat(recipient_id):
-    """Finds or creates a conversation and redirects to the chat page."""
-    recipient = dao.get_user_by_id(recipient_id)
-    if not recipient:
-        flash("User not found.", "danger")
-        return redirect(request.referrer or url_for('index'))
-
-    conversation = dao.get_or_create_conversation(current_user, recipient)
-
-    return redirect(url_for('chat_page', conversation_id=conversation.id))
-
-
-@app.route('/chat/<int:conversation_id>')
-@login_required
-def chat_page(conversation_id):
-    """Renders the main chat page for a specific conversation."""
-    conversation = dao.get_conversation_by_id(conversation_id)
-
-    if current_user not in conversation.users:
-        return "Unauthorized", 403
-
-    return render_template('chat.html', conversation=conversation)
-
-
-# ========== SOCKET.IO HANDLERS ==========
-
-@socketio.on('join_room')
-def handle_join_room(data):
-    """Client joins a specific conversation room."""
-    room = data['room']
-    join_room(room)
-    print(f"{current_user.username} has entered room: {room}")
-
-@socketio.on('send_message')
-def handle_send_message(data):
-    """Client sends a message. Server saves it and broadcasts to the room."""
-    room = data['room']
-    message_content = data['message']
-
-    new_message = dao.create_message(
-        content=message_content,
-        conversation_id=room,
-        sender_id=current_user.id
-    )
-
-    message_data = {
-        'sender_id': current_user.id,
-        'username': current_user.username,
-        'avatar': current_user.avatar,
-        'content': new_message.content,
-        'timestamp': new_message.timestamp.strftime('%I:%M %p')
-    }
-
-    emit('receive_message', message_data, to=room)
-
-
-@app.context_processor
-def inject_user():
-    is_recruiter = current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER
-    is_jobSeeker = current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER
-    is_admin = current_user.is_authenticated and current_user.role == RoleEnum.ADMIN
-
-    return dict(is_recruiter=is_recruiter, is_jobSeeker=is_jobSeeker, is_admin=is_admin)
-
-@app.route('/chat/conversations')
-@login_required
-def list_conversations():
-    """Displays a list of the current user's conversations."""
-    conversations = dao.get_user_conversations(current_user.id)
-    return render_template('conversations.html', conversations=conversations)
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
@@ -224,9 +152,9 @@ def profile_process():
                     elif not title or not file:
                         flash('Please provide a title and file for the CV', 'danger')
                     else:
-                        allowed_extensions = ('.pdf', '.doc', '.docx')
-                        if not file.filename.lower().endswith(allowed_extensions):
-                            flash('Only PDF, DOC, and DOCX files are allowed', 'danger')
+                        # Validate file type
+                        if not file.filename.lower().endswith('.pdf'):
+                            flash('Only PDF files are allowed', 'danger')
                         else:
                             success = dao.add_cv(
                                 title=title,
@@ -346,29 +274,59 @@ def login_process():
 
 
 @app.route("/login/google")
-def google_login():
+def google_initiate_login():
     if not google.authorized:
         return redirect(url_for("google.login"))
+    # Nếu đã được ủy quyền (authorized) rồi, chuyển hướng về trang chính.
+    return redirect(url_for("index"))
+
+
+@app.route("/login/google/callback")
+def google_authorized():
+    if not google.authorized:
+        flash("Đăng nhập bằng Google thất bại: Người dùng chưa cấp quyền.", "danger")
+        return redirect(url_for("login_process"))
 
     resp = google.get("/oauth2/v2/userinfo")
     if resp.ok:
         info = resp.json()
-        email = info["email"]
-        name = info["name"]
+        email = info.get("email")
+        name = info.get("name")
+        avatar_url = info.get("picture")
 
-        # Tìm hoặc tạo user
-        user = User.query.filter_by(email=email).first()
+        if not email:
+            flash("Đăng nhập bằng Google thất bại: Không lấy được email.", "danger")
+            return redirect(url_for("login_process"))
+
+        # Tìm người dùng theo email
+        user = dao.get_user_by_email(email)  # Giả sử bạn đã có hàm này trong dao.py
+
         if not user:
-            user = User(email=email, name=name)
-            db.session.add(user)
-            db.session.commit()
+            # GỌI HÀM DAO VÀ GÁN KẾT QUẢ VÀO BIẾN 'user'
+            user = dao.add_user_google(
+                username=email.split('@')[0],
+                email=email,
+                first_name=name.split(' ')[0] if name else '',
+                last_name=' '.join(name.split(' ')[1:]) if name else '',
+                avatar=avatar_url,
+                role='JOBSEEKER',  # Truyền chuỗi, không phải enum
+                password='google_user_password_placeholder'
+            )
+            flash("Tạo tài khoản thành công!", "success")
 
-        login_user(user)
-        flash("Đăng nhập bằng Google thành công!", "success")
-        return redirect("/")
+        # Sau khi đảm bảo biến 'user' đã có giá trị
+        if user:
+            login_user(user)
+            flash("Đăng nhập bằng Google thành công!", "success")
+            return redirect(url_for("index"))
+        else:
+            # Xử lý trường hợp add_user_google thất bại
+            flash("Đăng nhập bằng Google thất bại", "danger")
+            return redirect(url_for("login_process"))
 
+    # Trường hợp resp.ok == False
     flash("Đăng nhập bằng Google thất bại", "danger")
-    return redirect(url_for("login"))
+    return redirect(url_for("login_process"))
 
 
 @app.route("/logout")
@@ -446,8 +404,11 @@ def job_detail(job_id):
     applications = []
     if current_user.is_authenticated and current_user.role == RoleEnum.RECRUITER and job.company_id == current_user.company.id:
         applications = dao.load_applications_for_company(current_user.id, page=page, per_page=page_size)
+        print(applications)
         content = f"Nhà tuyển dụng đã xem hồ sơ của bạn cho công việc '{job.title}'."
         # dao.NotificationDAO.create(user_id=applications.jobseeker_id, content=content)
+        # for app in applications.items:
+        #     dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
                            applies=applications)
@@ -513,7 +474,6 @@ def application():
 
 
 # Recruiter
-# Recruiter
 @app.route('/job-posting', methods=['GET', 'POST'])
 def job_posting():
     title = "Job Posting"
@@ -575,6 +535,7 @@ def job_posting():
                            jobs=jobs,
                            categories=cates,
                            employment_types=employment_enum, )
+
 
 @app.route("/api/verified-apply/<int:apply_id>", methods=['POST'])
 @login_required
@@ -711,11 +672,108 @@ def webhook():
         return jsonify({"error": str(e)}), 400
 
 
-if __name__ == '__main__':
-    socketio.run(
-        app,
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 5000)),
-        debug=True,
-        use_reloader=False
+# Chat
+@app.route('/conversations')
+@login_required
+def conversations_list():
+    convs = dao.get_conversations_for_user(current_user.id)
+    return render_template('conversations.html',
+                           title="Your Conversations",
+                           subtitle="All your chats are here",
+                           conversations=convs)
+
+
+@app.route('/chat/<int:conversation_id>')
+@login_required
+def chat_room(conversation_id):
+    """Vào phòng chat cụ thể."""
+    conv = dao.get_conversation_by_id(conversation_id)
+    if not conv or current_user not in conv.users:
+        abort(403) # Không có quyền truy cập
+
+    # Lấy người nhận (người còn lại trong cuộc trò chuyện)
+    recipient = next((user for user in conv.users if user.id != current_user.id), None)
+
+    return render_template('chat.html',
+                           conversation=conv,
+                           recipient=recipient,
+                           messages=conv.messages)
+
+
+@app.route('/start_chat/<int:recruiter_id>')
+@login_required
+def start_chat(recruiter_id):
+    if current_user.role != RoleEnum.JOBSEEKER:
+        flash("Only job seekers can start a conversation.", "warning")
+        return redirect(request.referrer or url_for('index'))
+
+    recruiter = dao.get_user_by_id(recruiter_id)
+    if not recruiter or recruiter.role != RoleEnum.RECRUITER:
+        flash("Recruiter not found.", "danger")
+        return redirect(url_for('index'))
+
+    conv = dao.get_or_create_conversation(current_user.id, recruiter_id)
+    if conv:
+        return redirect(url_for('chat_room', conversation_id=conv.id))
+    else:
+        flash("Could not start conversation.", "danger")
+        return redirect(url_for('index'))
+
+@socketio.on('join')
+def on_join(data):
+    room = data['room']
+    join_room(room)
+    print(f"{current_user.username} has entered the room: {room}")
+
+
+@socketio.on('message')
+def handle_message(data):
+    room = data['room']
+    content = data['data']
+    conversation_id = int(room)
+
+    # Lưu tin nhắn vào DB
+    msg = dao.add_message(
+        conversation_id=conversation_id,
+        sender_id=current_user.id,
+        content=content
     )
+
+    # Gửi tin nhắn đến tất cả client trong phòng
+    response = {
+        "sender": current_user.username,
+        "avatar": current_user.avatar,
+        "message": msg.content,
+        "timestamp": msg.timestamp.strftime("%b %d, %I:%M %p")
+    }
+    send(response, to=room)
+    print(f"Message from {current_user.username} to room {room}: {content}")
+
+@app.route('/recruiter/start_chat/<int:jobseeker_id>')
+@login_required
+def recruiter_start_chat(jobseeker_id):
+    if current_user.role != RoleEnum.RECRUITER:
+        flash("Only recruiters can start this conversation.", "warning")
+        return redirect(request.referrer or url_for('index'))
+
+    jobseeker = dao.get_user_by_id(jobseeker_id)
+    if not jobseeker or jobseeker.role != RoleEnum.JOBSEEKER:
+        flash("Job seeker not found.", "danger")
+        return redirect(url_for('index'))
+
+    conv = dao.get_or_create_conversation(current_user.id, jobseeker_id)
+    if conv:
+        # Tạo thông báo cho người tìm việc
+        notification_content = f"Recruiter '{current_user.username}' from '{current_user.company.company_name}' has started a conversation with you."
+        dao.NotificationDAO.create(user_id=jobseeker_id, content=notification_content)
+
+        return redirect(url_for('chat_room', conversation_id=conv.id))
+    else:
+        flash("Could not start conversation.", "danger")
+        return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    with app.app_context():
+        from app.admin import *
+
+        socketio.run(app, host="0.0.0.0", port=5000, debug=True)
