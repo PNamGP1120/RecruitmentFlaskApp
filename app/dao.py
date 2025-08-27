@@ -622,6 +622,46 @@ def get_list_recruiter(page=None, per_page=None):
     print(listRecruiter_pagination)
     return listRecruiter_pagination
 
+def get_conversations_for_user(user_id):
+    """Lấy tất cả các cuộc trò chuyện của một người dùng."""
+    user = User.query.get(user_id)
+    if user:
+        return user.conversation
+    return []
+
+def get_conversation_by_id(conversation_id):
+    return Conversation.query.get(conversation_id)
+
+def get_or_create_conversation(user1_id, user2_id):
+    conv = db.session.query(Conversation).filter(
+        Conversation.users.any(id=user1_id),
+        Conversation.users.any(id=user2_id)
+    ).first()
+
+    if conv:
+        return conv
+    else:
+        user1 = User.query.get(user1_id)
+        user2 = User.query.get(user2_id)
+        if user1 and user2:
+            new_conv = Conversation()
+            new_conv.users.append(user1)
+            new_conv.users.append(user2)
+            db.session.add(new_conv)
+            db.session.commit()
+            return new_conv
+    return None
+
+def add_message(conversation_id, sender_id, content):
+    message = Message(
+        conversation_id=conversation_id,
+        sender_id=sender_id,
+        content=content
+    )
+    db.session.add(message)
+    db.session.commit()
+    return message
+
 if __name__ == "__main__":
     with app.app_context():
         # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

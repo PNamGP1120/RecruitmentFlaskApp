@@ -44,21 +44,25 @@
 
                         <!-- Modal body -->
                         <div class="modal-body row">
-                             <div class="col-4">
-                                 <img class="rounded" src="{{a.cv.resume.user.avatar}}" alt="Avatar" width="100%">
-                                 <h4 class="text-center">{{a.cv.resume.user.first_name}} {{ a.cv.resume.user.last_name}} </h4>
-                                 <div>
-                                     <h5 >Information</h5>
-                                     <p><strong>Skill: </strong> {{ a.cv.resume.skill}}</p>
-                                     <p><strong>experience: </strong> {{ a.cv.resume.experience}}</p>
-                                     <p><strong>education: </strong> {{ a.cv.resume.education}}</p>
-                                     <p><strong>preferred_locations: </strong> {{ a.cv.resume.preferred_locations}}</p>
-                                     <p><strong>preferred_job_types: </strong> {{ a.cv.resume.preferred_job_types}}</p>
-                                     <p><strong>linkedin: </strong> <a class="text-info" target="_blank" href="{{ a.cv.resume.linkedin_url}}">{{ a.cv.resume.linkedin_url}}</a></p>
-                                 </div>
-                             </div>
+                            <div class="col-4">
+                                <img class="rounded" src="{{a.cv.resume.user.avatar}}" alt="Avatar" width="100%">
+                                <h4 class="text-center">{{a.cv.resume.user.first_name}} {{
+                                    a.cv.resume.user.last_name}} </h4>
+                                <div>
+                                    <h5>Information</h5>
+                                    <p><strong>Skill: </strong> {{ a.cv.resume.skill}}</p>
+                                    <p><strong>experience: </strong> {{ a.cv.resume.experience}}</p>
+                                    <p><strong>education: </strong> {{ a.cv.resume.education}}</p>
+                                    <p><strong>preferred_locations: </strong> {{ a.cv.resume.preferred_locations}}</p>
+                                    <p><strong>preferred_job_types: </strong> {{ a.cv.resume.preferred_job_types}}</p>
+                                    <p><strong>linkedin: </strong> <a class="text-info" target="_blank"
+                                                                      href="{{ a.cv.resume.linkedin_url}}">{{
+                                        a.cv.resume.linkedin_url}}</a></p>
+                                </div>
+                            </div>
                             <div class="col">
-                                <p><span class="bg-info text-dark m-2 p-2 rounded">Cover letter: </span>{{a.cover_letter}}</p>
+                                <p><span class="bg-info text-dark m-2 p-2 rounded">Cover letter: </span>{{a.cover_letter}}
+                                </p>
                                 <iframe src="{{a.cv.file_path}}" width="100%" height="650px">
 
                                 </iframe>
@@ -70,9 +74,12 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
                             </button>
-                            {% if is_Jobseeker %}
-                            {% elif is_recruiter %}
-                            <form id="verify-apply-form-{{a.id}}">
+                            {% if is_recruiter %}
+                            <a href="{{ url_for('recruiter_start_chat', jobseeker_id=a.cv.resume.user.id) }}"
+                               class="btn btn-info">
+                                <i class="bi bi-chat-dots"></i> Chat with Candidate
+                            </a>
+                            <form id="verify-apply-form-{{a.id}}" class="d-inline">
                                 <input type="hidden" name="med" id="med-action-{{a.id}}">
                                 <button type="button" class="btn btn-success"
                                         onclick="verifiedApply({{ a.id }}, 'Confirm')">Confirm
@@ -86,9 +93,8 @@
                                         onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
                                 </button>
                             </form>
-
-
                             {% endif %}
+
                         </div>
 
                     </div>

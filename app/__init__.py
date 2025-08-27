@@ -7,13 +7,14 @@ from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import quote
 from flask_login import LoginManager
 from flask_dance.contrib.google import make_google_blueprint, google
+from flask_socketio import SocketIO
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'jikagfvcuyidwsfgdsfhahfadgdhdfhbssgvvudbsjahfduyjfvdguieygvsfuy'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:%s@localhost/recruitmentdb?charset=utf8mb4' % quote(
-    "Phuongnam0212@")
+    "Admin@123")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config["PAGE_SIZE"] = 8
 
@@ -37,6 +38,7 @@ app.register_blueprint(google_bp, url_prefix="/login")
 
 db = SQLAlchemy(app)
 login = LoginManager(app)
+socketio = SocketIO(app)
 
 cloudinary.config(
     cloud_name="dqpu49bbo",

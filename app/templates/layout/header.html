@@ -15,23 +15,42 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mx-auto">
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
+                <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                    Home
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/jobs' %}active{% endif %}" href="/jobs">Jobs</a>
+                <a class="nav-link {% if request.path == '/jobs' %}active{% endif %}" href="/jobs">
+                    Jobs
+                </a>
             </li>
             {% if is_recruiter %}
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/job-posting' %}active{% endif %}"
-                   href="{{url_for('job_posting')}}">Job Posting</a>
+                   href="{{url_for('job_posting')}}">
+                    Job Posting
+                </a>
             </li>
             {% endif %}
+
+            {% if is_recruiter or is_jobSeeker %}
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">About
-                    Us</a>
+                <a class="nav-link {% if 'conversations' in request.path %}active{% endif %}"
+                                    href="{{ url_for('conversations_list') }}">
+                    Conversations
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{url_for('about')}}">
+                    About Us
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">Contact Us</a>
+                <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">
+                    Contact Us
+                </a>
             </li>
         </ul>
 
