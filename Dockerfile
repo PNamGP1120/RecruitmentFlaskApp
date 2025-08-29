@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 5000
 
 # Entry point
-CMD ["python", "index.py"]
+CMD ["python", "run"]
