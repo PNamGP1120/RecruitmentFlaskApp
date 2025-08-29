@@ -81,6 +81,8 @@
                             </a>
                             <form id="verify-apply-form-{{a.id}}" class="d-inline">
                                 <input type="hidden" name="med" id="med-action-{{a.id}}">
+                                {% if a.status == ApplicationStatusEnum.PENDING %}
+
                                 <button type="button" class="btn btn-success"
                                         onclick="verifiedApply({{ a.id }}, 'Confirm')">Confirm
                                 </button>
@@ -92,6 +94,20 @@
                                 <button type="button" class="btn btn-primary"
                                         onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
                                 </button>
+                                {% elif a.status == ApplicationStatusEnum.ACCEPTED %}
+                                <button type="button" class="btn btn-warning"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+                                {% elif a.status == ApplicationStatusEnum.CONFIRMED %}
+                                <button type="button" class="btn btn-danger"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+
+                                <button type="button" class="btn btn-primary"
+                                        onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
+                                </button>
+                                {% endif %}
+
                             </form>
                             {% endif %}
 
