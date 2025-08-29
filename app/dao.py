@@ -1,14 +1,18 @@
 import hashlib
 from datetime import datetime
+from itertools import groupby
 
 import cloudinary.uploader
 from flask_login import current_user
+from oauthlib.uri_validate import query
 
 from sqlalchemy import or_
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
     JobStatusEnum, Category, EmploymentEnum, RoleEnum, ApplicationStatusEnum
+from sqlalchemy import func, extract
+import string, random
 
 
 def load_cate():
@@ -453,6 +457,10 @@ def load_company_by_id(user_id):
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
+def get_user_by_application_id(application_id):
+    application = Application.query.get(application_id)
+    return application.cv.resume.user if application else None
+
 
 def auth_user(username, password, role=None):
     user = User.query.filter_by(username=username).first()
@@ -519,8 +527,12 @@ def load_applications_for_user(current_user, page=None, per_page=None, status=No
 
 
 #load job cua cong ty
-def get_job_by_company_id(company_id):
-    job_ids = db.session.query(Job.id).filter_by(company_id=company_id).all()
+def get_job_by_company_id(company_id, year=None):
+    query = db.session.query(Job.id).filter(Job.company_id == company_id)
+
+    if year:
+        query = query.filter(extract('year', Job.created_date) == year)
+    job_ids = query.all()
     return [id for (id,) in job_ids]
 
 #Lay danh sach cac don ung tuyen cua 1 job
@@ -662,6 +674,50 @@ def add_message(conversation_id, sender_id, content):
     db.session.commit()
     return message
 
+
+def stats_job_by_recruiter(company_id, time='month', year=datetime.now().year):
+    return (
+        db.session.query(
+            func.extract(time, Job.created_date).label("month"),
+            func.count(Job.id).label("count"),
+            func.extract("year", Job.created_date).label("year")
+        )
+        .join(Company, Company.id == Job.company_id)
+        .filter(Company.id == company_id)
+        .filter(func.extract("year", Job.created_date) == year)
+        .group_by(func.extract(time, Job.created_date), func.extract("year", Job.created_date))
+        .order_by(func.extract(time, Job.created_date))
+        .all()
+    )
+
+
+def stats_application_by_recruiter(job_id):
+    job = db.session.query(Job).filter(Job.id==job_id).first()
+    query = db.session.query(Application).filter(Application.job_id==job_id).count()
+    return {"job_id": job.id, "title": job.title,  "count": query}
+
+
+def render_interview_link(application_id, prefix="application"):
+    room = f"{prefix}_{application_id}_" + ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+    return f"https://meet.jit.si/{room}"
+
+
+def create_interview_link(application_id, interview_date):
+    query = db.session.query(Interview).filter(Interview.application_id==application_id).first()
+    if not query:
+        link = render_interview_link(application_id)
+        interview = Interview(
+            application_id=application_id,
+            dateTime = interview_date,
+            url=link
+        )
+        db.session.add(interview)
+        db.session.commit()
+        return link
+    else:
+        return query.url
+
+
 if __name__ == "__main__":
     with app.app_context():
         # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)
@@ -677,4 +733,6 @@ if __name__ == "__main__":
         #         print(a)
         # print("ap.itmes",ap.items)
 
-        print(count_candidates())
+        # print(count_candidates())
+        print(stats_application_by_recruiter(job_id=3))
+        print(get_user_by_application_id(application_id=1))

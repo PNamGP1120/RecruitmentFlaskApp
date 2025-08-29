@@ -143,7 +143,29 @@ async function cancelRecruiter(userId) {
     }
     })
     }
+}
 
+
+async function createDatetimeInterview(applyId) {
+    const value = document.getElementById("datetime_interview").value;
+    console.log("value datetime", value);
+    let formDataDatetime = new FormData();
+    formDataDatetime.append("date", value);
+    if(confirm(`Bạn chắc chắn muốn tạo lịch vào ${value}`) === true){
+    fetch(`/api/${applyId}/create_link`, {
+    method: "POST",
+    body: formDataDatetime }).then(res => res.json()).then(data => {
+        if (data.status === 201){
+            alert("Tạo lịch thành công!");
+            location.reload();
+        }
+        else {
+            alert("Tạo lịch thất bại!");
+            location.reload();
+        }
+
+    }).catch(err => alert(`xãy ra lỗi ${err}`));
+    }
 }
 
 

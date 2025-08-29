@@ -31,6 +31,14 @@
                 View
             </button>
 
+
+            {% if is_recruiter and a.status == ApplicationStatusEnum.ACCEPTED %}
+            <button type="button" class="btn btn-primary text-warning"
+                    onclick="" data-bs-toggle="modal"
+                    data-bs-target="#modal_interview">Interview
+            </button>
+            {% endif %}
+
             <!-- The Modal -->
             <div class="modal" id="modal{{a.id}}">
                 <div class="modal-dialog modal-xl">
@@ -98,6 +106,7 @@
                                 <button type="button" class="btn btn-warning"
                                         onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
                                 </button>
+
                                 {% elif a.status == ApplicationStatusEnum.CONFIRMED %}
                                 <button type="button" class="btn btn-danger"
                                         onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
@@ -116,6 +125,39 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal create interview -->
+            <div class="modal" id="modal_interview">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title ">Create an interview schedule </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body row">
+                            <label for="datetime_interview">Chọn ngày & giờ:</label>
+                            <input type="datetime-local" id="datetime_interview" name="datetime">
+
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
+                            </button>
+
+                            <button type="button" class="btn btn-primary" onclick="createDatetimeInterview({{a.id}})">Create
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
