@@ -1,29 +1,19 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for MySQL to start..."
-until python - <<EOF
-import pymysql
-try:
-    pymysql.connect(
-        host="$MYSQL_HOST",
-        user="$MYSQL_USER",
-        password="$MYSQL_PASSWORD",
-        database="$MYSQL_DATABASE"
-    )
-except Exception:
-    import sys, time
-    time.sleep(1)
-    sys.exit(1)
-EOF
+echo "🟢 Chờ MySQL sẵn sàng..."
+# Lặp kiểm tra MySQL
+until mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" &> /dev/null
 do
-    echo "MySQL is unavailable - sleeping"
+  echo "Chưa sẵn sàng, đợi 5s..."
+  sleep 5
 done
+echo "✅ MySQL đã sẵn sàng!"
 
-# Chạy script init_db.py để tạo các bảng (nếu bạn muốn tự động)
-echo "Creating tables..."
-python -m app.init_db
+# Khởi tạo database và populate dữ liệu
+echo "⚡ Tạo bảng và chèn dữ liệu mẫu..."
+python3 -m app.init_db
 
-# Khởi động Flask
-echo "Starting Flask app..."
-exec python -m app.run
+# Chạy Flask
+echo "🚀 Khởi động Flask server..."
+flask run --host=0.0.0.0 --port=5000

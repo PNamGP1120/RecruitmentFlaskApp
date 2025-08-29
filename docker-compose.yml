@@ -1,30 +1,62 @@
-services:
-  web:
-    volumes:
-      - .:/app
-    build: .
-    ports:
-      - "5000:5000"
-    depends_on:
-      - db
-    environment:
-      MYSQL_USER: root
-      MYSQL_PASSWORD: Phuongnam0212@
-      MYSQL_DATABASE: recruitmentdb
-      MYSQL_HOST: db
-      SECRET_KEY: 'jikagfvcuyidwsfgdsfhahfadgdhdfhbssgvvudbsjahfduyjfvdguieygvsfuy'
-      GOOGLE_OAUTH_CLIENT_ID: '310143509450-erjdeni7iprik2u725hkil1i3a9dg9ud.apps.googleusercontent.com'
-      GOOGLE_OAUTH_CLIENT_SECRET: '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'
-      CLOUDINARY_CLOUD_NAME: 'dqpu49bbo'
-      CLOUDINARY_API_KEY: '743773348627895'
-      CLOUDINARY_API_SECRET: 'EF7elKsibuI8JEBqfMNZYYWUYvo'
-      MAIL_USERNAME: 'phuongnam.it0212@gmail.com'
-      MAIL_PASSWORD: 'Phuongnam0212'
+version: "3.13"
 
+services:
   db:
-    image: mysql:8
+    image: mysql:8.0
+    container_name: recruitment_mysql
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: Phuongnam0212@
       MYSQL_DATABASE: recruitmentdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_USER_HOST: '%'
+      MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
     ports:
-      - "3307:3306"
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - recruitment-net
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-ppass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    container_name: recruitment_flask_app
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: recruitmentdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      SECRET_KEY: jikagfvcuyidwsfgdsfhahfadgdhdfhbssgvvudbsjahfduyjfvdguieygvsfuy
+      MAIL_USERNAME: phuongnam.it0212@gmail.com
+      MAIL_PASSWORD: Phuongnam0212
+      CLOUDINARY_CLOUD_NAME: dqpu49bbo
+      CLOUDINARY_API_KEY: 743773348627895
+      CLOUDINARY_API_SECRET: EF7elKsibuI8JEBqfMNZYYWUYvo
+      GOOGLE_OAUTH_CLIENT_ID: 310143509450-erjdeni7iprik2u725hkil1i3a9dg9ud.apps.googleusercontent.com
+      GOOGLE_OAUTH_CLIENT_SECRET: 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
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - recruitment-net
+    volumes:
+      - .:/app
+    command: bash -c "./entrypoint.sh"
+
+volumes:
+  db_data:
+
+networks:
+  recruitment-net:
+    driver: bridge
