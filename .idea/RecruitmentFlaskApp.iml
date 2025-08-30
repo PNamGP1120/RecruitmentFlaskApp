@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/winenv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12 (RecruitmentFlaskApp)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at /media/locnguyen/New Volume/RecruitmentFlaskApp/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
