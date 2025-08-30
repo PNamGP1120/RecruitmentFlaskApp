@@ -1,6 +1,7 @@
 body {
     background-color: lightblue;
     color: darkblue;
+    font-family: Arial, sans-serif;
 }
 
 .navbar {
@@ -426,4 +427,53 @@ table td a:hover {
 .title-color {
     color:#29008b;
     text-decoration: none;
+}
+
+/*Chat*/
+.chat-container {
+    width: 600px;
+    margin: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    height: 70vh;
+    overflow-y: scroll;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.message.sent {
+    background-color: #dcf8c6;
+    text-align: right;
+    margin-left: auto;
+    max-width: 70%;
+}
+
+.message.received {
+    background-color: #f1f0f0;
+    text-align: left;
+    margin-right: auto;
+    max-width: 70%;
+}
+
+.message-info {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.input-area {
+    display: flex;
+    margin-top: 10px;
+}
+
+#message-input {
+    flex-grow: 1;
+    padding: 10px;
+}
+
+#send-button {
+    padding: 10px;
 }

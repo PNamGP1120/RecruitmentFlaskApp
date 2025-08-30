@@ -71,7 +71,7 @@
                         <input type="text" name="title">
                     </label><br>
                     <label>File CV</label>
-                    <input type="file" name="file"><br>
+                    <input type="file" name="file" accept=".pdf,.doc,.docx"><br>
                     <label>
                         Set default
                         <input type="checkbox" name="default">
@@ -116,7 +116,7 @@
                                     <input type="text" name="title" value="{{ row.title }}" required>
                                 </label><br>
                                 <label>File CV (Leave blank to keep current file)</label>
-                                <input type="file" name="file" accept=".pdf"><br>
+                                <input type="file" name="file" accept=".pdf,.doc,.docx"><br>
                                 <label>
                                     Set default
                                     <input type="checkbox" name="default" {% if row.is_default %}checked{% endif %}>
