@@ -13,8 +13,8 @@
                         bg-info text-dark
                         {% endif%}
                          mb-2 p-2">Status: {{a.status.value}}</span>
-            <h5 class="mb-1"><a class="title-color" href="/job-detail/{{a.job_id}}">{{ a.job.title }}</a> <a
-                    class="title-color" href="#">[{{a.job.company.company_name}}]</a></h5>
+            <h5 class="mb-1"><a class="title-color" href="{{ url_for('job_detail', job_id=a.job_id) }}">{{ a.job.title }}</a> <a
+                    class="title-color" href="{{ url_for('view_company', company_id=a.job.company_id) }}">[{{a.job.company.company_name}}]</a></h5>
             <div class="text-muted mb-1">{{ a.job.category }}</div>
             <div class="mb-1">
                 <span class="me-2"><i class="bi bi-briefcase"></i> {{ a.job.requirements }}</span>

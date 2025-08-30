@@ -423,7 +423,7 @@ def job_detail(job_id):
         #     dao.NotificationDAO.create(user_id=app.jobseeker_id, content=content)
 
     return render_template("job_detail.html", jobDetail=job, jobs=jobs, cvs=cvs, RoleEnum=RoleEnum,
-                           applies=applications)
+                           applies=applications, now = datetime.utcnow())
 
 
 @app.route("/api/apply/<int:job_id>", methods=["POST"])
@@ -864,6 +864,10 @@ def list_interview(user_id):
     return render_template("list_interview.html", title=title , list_interview=list_interview )
 
 
+@app.route("/company/<int:company_id>")
+def view_company(company_id):
+    company = dao.get_company_by_id(company_id=company_id)
+    return render_template("view_company.html", title="View Company", company=company)
 
 
 if __name__ == '__main__':
