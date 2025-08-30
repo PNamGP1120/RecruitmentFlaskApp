@@ -7,6 +7,7 @@ from flask_login import current_user
 from oauthlib.uri_validate import query
 
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 from app import db, app
 from app.models import User, Resume, Company, CV, Job, Application, Interview, Conversation, Message, Notification, \
@@ -21,17 +22,17 @@ def load_cate():
 
 
 def load_jobs(
-    page=None,
-    per_page=None,
-    keyword=None,
-    location=None,
-    employment_type=None,
-    category_id=None,
-    company_id=None,
-    min_salary=None,
-    max_salary=None,
-    status=JobStatusEnum.POSTED,
-    exclude_job=None
+        page=None,
+        per_page=None,
+        keyword=None,
+        location=None,
+        employment_type=None,
+        category_id=None,
+        company_id=None,
+        min_salary=None,
+        max_salary=None,
+        status=JobStatusEnum.POSTED,
+        exclude_job=None
 ):
     """
     Tải danh sách các công việc với chức năng lọc, tìm kiếm và phân trang.
@@ -50,16 +51,15 @@ def load_jobs(
     :return: Đối tượng phân trang (Pagination object) chứa các công việc.
     """
 
-
     query = Job.query.filter()
 
     if status:
         query = query.filter(Job.status == status)
 
     if keyword:
-        query = query.filter( Job.title.contains(keyword))
+        query = query.filter(Job.title.contains(keyword))
 
-    if location :
+    if location:
         query = query.filter(Job.location.contains(location))
 
     if employment_type:
@@ -89,13 +89,13 @@ def load_jobs(
     if exclude_job:
         query = query.filter(Job.id != exclude_job)
 
-
     query = query.order_by(Job.created_date.desc())
     jobs_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    print("a",jobs_pagination.items)
+    print("a", jobs_pagination.items)
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
 
     return jobs_pagination
+
 
 def add_job(company_id, **job_data):
     """
@@ -129,7 +129,6 @@ def add_job(company_id, **job_data):
         category_id=int(category_id),
         company_id=company_id
 
-
     )
     print(category_id)
     print('jhgvcbuyiodsavbgfihljvbilofaedhgbvlhjsdgbhfilbdgljkfgblkjsdbfjiklhiutgfhijhiugioygouyguyifgvouyfvip')
@@ -143,8 +142,6 @@ def add_job(company_id, **job_data):
         db.session.rollback()
         print(f"Lỗi khi thêm công việc vào DB: {e}")
         return None
-
-
 
 
 def add_user(avatar_file, **user_data):
@@ -203,7 +200,7 @@ def add_user(avatar_file, **user_data):
                 print(f"Đã upload avatar lên Cloudinary: {res['secure_url']}")
             else:
                 print("Không có file avatar hợp lệ được gửi.")
-                new_user.avatar = None # Đặt avatar là None nếu file không hợp lệ
+                new_user.avatar = None  # Đặt avatar là None nếu file không hợp lệ
         except Exception as e:
             print(f"Lỗi khi upload avatar lên Cloudinary: {e}")
             new_user.avatar = None
@@ -272,7 +269,6 @@ def add_user_google(**user_data):
         return None
 
 
-
 def get_user_by_email(email):
     """
     Tìm và trả về một đối tượng User dựa trên email của họ.
@@ -280,6 +276,7 @@ def get_user_by_email(email):
     :return: Đối tượng User nếu tìm thấy, ngược lại là None.
     """
     return User.query.filter_by(email=email).first()
+
 
 def add_resume(resume):
     """
@@ -323,6 +320,7 @@ def update_resume(resume, data):
         print(f"Error updating resume: {e}")
         return False
 
+
 def add_cv(title, file, is_default, resume_id=None):
     """
     Add a CV to the database and upload the file to Cloudinary.
@@ -362,6 +360,7 @@ def add_cv(title, file, is_default, resume_id=None):
         print(f"Error adding CV: {e}")
         return False
 
+
 def update_cv(cv, title, file, is_default, resume_id=None):
     """
     Update an existing CV in the database and optionally upload a new file to Cloudinary.
@@ -387,7 +386,8 @@ def update_cv(cv, title, file, is_default, resume_id=None):
 
         # If this CV is set as default, unset others for the same resume
         if is_default and resume_id:
-            CV.query.filter_by(resume_id=resume_id, is_default=True).filter(CV.id != cv.id).update({'is_default': False})
+            CV.query.filter_by(resume_id=resume_id, is_default=True).filter(CV.id != cv.id).update(
+                {'is_default': False})
         cv.is_default = is_default
 
         db.session.commit()
@@ -396,6 +396,7 @@ def update_cv(cv, title, file, is_default, resume_id=None):
         db.session.rollback()
         print(f"Error updating CV: {e}")
         return False
+
 
 def delete_cv(cv):
     """
@@ -416,8 +417,10 @@ def delete_cv(cv):
         print(f"Error deleting CV: {e}")
         return False
 
+
 def is_company_exist(user_id):
     return Company.query.filter_by(user_id=user_id).first() is not None
+
 
 def add_company(data_company):
     company = Company(**data_company)
@@ -425,12 +428,14 @@ def add_company(data_company):
     db.session.commit()
     return company
 
+
 def update_company(company, data):
     for key, value in data.items():
-        print(key,value)
+        print(key, value)
         setattr(company, key, value)
     db.session.commit()
     return True
+
 
 # def load_company_by_id(user_id):
 #     return Company.query.filter_by(user_id=user_id).first()
@@ -438,24 +443,29 @@ def update_company(company, data):
 def is_company_exist(user_id):
     return Company.query.filter_by(user_id=user_id).first() is not None
 
+
 def add_company(data_company):
     company = Company(**data_company)
     db.session.add(company)
     db.session.commit()
     return company
 
+
 def update_company(company, data):
     for key, value in data.items():
-        print(key,value)
+        print(key, value)
         setattr(company, key, value)
     db.session.commit()
     return True
 
+
 def load_company_by_id(user_id):
     return Company.query.filter_by(user_id=user_id).first()
 
+
 def get_user_by_id(user_id):
     return User.query.get(user_id)
+
 
 def get_user_by_application_id(application_id):
     application = Application.query.get(application_id)
@@ -477,12 +487,15 @@ def auth_user(username, password, role=None):
                 return user
     return None
 
+
 def count_jobs():
     return db.session.query(Job).filter(Job.status == JobStatusEnum.POSTED).count()
+
 
 def count_candidates():
     print(User.role)
     return db.session.query(User).filter(User.role == RoleEnum.JOBSEEKER, User.is_active == True).count()
+
 
 def count_companies():
     return db.session.query(User).filter(User.role == RoleEnum.RECRUITER, User.is_active == True).count()
@@ -526,7 +539,7 @@ def load_applications_for_user(current_user, page=None, per_page=None, status=No
     return None
 
 
-#load job cua cong ty
+# load job cua cong ty
 def get_job_by_company_id(company_id, year=None):
     query = db.session.query(Job.id).filter(Job.company_id == company_id)
 
@@ -535,25 +548,26 @@ def get_job_by_company_id(company_id, year=None):
     job_ids = query.all()
     return [id for (id,) in job_ids]
 
-#Lay danh sach cac don ung tuyen cua 1 job
+
+# Lay danh sach cac don ung tuyen cua 1 job
 def get_application_by_job(job_id):
     return Application.query.filter_by(job_id=job_id).all()
 
-#lay danh sach cua tat ca job
+
+# lay danh sach cua tat ca job
 def get_applications_by_job_ids(job_ids):
     return Application.query.filter(Application.job_id.in_(job_ids))
-
 
 
 # load danh sach cac don ung tuyen cua mot cong ty (tat ca job)
 def load_applications_for_company(user_id=None, page=None, per_page=None, status=None):
     if page and per_page:
-        #lay thong tin cong ty
+        # lay thong tin cong ty
         company = load_company_by_id(user_id)
         if not company:
             return Application.query.filter(False).paginate(page=page, per_page=per_page)
 
-        #lat job cua cong ty
+        # lat job cua cong ty
         jobs = get_job_by_company_id(company.id)
         print(jobs)
         if not jobs:
@@ -575,9 +589,9 @@ class NotificationDAO:
     @staticmethod
     def create(user_id: int, content: str) -> Notification:
         new_notification = Notification(
-            user_id = user_id,
-            content = content,
-            created_date = datetime.now()
+            user_id=user_id,
+            content=content,
+            created_date=datetime.now()
         )
         db.session.add(new_notification)
         db.session.commit()
@@ -595,7 +609,7 @@ class NotificationDAO:
 
     @staticmethod
     def get_unread(user_id: int) -> int:
-        return Notification.query.filter_by(user_id=user_id, is_read = False).count()
+        return Notification.query.filter_by(user_id=user_id, is_read=False).count()
 
     @staticmethod
     def mark_all_as_read(user_id: int) -> None:
@@ -626,13 +640,14 @@ class NotificationDAO:
             notify.is_read = True
             db.session.commit()
 
-def get_list_recruiter(page=None, per_page=None):
 
+def get_list_recruiter(page=None, per_page=None):
     query = User.query.filter_by(role=RoleEnum.RECRUITER, is_active=True)
     print("query:", query)
     listRecruiter_pagination = query.paginate(page=page, per_page=per_page)
     print(listRecruiter_pagination)
     return listRecruiter_pagination
+
 
 def get_conversations_for_user(user_id):
     """Lấy tất cả các cuộc trò chuyện của một người dùng."""
@@ -641,8 +656,10 @@ def get_conversations_for_user(user_id):
         return user.conversation
     return []
 
+
 def get_conversation_by_id(conversation_id):
     return Conversation.query.get(conversation_id)
+
 
 def get_or_create_conversation(user1_id, user2_id):
     conv = db.session.query(Conversation).filter(
@@ -663,6 +680,7 @@ def get_or_create_conversation(user1_id, user2_id):
             db.session.commit()
             return new_conv
     return None
+
 
 def add_message(conversation_id, sender_id, content):
     message = Message(
@@ -692,9 +710,9 @@ def stats_job_by_recruiter(company_id, time='month', year=datetime.now().year):
 
 
 def stats_application_by_recruiter(job_id):
-    job = db.session.query(Job).filter(Job.id==job_id).first()
-    query = db.session.query(Application).filter(Application.job_id==job_id).count()
-    return {"job_id": job.id, "title": job.title,  "count": query}
+    job = db.session.query(Job).filter(Job.id == job_id).first()
+    query = db.session.query(Application).filter(Application.job_id == job_id).count()
+    return {"job_id": job.id, "title": job.title, "count": query}
 
 
 def render_interview_link(application_id, prefix="application"):
@@ -703,12 +721,12 @@ def render_interview_link(application_id, prefix="application"):
 
 
 def create_interview_link(application_id, interview_date):
-    query = db.session.query(Interview).filter(Interview.application_id==application_id).first()
+    query = db.session.query(Interview).filter(Interview.application_id == application_id).first()
     if not query:
         link = render_interview_link(application_id)
         interview = Interview(
             application_id=application_id,
-            dateTime = interview_date,
+            dateTime=interview_date,
             url=link
         )
         db.session.add(interview)
@@ -716,6 +734,27 @@ def create_interview_link(application_id, interview_date):
         return link
     else:
         return query.url
+
+
+def get_interview(application_id):
+    query = db.session.query(Interview).filter(Interview.application_id == application_id).first()
+    return query
+
+
+def get_list_interview_by_owner_company(user_id):
+    company= db.session.query(Company).filter(Company.user_id==user_id).first()
+    if company:
+        return (db.session.query(Interview)
+                .join(Application, Interview.application_id == Application.id)
+                .join(Job, Application.job_id == Job.id)
+                .filter(Job.company_id == company.id)
+                .options(
+            joinedload(Interview.application) #joinedLoad giup han che bi N+1 query
+            .joinedload(Application.job)
+        ).all())
+    return None
+
+
 
 
 if __name__ == "__main__":
@@ -734,5 +773,5 @@ if __name__ == "__main__":
         # print("ap.itmes",ap.items)
 
         # print(count_candidates())
-        print(stats_application_by_recruiter(job_id=3))
-        print(get_user_by_application_id(application_id=1))
+        print(get_list_interview_by_owner_company(1))
+

@@ -479,8 +479,15 @@ def application():
         if status == "All" or status == "Choose Status":
             status = None
         applies = dao.load_applications_for_company(current_user.id, page=page, per_page=per_page, status=status)
+        list_interview = []
+        for a in applies:
+            interview = dao.get_interview(a.id)
+            if interview:
+                list_interview.append(interview)
+        interview_map = {i.application_id: i for i in list_interview}
+        print("interview_map", interview_map)
         return render_template("applications.html", title="Applications",
-                               subtitle="List of applications for your company", applies=applies)
+                               subtitle="List of applications for your company", applies=applies, interview_map=interview_map)
     return render_template("applications.html", title="Applications",
                            subtitle="List of applications for your company")
 
@@ -841,6 +848,15 @@ def create_interview_link(application_id):
              f"Link phỏng vấn online (vòng 1): {link}")
     send_email(user.email, title, content)
     return jsonify({"link": link, "status": 201})
+
+
+
+@app.route("/<int:user_id>/interview")
+def list_interview(user_id):
+    list_interview = dao.get_list_interview_by_owner_company(user_id)
+    title="List interview for your company"
+    return render_template("list_interview.html", title=title , list_interview=list_interview )
+
 
 
 

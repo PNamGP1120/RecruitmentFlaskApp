@@ -87,20 +87,15 @@ function verifiedApply(applyId, action) {
         switch (action) {
             case "Confirm":
                 text = "Status: Confirmed";
-                classList.push("bg-info", "text-dark");
-                break;
+
             case "Reject":
                 text = "Status: Rejected";
-                classList.push("bg-danger");
-                break;
+
             case "Accept":
                 text = "Status: Accepted";
-                classList.push("bg-success");
-                break;
+
             default:
-                text = "Status: Unknown";
-                classList.push("bg-secondary");
-                break;
+               location.reload();
         }
 
         spanStatus.className = classList.join(" ");
