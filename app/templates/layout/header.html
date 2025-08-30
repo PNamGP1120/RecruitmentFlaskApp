@@ -131,13 +131,15 @@
                     <li><a class="dropdown-item" href="/applications">Applications</a></li>
                     {% elif is_recruiter %}
                     <li><a class="dropdown-item" href="/applications">Applications</a></li>
+                    <li><a class="dropdown-item" href="/stats-by-recruiter">Stats</a></li>
+                    <li><a class="dropdown-item" href="/{{current_user.id}}/interview">Interview</a></li>
                     {% elif is_admin %}
                     <li><a class="dropdown-item" href="/verified">Verified user</a></li>
                     {% endif %}
 
-                    {% if is_recruiter or is_jobSeeker %}
-                    <li><a class="dropdown-item" href="/applications">Applications</a></li>
-                    {% endif %}
+<!--                    {% if is_recruiter or is_jobSeeker %}-->
+<!--                    <li><a class="dropdown-item" href="/applications">Applications</a></li>-->
+<!--                    {% endif %}-->
 
                     <li>
                         <hr class="dropdown-divider">
