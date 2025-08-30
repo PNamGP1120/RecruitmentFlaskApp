@@ -9,6 +9,7 @@ from flask_login import LoginManager
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_socketio import SocketIO
 
+
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 app = Flask(__name__)
@@ -50,7 +51,9 @@ cloudinary.config(
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'phuongnam.it0212@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Phuongnam0212'
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'maivo0902@gmail.com'
+app.config['MAIL_PASSWORD'] = 'qzha nhir cldl ypzy'
+app.config['MAIL_DEFAULT_SENDER'] = 'maivo0902@gmail.com'
 
 mail = Mail(app)

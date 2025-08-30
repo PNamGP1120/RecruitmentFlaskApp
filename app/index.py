@@ -7,10 +7,22 @@ from app import socketio
 from app.models import Conversation, Message
 from pyexpat.errors import messages
 
-from app import app, dao, login
+from app import app, dao, login, mail
 from app.models import EmploymentEnum, RoleEnum
 from app.models import JobStatusEnum, ApplicationStatusEnum
 from app.models import Resume
+from datetime import datetime
+from flask_mail import Message as MailMessage
+
+
+def send_email(email, title, content):
+    msg = MailMessage(
+        subject=title,
+        recipients=[email],
+        body=content
+    )
+    mail.send(msg)
+    return 'Email sent successfully!'
 
 @app.context_processor
 def inject_user():
@@ -467,8 +479,15 @@ def application():
         if status == "All" or status == "Choose Status":
             status = None
         applies = dao.load_applications_for_company(current_user.id, page=page, per_page=per_page, status=status)
+        list_interview = []
+        for a in applies:
+            interview = dao.get_interview(a.id)
+            if interview:
+                list_interview.append(interview)
+        interview_map = {i.application_id: i for i in list_interview}
+        print("interview_map", interview_map)
         return render_template("applications.html", title="Applications",
-                               subtitle="List of applications for your company", applies=applies)
+                               subtitle="List of applications for your company", applies=applies, interview_map=interview_map)
     return render_template("applications.html", title="Applications",
                            subtitle="List of applications for your company")
 
@@ -772,8 +791,78 @@ def recruiter_start_chat(jobseeker_id):
         flash("Could not start conversation.", "danger")
         return redirect(url_for('index'))
 
+"""
+    Chức năng thống kê cho nhà tuyển dụng:
+    Thống kê số lượng don ung tuyen cua cong ty theo thang quy nam
+    
+"""
+@app.route("/stats-by-recruiter")
+@login_required
+def stats_by_recruiter():
+    if current_user.role != RoleEnum.RECRUITER:
+        return jsonify({"status": 403})
+    check_company = dao.is_company_exist(current_user.id)
+    if not check_company:
+        return jsonify({"message": "Bạn chưa có công ty hoặc không phải chủ công ty này", "status": 404})
+    company=dao.load_company_by_id(current_user.id)
+    stats = dao.stats_job_by_recruiter(company_id=company.id)
+    stats = [dict(row._mapping) for row in stats]
+    print("stats", stats)
+
+    list_job = dao.get_job_by_company_id(company_id=company.id, year=datetime.now().year)
+    if not list_job:
+        return jsonify({"message": "Bạn chưa có job nào", "status": 400})
+
+    stats_application = []
+    for job in list_job:
+        stats_application.append(dao.stats_application_by_recruiter(job_id=job))
+
+    print("application-stats",stats_application)
+    title = 'statistics and reports'
+    subtitle = ''
+    return render_template("recruiter/stats_for_recruiter.html", title=title,
+                           subtitle=subtitle, stats=stats, stast_applies = stats_application, year=datetime.now().year)
+
+
+@app.route("/api/<int:application_id>/create_link", methods=["post"])
+@login_required
+def create_interview_link(application_id):
+    if current_user.role != RoleEnum.RECRUITER:
+        return jsonify({"status": 403})
+    check_company = dao.is_company_exist(current_user.id)
+    if not check_company:
+        return jsonify({"message": "Bạn chưa có công ty hoặc không phải chủ công ty này", "status": 404})
+    interview = db.session.query(Interview).filter(Interview.application_id==application_id).first()
+    if interview:
+        return jsonify({"link": interview.url, "status": 200})
+
+    interview_date = request.form.get("date")
+    application=dao.get_application_by_id(application_id)
+    job = application.job
+    user = dao.get_user_by_application_id(application_id)
+    print("email", user.id, user.email)
+    link = dao.create_interview_link(application_id, interview_date)
+    title="Xác nhận trúng tuyển"
+    content=(f"Chúc mừng {user.username} đã trúng tuyển cho công việc {job.title} \n Bạn vui lòng tham gia phỏng vấn vào thời gian và địa điểm theo thông báo bên dưới \n"
+             f"Thời gian: {interview_date} \n"
+             f"Link phỏng vấn online (vòng 1): {link}")
+    send_email(user.email, title, content)
+    return jsonify({"link": link, "status": 201})
+
+
+
+@app.route("/<int:user_id>/interview")
+def list_interview(user_id):
+    list_interview = dao.get_list_interview_by_owner_company(user_id)
+    title="List interview for your company"
+    return render_template("list_interview.html", title=title , list_interview=list_interview )
+
+
+
+
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
 
-        socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+        # socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+        app.run(debug=True)

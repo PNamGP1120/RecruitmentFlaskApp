@@ -4,12 +4,11 @@
 {% include 'layout/hero_section.html' %}
 <div class="container-fluid py-4">
     <div class="row">
-        {% if not applies.items %}
-        <div class="alert alert-warning text-center">You have no applicationsw!</div>
-        {% else %}
+
         <div>
             <form action="/applications">
                 <div class="d-flex justify-content-around" style="width: 25%">
+                    <div >Filter by status:</div>
                     <div class="bg-light">
                         <select name="status" class="form-select">
                             <option> All</option>
@@ -32,6 +31,9 @@
                     </div>
                 </div>
             </form>
+            {% if not applies.items %}
+            <div class="alert alert-warning text-center mt-5">You have no applicationsw!</div>
+            {% else %}
             {% for a in applies %}
             {% include 'layout/cardapply.html' %}
             {% endfor %}

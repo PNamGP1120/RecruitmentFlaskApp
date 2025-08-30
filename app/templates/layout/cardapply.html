@@ -23,13 +23,21 @@
                 <span class="me-2"><i class="bi bi-geo-alt"></i> {{ a.job.location }}</span>
             </div>
         </div>
-        <div class="d-flex flex-row align-items-start card-job-item">
+        <div class="d-flex flex-column align-items-start card-job-item">
 
             <!-- Button to Open the Modal -->
             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                     data-bs-target="#modal{{a.id}}">
                 View
             </button>
+
+
+            {% if is_recruiter and a.status == ApplicationStatusEnum.ACCEPTED %}
+            <button type="button" class="btn btn-primary text-warning"
+                    onclick="" data-bs-toggle="modal"
+                    data-bs-target="#modal_interview{{a.id}}">Interview
+            </button>
+            {% endif %}
 
             <!-- The Modal -->
             <div class="modal" id="modal{{a.id}}">
@@ -38,7 +46,7 @@
 
                         <!-- Modal Header -->
                         <div class="modal-header">
-                            <h4 class="modal-title ">Apply for job {{ a.job.title}}</h4>
+                            <h4 class="modal-title ">Apply for job {{ a.job.title}} </h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
@@ -98,6 +106,7 @@
                                 <button type="button" class="btn btn-warning"
                                         onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
                                 </button>
+
                                 {% elif a.status == ApplicationStatusEnum.CONFIRMED %}
                                 <button type="button" class="btn btn-danger"
                                         onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
@@ -116,6 +125,60 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal create interview -->
+            <div class="modal" id="modal_interview{{a.id}}">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title ">Create an interview schedule </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body row">
+                            {% set check_id = false%}
+                            {% if a.id in interview_map %}
+                            {% set check_id = true %}
+                            <div class="alert alert-info text-center">
+                                <div>Thời gian phỏng vấn {{ interview_map[a.id].dateTime }}</div>
+                                <div>link phỏng vấn online: <a href="{{interview_map[a.id].url}}" target="_blank" rel="noopener noreferrer">{{interview_map[a.id].url}}</a></div>
+                            </div>
+                            {% else %}
+                            {% if is_recruiter%}
+                            <div>
+                                <label for="datetime_interview">Chọn ngày & giờ:</label>
+                                <input type="datetime-local" id="datetime_interview" name="datetime">
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info text-center">
+                                Đang chờ lịch phỏng vấn!
+                            </div>
+                            {% endif %}
+
+                            {% endif %}
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
+                            </button>
+                            {% if is_recruiter and check_id == false %}
+                            <button type="button" class="btn btn-primary" onclick="createDatetimeInterview({{a.id}})">
+                                Create
+                            </button>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
