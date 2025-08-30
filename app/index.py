@@ -870,5 +870,5 @@ if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
 
-        # socketio.run(app, host="0.0.0.0", port=5000, debug=True)
-        app.run(debug=True)
+        socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+        # app.run(debug=True)
