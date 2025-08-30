@@ -142,7 +142,7 @@ async function cancelRecruiter(userId) {
 
 
 async function createDatetimeInterview(applyId) {
-    const value = document.getElementById("datetime_interview").value;
+    const value = document.getElementById(`datetime_interview_${applyId}`).value;
     console.log("value datetime", value);
     let formDataDatetime = new FormData();
     formDataDatetime.append("date", value);
