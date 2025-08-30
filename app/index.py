@@ -473,8 +473,14 @@ def application():
         if status == "All" or status == "Choose Status":
             status = None
         applies = dao.load_applications_for_user(current_user, page=page, per_page=per_page, status=status)
+        list_interview = []
+        for a in applies:
+            interview = dao.get_interview(a.id)
+            if interview:
+                list_interview.append(interview)
+        interview_map = {i.application_id: i for i in list_interview}
         return render_template("applications.html", title="Applications",
-                               subtitle="List of your applications", applies=applies)
+                               subtitle="List of your applications", applies=applies, interview_map=interview_map)
     elif current_user.role == RoleEnum.RECRUITER:
         if status == "All" or status == "Choose Status":
             status = None

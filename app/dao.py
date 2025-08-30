@@ -757,6 +757,8 @@ def get_list_interview_by_owner_company(user_id):
 
 
 
+
+
 if __name__ == "__main__":
     with app.app_context():
         # u = load_jobs(location="Ha Noi City",employment_type=EmploymentEnum.FULLTIME)

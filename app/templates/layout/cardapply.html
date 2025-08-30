@@ -32,7 +32,7 @@
             </button>
 
 
-            {% if is_recruiter and a.status == ApplicationStatusEnum.ACCEPTED %}
+            {% if a.status == ApplicationStatusEnum.ACCEPTED %}
             <button type="button" class="btn btn-primary text-warning"
                     onclick="" data-bs-toggle="modal"
                     data-bs-target="#modal_interview{{a.id}}">Interview
@@ -147,16 +147,16 @@
                                 <div>link phỏng vấn online: <a href="{{interview_map[a.id].url}}" target="_blank" rel="noopener noreferrer">{{interview_map[a.id].url}}</a></div>
                             </div>
                             {% else %}
-                            {% if is_recruiter%}
-                            <div>
-                                <label for="datetime_interview">Chọn ngày & giờ:</label>
-                                <input type="datetime-local" id="datetime_interview" name="datetime">
-                            </div>
-                            {% else %}
-                            <div class="alert alert-info text-center">
-                                Đang chờ lịch phỏng vấn!
-                            </div>
-                            {% endif %}
+                                {% if is_recruiter%}
+                                <div>
+                                    <label for="datetime_interview">Chọn ngày & giờ:</label>
+                                    <input type="datetime-local" id="datetime_interview" name="datetime">
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info text-center">
+                                    Đang chờ lịch phỏng vấn!
+                                </div>
+                                {% endif %}
 
                             {% endif %}
                         </div>
