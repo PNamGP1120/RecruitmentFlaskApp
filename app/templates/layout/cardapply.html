@@ -149,8 +149,8 @@
                             {% else %}
                                 {% if is_recruiter%}
                                 <div>
-                                    <label for="datetime_interview">Chọn ngày & giờ:</label>
-                                    <input type="datetime-local" id="datetime_interview" name="datetime">
+                                    <label for="datetime_interview_{{a.id}}">Chọn ngày & giờ:</label>
+                                    <input type="datetime-local" id="datetime_interview_{{a.id}}" name="datetime">
                                 </div>
                                 {% else %}
                                 <div class="alert alert-info text-center">
