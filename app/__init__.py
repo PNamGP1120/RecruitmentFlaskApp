@@ -27,7 +27,7 @@ db_host = os.environ.get("MYSQL_HOST", "db")
 db_name = os.environ.get("MYSQL_DATABASE", "recruitmentdb")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"mysql+pymysql://{db_user}:{quote(db_password)}@{db_host}/{db_name}?charset=utf8mb4"
+    f"mysql+pymysql://{db_user}:{quote(db_password)}@{db_host}/{db_name}?charset=utf8mb4&ssl_disabled=true"
 )
 
 # Cấu hình Google OAuth

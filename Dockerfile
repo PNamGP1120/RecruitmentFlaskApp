@@ -1,20 +1,18 @@
 FROM python:3.11-slim
 
-# Cập nhật và cài dependency cần thiết cho mysqlclient
+# Cài các dependency cần thiết
 RUN apt-get update && apt-get install -y \
     build-essential \
     default-libmysqlclient-dev \
     libssl-dev \
     pkg-config \
+    default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Tạo thư mục app
 WORKDIR /app
 
-# Copy requirements
+# Copy requirements và cài
 COPY requirements.txt .
-
-# Upgrade pip và cài các package python
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,5 +22,13 @@ COPY . .
 # Expose port
 EXPOSE 5000
 
-# Entry point
-CMD ["python", "run"]
+# Biến môi trường Flask
+ENV FLASK_APP=app
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=5000
+ENV PYTHONUNBUFFERED=1
+
+# Copy entrypoint và cho phép thực thi
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
