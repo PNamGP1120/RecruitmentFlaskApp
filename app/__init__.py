@@ -58,4 +58,5 @@ app.config['MAIL_DEFAULT_SENDER'] = 'maivo0902@gmail.com'
 
 mail = Mail(app)
 
-from app import index
+# Muốn chạy unit test là phải uncomment dòng này ra
+# from app import index
