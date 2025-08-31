@@ -755,9 +755,8 @@ def get_list_interview_by_owner_company(user_id):
     return None
 
 
-
-
-
+def get_company_by_id(company_id):
+    return db.session.query(Company).filter(Company.id==company_id).first()
 
 if __name__ == "__main__":
     with app.app_context():
@@ -775,5 +774,5 @@ if __name__ == "__main__":
         # print("ap.itmes",ap.items)
 
         # print(count_candidates())
-        print(get_list_interview_by_owner_company(1))
+        print(get_company_by_id(company_id=3).company_name)
 

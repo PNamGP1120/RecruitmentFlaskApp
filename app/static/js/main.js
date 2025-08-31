@@ -146,22 +146,63 @@ async function createDatetimeInterview(applyId) {
     console.log("value datetime", value);
     let formDataDatetime = new FormData();
     formDataDatetime.append("date", value);
-    if(confirm(`Bạn chắc chắn muốn tạo lịch vào ${value}`) === true){
-    fetch(`/api/${applyId}/create_link`, {
-    method: "POST",
-    body: formDataDatetime }).then(res => res.json()).then(data => {
-        if (data.status === 201){
-            alert("Tạo lịch thành công!");
-            location.reload();
-        }
-        else {
-            alert("Tạo lịch thất bại!");
-            location.reload();
-        }
 
-    }).catch(err => alert(`xãy ra lỗi ${err}`));
+    if (!value){
+        alert("Vui lòng chọn ngày giờ!");
+
     }
+    else {
+    if(confirm(`Bạn chắc chắn muốn tạo lịch vào ${value}`) === true){
+    // Hiện loading
+        const btn = document.getElementById(`button_create_${applyId}`);
+        const loading = document.getElementById(`loading_${applyId}`);
+        btn.disabled = true;
+        loading.style.display = "inline";
+
+        try {
+            const res = await fetch(`/api/${applyId}/create_link`, {
+                method: "POST",
+                body: formDataDatetime
+            });
+            const data = await res.json();
+
+            if (data.status === 201) {
+                alert("Tạo lịch thành công!");
+            } else {
+                alert("Tạo lịch thất bại!");
+            }
+            location.reload();
+        } catch (err) {
+            alert(`Xảy ra lỗi: ${err}`);
+            location.reload();
+        } finally {
+            // Ẩn loading, bật lại nút
+            btn.disabled = false;
+            loading.style.display = "none";
+        }
+    }
+    }
+
 }
 
+
+    const salaryRange = document.getElementById("salaryRange");
+    const salaryText = document.getElementById("salaryText");
+
+    const formatter = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        minimumFractionDigits: 0
+    });
+
+    salaryRange.addEventListener("input", function () {
+    const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0
+    });
+    console.log("salary", salaryRange.value)
+    salaryText.textContent = `Salary: ${formatter.format(salaryRange.value)} - ${formatter.format(salaryRange.max)}`;
+});
 
 

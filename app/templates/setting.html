@@ -1,0 +1,9 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
+<div class="container">
+    <div class="alert alert-info text-center" >Chưa có setting nào cho hệ thống!</div>
+</div>
+{% endblock %}
