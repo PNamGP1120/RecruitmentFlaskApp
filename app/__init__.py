@@ -58,4 +58,4 @@ app.config['MAIL_DEFAULT_SENDER'] = 'maivo0902@gmail.com'
 
 mail = Mail(app)
 
-from app import index
+# from app import index

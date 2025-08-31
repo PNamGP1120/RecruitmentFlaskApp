@@ -151,6 +151,7 @@
                                 <div>
                                     <label for="datetime_interview_{{a.id}}">Chọn ngày & giờ:</label>
                                     <input type="datetime-local" id="datetime_interview_{{a.id}}" name="datetime">
+                                    <span id="loading_{{a.id}}" style="display:none;">⏳ Đang xử lý...</span>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-info text-center">
@@ -166,7 +167,7 @@
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
                             </button>
                             {% if is_recruiter and check_id == false %}
-                            <button type="button" class="btn btn-primary" onclick="createDatetimeInterview({{a.id}})">
+                            <button id="button_create_{{a.id}}" type="button" class="btn btn-primary" onclick="createDatetimeInterview({{a.id}})">
                                 Create
                             </button>
 
