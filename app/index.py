@@ -867,6 +867,10 @@ def view_company(company_id):
     return render_template("view_company.html", title="View Company", company=company)
 
 
+@app.route("/settings")
+def setting():
+    return render_template("setting.html", title="Setting")
+
 if __name__ == '__main__':
     with app.app_context():
         from app.admin import *
