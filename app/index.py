@@ -4,13 +4,10 @@ from flask_dance.contrib.google import google
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import join_room, leave_room, send
 from app import socketio
-from app.models import Conversation, Message
+from app.models import Conversation, Message, EmploymentEnum, RoleEnum, JobStatusEnum, ApplicationStatusEnum, Resume, CV, Job, Application, Interview
 from pyexpat.errors import messages
 
-from app import app, dao, login, mail
-from app.models import EmploymentEnum, RoleEnum
-from app.models import JobStatusEnum, ApplicationStatusEnum
-from app.models import Resume
+from app import app, dao, login, mail, db
 from datetime import datetime
 from flask_mail import Message as MailMessage
 

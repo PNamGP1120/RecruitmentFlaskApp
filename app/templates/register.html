@@ -71,10 +71,8 @@
 
 {% block content %}
 
-<!-- Hero Section -->
 {% include 'layout/hero_section.html'%}
 
-<!-- Main Content -->
 <section class="py-5">
     <div class="container">
         <div class="row g-5">
@@ -126,6 +124,11 @@
                     {% endwith %}
 
                     <form method="POST" action="{{ url_for('register_process') }}" enctype="multipart/form-data">
+                        {% if err_msg %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ err_msg }}
+                        </div>
+                        {% endif %}
 
                         {% set fields = [
                         {'id': 'first_name', 'label': 'First Name', 'type': 'text', 'placeholder': 'Your name', 'value':
