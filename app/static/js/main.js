@@ -164,4 +164,23 @@ async function createDatetimeInterview(applyId) {
 }
 
 
+    const salaryRange = document.getElementById("salaryRange");
+    const salaryText = document.getElementById("salaryText");
+
+    const formatter = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        minimumFractionDigits: 0
+    });
+
+    salaryRange.addEventListener("input", function () {
+    const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0
+    });
+    console.log("salary", salaryRange.value)
+    salaryText.textContent = `Salary: ${formatter.format(salaryRange.value)} - ${formatter.format(salaryRange.max)}`;
+});
+
 
