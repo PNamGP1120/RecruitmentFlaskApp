@@ -1,5 +1,34 @@
 # Job Portal System
 
+## Table of Contents
+- [Environment Variables (.env)](#environment-variables-env)
+- [Overview](#overview)
+- [Technical](#technical)
+- [Features](#features)
+- [Diagrams](#diagrams)
+- [Result](#result)
+- [Project Documentation](#project-documentation)
+- [Contributions](#contributions)
+
+## Environment Variables (.env)
+
+Trước khi chạy dự án, bạn cần tạo file `.env` ở thư mục gốc, cùng cấp với thư mục `app` và cấu hình các biến môi trường sau:
+
+```env
+SECRET_KEY=your_secret_key_here
+
+DB_PASSWORD=your_mysql_password
+
+GOOGLE_OAUTH_CLIENT_ID=your_google_client_id
+GOOGLE_OAUTH_CLIENT_SECRET=your_google_client_secret
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+MAIL_USERNAME=your_email@example.com
+MAIL_PASSWORD=your_email_password
+```
 
 ## Overview
 Hệ thống cổng thông tin việc làm là một nền tảng trực tuyến giúp kết nối giữa người tìm việc và nhà tuyển dụng một cách hiệu quả và thuận tiện. Hệ thống cung cấp các chức năng quản lý hồ sơ, đăng tin tuyển dụng, ứng tuyển, quản lý đơn ứng tuyển, chat và phỏng vấn trực tuyến. Người tìm việc có thể tạo hồ sơ cá nhân, tải CV và tìm kiếm việc làm phù hợp theo tiêu chí mong muốn, trong khi nhà tuyển dụng có thể đăng tin tuyển dụng, quản lý đơn ứng tuyển và theo dõi tiến trình tuyển dụng. Dự án hướng tới việc số hóa quy trình tuyển dụng, giúp tiết kiệm thời gian, nâng cao hiệu quả và minh bạch thông tin giữa các bên.  
@@ -73,62 +102,74 @@ Hệ thống cổng thông tin việc làm là một nền tảng trực tuyến
 
 ## Result
 
-- **Trang chủ**  
+### Trang chủ
   ![Home](./images/home.png)  
 
-- **Trang tìm kiếm việc làm**  
+### Trang tìm kiếm việc làm 
   ![Job Search](./images/jobsearch.png)  
 
-- **Trang chi tiết việc làm**  
+### Trang chi tiết việc làm
   ![Job Detail](./images/jobdetail.png)  
 
-- **Trang liên hệ**  
+### Trang liên hệ
   ![Contact](./images/contact.png)  
 
-- **Đăng nhập bằng Username/Password**  
+### Đăng nhập bằng Username/Password 
   ![Login](./images/login.png)  
 
-- **Đăng ký tài khoản**  
+### Đăng ký tài khoản
   ![Register](./images/register.png)  
 
-- **Đăng nhập bằng Google**  
+### Đăng nhập bằng Google  
   ![Google Login](./images/googlelogin.png)  
 
-- **Quản lý tài khoản (Admin)**  
+### Quản lý tài khoản (Admin)
   ![Admin Account](./images/adminaccount.png)  
 
-- **Tạo & quản lý hồ sơ CV trực tuyến**  
+### Tạo & quản lý hồ sơ CV trực tuyến
   ![CV Management](./images/cvmanagement.png)  
 
-- **Tìm kiếm & lọc tin tuyển dụng**  
+### Tìm kiếm & lọc tin tuyển dụng
   ![Filter Jobs](./images/filterjobs.png)  
 
-- **Nộp hồ sơ trực tuyến**  
+### Nộp hồ sơ trực tuyến
   ![Apply Job](./images/applyjob.png)  
 
-- **Đăng tin tuyển dụng mới**  
+### Đăng tin tuyển dụng mới
   ![Post Job](./images/postjob.png)  
 
-- **Quản lý hồ sơ ứng tuyển**  
+### Quản lý hồ sơ ứng tuyển
   ![Applications](./images/applications.png)  
 
-- **Xem chi tiết đơn ứng tuyển**  
+### Xem chi tiết đơn ứng tuyển
   ![Application Detail](./images/applicationdetail.png)  
 
-- **Tạo lịch phỏng vấn**  
+### Tạo lịch phỏng vấn
   ![Interview Schedule](./images/interviewschedule.png)  
 
-- **Thông tin lịch phỏng vấn**  
+### Thông tin lịch phỏng vấn
   ![Interview Info](./images/interviewinfo.png)  
 
-- **Hệ thống gửi mail cho người dùng**  
+### Hệ thống gửi mail cho người dùng
   ![Email System](./images/emailsystem.png)  
 
-- **Thông báo tự động**  
+### Thông báo tự động
   ![Notifications](./images/notifications.png)  
 
-- **Nhắn tin giữa nhà tuyển dụng và ứng viên**  
+### Nhắn tin giữa nhà tuyển dụng và ứng viên
   ![Chat](./images/chat.png)  
 
-- **Trang thống kê báo cáo của nhà tuyển dụng**  
+### Trang thống kê báo cáo của nhà tuyển dụng
   ![Employer Report](./images/employerreport.png)  
+
+
+
+## Project Documentation
+Chi tiết báo cáo quản lý dự án có thể xem tại:  
+[Project Report](./docs/Bao-cao-quan-ly-viec-lam.docx.pdf)
+
+
+## Contributions
+- Đặng Phương Nam  
+- Nguyễn Tấn Lộc  
+- Võ Văn Mãi
