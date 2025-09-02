@@ -1,0 +1,72 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{% include 'layout/hero_section.html' %}
+<div class="container-fluid py-4 ">
+    <div class="row card mb-3 shadow-sm border-1 p-2">
+        <div>
+            <div class="d-inline-flex p-3 bg-info justify-content-start">
+                <div style="align-self: center; margin-right:5px" >Filter by status:</div>
+
+                <form action="/applications">
+                    <div class="d-flex justify-content-around" >
+                        <div class="bg-light" style="width: 200px; margin-right: 5px">
+                            <select name="status" class="form-select">
+                                <option> All</option>
+                                <option value="{{ApplicationStatusEnum.PENDING.value}}">
+                                    {{ApplicationStatusEnum.PENDING.value}}
+                                </option>
+                                <option value="{{ApplicationStatusEnum.REJECTED.value}}">
+                                    {{ApplicationStatusEnum.REJECTED.value}}
+                                </option>
+                                <option value="{{ApplicationStatusEnum.CONFIRMED.value}}">
+                                    {{ApplicationStatusEnum.CONFIRMED.value}}
+                                </option>
+                                <option value="{{ApplicationStatusEnum.ACCEPTED.value}}">
+                                    {{ApplicationStatusEnum.ACCEPTED.value}}
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% if not applies.items %}
+            <div class="alert alert-warning text-center mt-5">You have no applicationsw!</div>
+            {% else %}
+            {% for a in applies %}
+            {% include 'layout/cardapply.html' %}
+            {% endfor %}
+            <!-- Pagination -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if applies.has_prev %}
+                    <li class="page-item"><a class="page-link"
+                                             href="{{ url_for('application', page=applies.prev_num, status=request.args.get('status')) }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% if applies.pages > 1 %}
+                    {% for p in range(1, applies.pages+1) %}
+                    <li id="page{{p}}" class="page-item"><a class="page-link"
+                                                            href="{{ url_for('application', page=p, status=request.args.get('status')) }}">{{p}}</a>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if applies.has_next %}
+                    <li class="page-item"><a class="page-link"
+                                             href="{{ url_for('application', page=applies.next_num, status=request.args.get('status')) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock%}

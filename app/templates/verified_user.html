@@ -1,0 +1,147 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
+<div class="container">
+    {% if not listRecruiter %}
+    <div class="alert alert-info">There are no users</div>
+    {% else %}
+    {% for user in listRecruiter %}
+    <div class="card mb-3 shadow-sm border-0">
+        <div class="card-body d-flex justify-content-between align-items-start p-3">
+            <div class="m-2">
+                <img src="{{ user.avatar if user.avatar else '' }}" class="rounded" style=""
+                     alt="avatar of {{user.last_name}}" width="120px" height="120px">
+            </div>
+            <div class="flex-grow-1 me-3 ml-2">
+                    <span class="badge bg-success text-white mb-2 fs-7"> Date join:
+                        {{ user.joined_date.strftime('%d %b %Y') }}
+                    </span>
+                <h5 class="card-title fw-bold text-dark mb-1">Name: {{ user.last_name }} {{user.first_name}}</h5>
+                <div class="d-flex flex-wrap gap-3 text-secondary">
+                    <span class="d-flex align-items-center"><i class="bi bi-briefcase me-2 text-primary"></i> Phone number: {{ user.phone if user.phone else "None" }}</span>
+                    <span class="d-flex align-items-center"><i class="bi bi-email me-2 text-primary"></i> Email: {{ user.email }}</span>
+
+                </div>
+                <h5 class="card-title fw-bold text-dark mb-1">Company name: {{ user.company.company_name }}</h5>
+            </div>
+            <!-- Button to Open the Modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal{{user.id}}">
+                View User Detail
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="myModal{{user.id}}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">User & company information</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                            <div>
+                                <div class="text-center mb-3">
+                                    <img src="{{ user.avatar }}" alt="Avatar" class="img-fluid rounded"
+                                         style="width: 200px; height: 200px; object-fit: cover;">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- Cột trái: Thông tin User -->
+                                <div class="col-md-6">
+                                    <h5>Profile User</h5>
+
+                                    <p><strong>Name:</strong> {{ user.last_name }} {{ user.first_name }}</p>
+                                    <p><strong>Username:</strong> {{ user.username }}</p>
+                                    <p><strong>Email:</strong> {{ user.email }}</p>
+                                    <p><strong>Phone number:</strong> {{ user.phone }}</p>
+                                    <p><strong>Role:</strong> {{ user.role.value }}</p>
+                                    <p><strong>Joined date:</strong> {{ user.joined_date.strftime('%d/%m/%Y') }}</p>
+                                    <p><strong>Status:</strong> {{ 'Active' if user.is_active else 'Locking' }}
+                                    </p>
+                                </div>
+
+                                <!-- Cột phải: Thông tin công ty -->
+                                <div class="col-md-6">
+                                    {% if user.company %}
+                                    <h5>Information Company</h5>
+                                    <p><strong>Company name:</strong> {{ user.company.company_name }}</p>
+                                    <p><strong>Industry:</strong> {{ user.company.industry }}</p>
+                                    <p><strong>Company size:</strong> {{ user.company.company_size }}</p>
+                                    <p><strong>Address:</strong> {{ user.company.address }}</p>
+                                    <p><strong>Website:</strong> <a href="{{ user.company.website }}" target="_blank">{{
+                                        user.company.website }}</a></p>
+                                    <p><strong>Introduction:</strong></p>
+                                    <div style="max-height: 150px; overflow-y: auto;">
+                                        <p>{{ user.company.introduction }}</p>
+                                    </div>
+                                    {% else %}
+                                    <h5>No company information yet</h5>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div id="message-verified-cancel-recruiter"></div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+
+                            {% if user.is_recruiter %}
+                            <button class="btn btn-danger cancel-recruiter-btn"
+                                    data-user-id="{{ user.id }}"
+                                    data-bs-dismiss="modal"
+                                    onclick="cancelRecruiter({{user.id}})"
+                            >Cancel Recruiter Permission
+
+                            </button>
+                            {% else %}
+                            <button class="btn btn-success verify-recruiter-btn"
+                                    data-user-id="{{ user.id }}"
+                                    data-bs-dismiss="modal"
+                                    onclick="verifiedRecruiter({{user.id}})"
+                            >Verify
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    {% endfor %}
+    {% endif%}
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if listRecruiter.has_prev %}
+            <li class="page-item"><a class="page-link"
+                                     href="{{ url_for('verified_user', page=listRecruiter.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% if listRecruiter.pages > 1 %}
+            {% for p in range(1, listRecruiter.pages+1) %}
+            <li id="page{{p}}" class="page-item"><a class="page-link"
+                                                    href="{{ url_for('verified_user', page=p) }}">{{p}}</a>
+            </li>
+            {% endfor %}
+            {% endif %}
+
+            {% if listRecruiter.has_next %}
+            <li class="page-item"><a class="page-link"
+                                     href="{{ url_for('verified_user', page=listRecruiter.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+</div>
+{% endblock %}

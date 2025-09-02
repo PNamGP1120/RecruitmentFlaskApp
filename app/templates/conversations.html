@@ -1,0 +1,42 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">{{ title }}</h2>
+        <p class="text-muted">{{ subtitle }}</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="list-group">
+                {% if conversations %}
+                    {% for conv in conversations %}
+                        {% set recipient = (conv.users|selectattr('id', 'ne', current_user.id)|list)[0] %}
+                        <a href="{{ url_for('chat_room', conversation_id=conv.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <img src="{{ recipient.avatar }}" alt="Avatar" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                            <div class="flex-grow-1">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ recipient.username }}</h5>
+                                    <small class="text-muted">{{ conv.messages[-1].timestamp.strftime('%b %d') if conv.messages else '' }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">
+                                    {% if conv.messages %}
+                                        {{ conv.messages[-1].content[:40] }}{% if conv.messages[-1].content|length > 40 %}...{% endif %}
+                                    {% else %}
+                                        No messages yet.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info text-center">You have no conversations.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

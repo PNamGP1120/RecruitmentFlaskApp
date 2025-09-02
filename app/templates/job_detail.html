@@ -1,0 +1,271 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Job Detail{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8 border--radius">
+            <div class="mb-3">
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body d-flex align-items-center">
+                        <img src="{{ jobDetail.company.user.avatar or url_for('static', filename='default-logo.png') }}"
+                             alt="Company Logo"
+                             class="rounded me-4"
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                        <div>
+                            <h2 class="card-title mb-1"><a class="text-decoration-none text-dark" href="{{ url_for('view_company', company_id=jobDetail.company_id ) }}">{{ jobDetail.company.company_name }}</a></h2>
+                            <p class="text-muted mb-1">
+                                {{ jobDetail.company.industry }} • {{ jobDetail.company.company_size }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-geo-alt-fill me-1"></i> {{ jobDetail.company.address }}
+                            </p>
+                            {% if jobDetail.company.website %}
+                            <a href="{{ jobDetail.company.website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-globe me-1"></i> Website
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-4 flex-row justify-content-center">
+                    <h3 class="fw-bold text-center">{{ jobDetail.title }}</h3>
+
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.role == RoleEnum.JOBSEEKER %}
+                    <button style="margin-top:-15px" type="button" class="btn btn-register" data-bs-toggle="modal"
+                            data-bs-target="#myModal">
+                        Apply Job
+                    </button>
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-danger">Please <a href="/login?next=/job-detail/{{jobDetail.id}}">log in</a>
+                        to apply.
+                    </div>
+                    {% endif %}
+                </div>
+                <p class="text-muted small mb-2 text-center">
+                    {% set days = (now - jobDetail.created_date).days %}
+                    {% if days == 0 %}
+                    Đăng hôm nay
+                    {% elif days == 1 %}
+                    Đăng 1 ngày trước (ngày đăng: {{jobDetail.created_date}})
+                    {% else %}
+                    Đăng {{ days }} ngày trước (ngày đăng: {{jobDetail.created_date}})
+                    {% endif %}
+                </p>
+                <div class="d-flex flex-wrap gap-4 text-muted small mb-3">
+                    <span><i class="bi bi-briefcase"></i> {{ jobDetail.category or "Uncategorized" }}</span>
+                    <span><i class="bi bi-clock"></i> {{ jobDetail.employment_type.value if jobDetail.employment_type else "Unknown" }}</span>
+                    <span><i class="bi bi-currency-dollar"></i> {{ jobDetail.salary or "Negotiable" }}</span>
+                    <span><i class="bi bi-geo-alt"></i> {{ jobDetail.location or "Unknown Location" }}</span>
+                    <!--<a style="margin-top:-15px" class="btn btn-register" href="#">Apply Job</a>-->
+
+                </div>
+
+                <!-- The Modal  Apply job -->
+                <div class="modal" id="myModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Appply for job {{jobDetail.title}}</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <!-- Modal body -->
+                            <div class="modal-body">
+
+                                <form id="applyForm">
+                                    <div class="mb-3 mt-3">
+                                        <label for="coverLetter" class="form-label">Cover letter:</label>
+                                        <input type="text" class="form-control" id="coverLetter"
+                                               placeholder="Enter cover letter..."
+                                               name="coverLetter">
+                                    </div>
+                                    <div>
+                                        {% if not cvs%}
+                                        <h6>You don't have any CV yet</h6>
+                                        {% else %}
+                                        {% for cv in cvs %}
+                                        <div>
+                                            <input type="radio" class="form-check-input" id="radio{{cv.id}}" name="cv"
+                                                   value="{{cv.id}}"> {{ cv.title }}
+                                            <label class="form-check-label" for="radio{{cv.id}}"></label>
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="message" id="error-apply"></div>
+                                </form>
+                            </div>
+
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="button" onclick="apply({{jobDetail.id}})" class="btn btn-success"
+                                        form="applyForm">Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold">Job Description</h5>
+            <p class="text-muted">
+                {{jobDetail.description}}
+            </p>
+
+            <h5 class="fw-bold">Key Responsibilities</h5>
+            <ul class="list-unstyled text-muted">
+                <li><i class="bi bi-check2 text-success me-2"></i>Et nunc ut tempus duis nisl sed massa...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Cras facilisis dignissim augue lorem amet...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Ornare varius faucibus nisi vitae vitae cras ornare...
+                </li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in. Orci imperdiet...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in. Orci imperdiet...</li>
+            </ul>
+
+            <h5 class="fw-bold">Professional Skills</h5>
+            <ul class="list-unstyled text-muted">
+                <li><i class="bi bi-check2 text-success me-2"></i>Et nunc ut tempus duis nisl sed massa...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Ornare varius faucibus nisi vitae cras ornare...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+                <li><i class="bi bi-check2 text-success me-2"></i>Tortor amet porta proin in...</li>
+            </ul>
+
+            <div class="my-4">
+                <h6>Tags:</h6>
+                {% if jobDetail.tags %}
+                {% for tag in jobDetail.tags %}
+                <span class="badge rounded-pill text-bg-light text-success border border-success me-2">{{tag}}</span>
+
+                {% endfor %}
+                {% else %}
+                <span>not tag</span>
+                {% endif%}
+
+            </div>
+
+            <div class="mb-5">
+                <strong>Share Job:</strong>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-twitter-x"></i></a>
+                <a href="#" class="ms-2 text-dark"><i class="bi bi-linkedin"></i></a>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 ">
+            <div class="mb-4 border--radius sidebar-detail">
+                <h6 class="fw-bold text-center">Job Overview</h6>
+                <div>
+                    <p class="mb-1"><strong>Job Title:</strong> {{jobDetail.title}}</p>
+                    <p class="mb-1"><strong>Job Type:</strong> {{jobDetail.employment_type}}</p>
+                    <p class="mb-1"><strong>Category:</strong> {{jobDetail.category}}</p>
+                    <p class="mb-1"><strong>Experience:</strong> {{jobDetail.title}}</p>
+                    <p class="mb-1"><strong>Degree:</strong> Master</p>
+                    <p class="mb-1"><strong>Offered Salary:</strong> $ {{jobDetail.salary}}</p>
+                    <p class="mb-2 "><strong>Location:</strong> VietNam, {{jobDetail.location}}</p>
+                    <div>
+
+                        {# Replace this URL with your actual Google Maps embed URL #}
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.824219468925!2d106.69085887508603!3d10.748722889399285!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f01f2f84737%3A0xf639ce8a6e8b5d3a!2sUniversity%20of%20Science%2C%20VNU-HCM!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class=" border--radius sidebar-detail">
+                <h6 class="fw-bold mb-3 text-center">Contact Recruiter</h6>
+                {% if current_user.is_authenticated and current_user.role == RoleEnum.JOBSEEKER %}
+                <a href="{{ url_for('start_chat', recruiter_id=jobDetail.company.user.id) }}"
+                   class="btn btn-register w-100">
+                    Chat with Recruiter
+                </a>
+                {% elif current_user.is_authenticated %}
+                <p class="text-center text-muted">
+                    Only job seekers can start a chat.
+                </p>
+                {% else %}
+                <p class="text-center text-muted">
+                    <a href="{{ url_for('login_process', next=request.path) }}">
+                        Login
+                    </a>
+                    to chat with the recruiter.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% if current_user.role == RoleEnum.JOBSEEKER%}
+<div class="container my-5 ">
+    <h4>Related Jobs</h4>
+    <p class="text-muted">At suscipit pretium tincidunt amet lacus at sem amet aliquet</p>
+    <div>
+        {% if jobs %}
+        {% for job in jobs %}
+        {% include 'layout/cardjob.html' %}
+        {% endfor %}
+        {% endif %}
+    </div>
+
+
+</div>
+{% endif%}
+
+{% if is_recruiter %}
+{% if not applies %}
+<div class="alert alert-info text-center"> There are no applications yet!</div>
+{% else %}
+{% for a in applies %}
+{% include 'layout/cardapply.html' %}
+{% endfor %}
+<!-- Pagination -->
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if applies.has_prev %}
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.prev_num)}}">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if applies.pages > 1 %}
+
+        {% for p in range(1, applies.pages+1) %}
+        <li id="page{{p}}" class="page-item">
+            <a class="page-link" href="{{ url_for('job_detail',job_id=jobDetail.id, page=p) }}">{{p}}</a>
+        </li>
+        {% endfor %}
+
+        {% endif %}
+
+        {% if applies.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('job_detail',job_id=jobDetail.id, page=applies.next_num) }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{%endif%}
+{% endif %}
+
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+{% endblock %}

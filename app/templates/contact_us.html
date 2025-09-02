@@ -1,0 +1,261 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Contact Us - Job Portal{% endblock %}
+
+{% block css %}
+{{ super() }} {# Keep existing CSS from base.html #}
+<style>
+    /* CSS for info-box, synchronized with Register/Login pages */
+    .info-box {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        height: 100%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .info-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .info-icon {
+        font-size: 1.8rem;
+        color: #20c997;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+
+    /* Wrapper for the contact form, synchronized with register-form-wrapper */
+    .contact-form-wrapper {
+        background-color: #edf8f6;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        box-shadow: 0 0 15px rgba(0,0,0,0.08);
+    }
+
+    /* Form fields, synchronized with form-control in register/login */
+    .form-control,
+    .form-control-textarea {
+        flex: 1;
+        border: 1px solid #cce5e2;
+        border-radius: 0.5rem;
+        padding: 0.85rem 1.25rem;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-control-textarea:focus {
+        border-color: #20c997;
+        box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.25);
+    }
+
+    /* Label for form, synchronized with form-label in register/login */
+    /* This style is for labels when they are NOT inline (i.e., display: block) */
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem; /* This will be overridden by form-group-inline for inline labels */
+        display: block;
+        color: #343a40;
+    }
+
+    /* Custom style to make label and input inline, similar to register form's form-group-inline */
+    .form-group-inline {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem; /* Consistent spacing */
+    }
+    /* Adjust label width for inline forms */
+    .form-group-inline .form-label {
+        min-width: 130px; /* Consistent with register form */
+        margin-bottom: 0; /* Remove bottom margin when inline */
+    }
+
+
+    /* Submit button, synchronized with btn-custom */
+    .btn-custom {
+        background-color: #20c997;
+        color: white;
+        border: none;
+        padding: 0.85rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        background-color: #17a589;
+        transform: translateY(-1px);
+    }
+
+    /* Adjust headings and paragraphs for dark text on light backgrounds */
+    /* Removed .bg-light from selector as main section no longer has bg-light */
+    h2,
+    p.text-muted,
+    .contact-form-wrapper h4,
+    .contact-form-wrapper p.text-muted,
+    .info-box h6,
+    .info-box p {
+        color: #343a40;
+    }
+
+    /* Google Map container */
+    .map-container {
+        position: relative;
+        /* padding-bottom: 56.25%; */ /* Removed to allow fixed height */
+        height: 350px; /* Smaller fixed height for the map */
+        overflow: hidden;
+    }
+
+    .map-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .contact-form-wrapper {
+            padding: 1.5rem;
+        }
+        .form-group-inline { /* Stack labels and inputs on small screens */
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.25rem; /* Smaller gap when stacked */
+        }
+        .form-group-inline .form-label {
+            min-width: unset; /* Remove min-width on small screens */
+            margin-bottom: 0.25rem; /* Add some margin when stacked */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
+
+<!-- Main Content Section -->
+<section class="py-5"> {# Removed bg-light #}
+    <div class="container py-4">
+        <div class="row g-5">
+
+            <!-- LEFT: Contact Form -->Learn more about our company and our services.
+            <div class="col-md-6">
+                <div class="contact-form-wrapper">
+                    <h4 class="fw-bold mb-3 text-dark">Send Us a Message</h4>
+                    <p class="text-muted mb-4">Please fill out the form below to contact us. We will respond as soon as possible.</p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('contact') }}">
+                        {# Full Name #}
+                        <div class="form-group-inline mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Your full name" required>
+                        </div>
+                        {# Email Address #}
+                        <div class="form-group-inline mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="email@example.com" required>
+                        </div>
+                        {# Subject #}
+                        <div class="form-group-inline mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g., Support Request, Feedback" required>
+                        </div>
+                        {# Your Message #}
+                        <div class="form-group-inline mb-4">
+                            <label for="message" class="form-label">Your Message</label>
+                            <textarea class="form-control form-control-textarea" id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-custom btn-lg">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: Contact Information Boxes (Single Column) -->
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3 text-dark">Have Questions? We Have Answers.</h2>
+                <p class="text-muted mb-4">
+                    Feel free to reach out to our support team if you need any assistance or have inquiries about Job Portal.
+                </p>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="info-box bg-white p-4 rounded-3 h-100 shadow-sm d-flex align-items-start gap-3">
+                            <i class="bi bi-geo-alt-fill info-icon fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">Office Address</h6>
+                                <p class="mb-0 text-muted small">123 ABC Street, XYZ District, Ho Chi Minh City, Vietnam</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-box bg-white p-4 rounded-3 h-100 shadow-sm d-flex align-items-start gap-3">
+                            <i class="bi bi-envelope-fill info-icon fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">Email Us</h6>
+                                <p class="mb-0 text-muted small"><a href="mailto:info@jobportal.com" class="text-decoration-none text-dark">info@jobportal.com</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-box bg-white p-4 rounded-3 h-100 shadow-sm d-flex align-items-start gap-3">
+                            <i class="bi bi-telephone-fill info-icon fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">Call for Support</h6>
+                                <p class="mb-0 text-muted small"><a href="tel:+84123456789" class="text-decoration-none text-dark">+84 123 456 789</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-box bg-white p-4 rounded-3 h-100 shadow-sm d-flex align-items-start gap-3">
+                            <i class="bi bi-clock-fill info-icon fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">Working Hours</h6>
+                                <p class="mb-0 text-muted small">Mon - Fri: 9:00 AM - 5:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{# Google Map Section #}
+<section class="py-5">
+    <div class="container py-4">
+        <h2 class="text-center fw-bold mb-4 text-dark">Find Us on the Map</h2>
+        <div class="map-container rounded-4 shadow-lg overflow-hidden">
+            {# Replace this URL with your actual Google Maps embed URL #}
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.824219468925!2d106.69085887508603!3d10.748722889399285!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f01f2f84737%3A0xf639ce8a6e8b5d3a!2sUniversity%20of%20Science%2C%20VNU-HCM!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,185 @@
+<div class="list-group-item mb-3 ">
+    <div class="d-flex justify-content-between job-item--detail ">
+        <div>
+            <span class="badge text-primary mb-2 p-2">Sent date: {{a.applied_date}}</span>
+            <span id="status-{{a.id}}" class="badge
+                        {% if a.status == ApplicationStatusEnum.PENDING %}
+                        bg-warning text-dark
+                        {% elif a.status == ApplicationStatusEnum.REJECTED %}
+                        bg-danger
+                        {% elif a.status == ApplicationStatusEnum.ACCEPTED %}
+                        bg-success
+                        {% else %}
+                        bg-info text-dark
+                        {% endif%}
+                         mb-2 p-2">Status: {{a.status.value}}</span>
+            <h5 class="mb-1"><a class="title-color" href="{{ url_for('job_detail', job_id=a.job_id) }}">{{ a.job.title }}</a> <a
+                    class="title-color" href="{{ url_for('view_company', company_id=a.job.company_id) }}">[{{a.job.company.company_name}}]</a></h5>
+            <div class="text-muted mb-1">{{ a.job.category }}</div>
+            <div class="mb-1">
+                <span class="me-2"><i class="bi bi-briefcase"></i> {{ a.job.requirements }}</span>
+                <span class="me-2"><i class="bi bi-clock"></i> {{ a.job.employment_type.value }}</span>
+                <span class="me-2"><i class="bi bi-cash"></i> {{ a.job.salary }}</span>
+                <span class="me-2"><i class="bi bi-geo-alt"></i> {{ a.job.location }}</span>
+            </div>
+        </div>
+        <div class="d-flex flex-column align-items-start card-job-item">
+
+            <!-- Button to Open the Modal -->
+            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#modal{{a.id}}">
+                View
+            </button>
+
+
+            {% if a.status == ApplicationStatusEnum.ACCEPTED %}
+            <button type="button" class="btn btn-primary text-warning"
+                    onclick="" data-bs-toggle="modal"
+                    data-bs-target="#modal_interview{{a.id}}">Interview
+            </button>
+            {% endif %}
+
+            <!-- The Modal -->
+            <div class="modal" id="modal{{a.id}}">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title ">Apply for job {{ a.job.title}} </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body row">
+                            <div class="col-4">
+                                <img class="rounded" src="{{a.cv.resume.user.avatar}}" alt="Avatar" width="100%">
+                                <h4 class="text-center">{{a.cv.resume.user.first_name}} {{
+                                    a.cv.resume.user.last_name}} </h4>
+                                <div>
+                                    <h5>Information</h5>
+                                    <p><strong>Skill: </strong> {{ a.cv.resume.skill}}</p>
+                                    <p><strong>experience: </strong> {{ a.cv.resume.experience}}</p>
+                                    <p><strong>education: </strong> {{ a.cv.resume.education}}</p>
+                                    <p><strong>preferred_locations: </strong> {{ a.cv.resume.preferred_locations}}</p>
+                                    <p><strong>preferred_job_types: </strong> {{ a.cv.resume.preferred_job_types}}</p>
+                                    <p><strong>linkedin: </strong> <a class="text-info" target="_blank"
+                                                                      href="{{ a.cv.resume.linkedin_url}}">{{
+                                        a.cv.resume.linkedin_url}}</a></p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <p><span class="bg-info text-dark m-2 p-2 rounded">Cover letter: </span>{{a.cover_letter}}
+                                </p>
+                                <iframe src="{{a.cv.file_path}}" width="100%" height="650px">
+
+                                </iframe>
+                                <div id="message-verified-apply-{{a.id}}" class="mt-2 text-success"></div>
+                            </div>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
+                            </button>
+                            {% if is_recruiter %}
+                            <a href="{{ url_for('recruiter_start_chat', jobseeker_id=a.cv.resume.user.id) }}"
+                               class="btn btn-info">
+                                <i class="bi bi-chat-dots"></i> Chat with Candidate
+                            </a>
+                            <form id="verify-apply-form-{{a.id}}" class="d-inline">
+                                <input type="hidden" name="med" id="med-action-{{a.id}}">
+                                {% if a.status == ApplicationStatusEnum.PENDING %}
+
+                                <button type="button" class="btn btn-success"
+                                        onclick="verifiedApply({{ a.id }}, 'Confirm')">Confirm
+                                </button>
+
+                                <button type="button" class="btn btn-danger"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+
+                                <button type="button" class="btn btn-primary"
+                                        onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
+                                </button>
+                                {% elif a.status == ApplicationStatusEnum.ACCEPTED %}
+                                <button type="button" class="btn btn-warning"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+
+                                {% elif a.status == ApplicationStatusEnum.CONFIRMED %}
+                                <button type="button" class="btn btn-danger"
+                                        onclick="verifiedApply({{ a.id }}, 'Reject')">Reject
+                                </button>
+
+                                <button type="button" class="btn btn-primary"
+                                        onclick="verifiedApply({{ a.id }}, 'Accept')">Accept
+                                </button>
+                                {% endif %}
+
+                            </form>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal create interview -->
+            <div class="modal" id="modal_interview{{a.id}}">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title ">Create an interview schedule </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body row">
+                            {% set check_id = false%}
+                            {% if a.id in interview_map %}
+                            {% set check_id = true %}
+                            <div class="alert alert-info text-center">
+                                <div>Thời gian phỏng vấn {{ interview_map[a.id].dateTime }}</div>
+                                <div>link phỏng vấn online: <a href="{{interview_map[a.id].url}}" target="_blank" rel="noopener noreferrer">{{interview_map[a.id].url}}</a></div>
+                            </div>
+                            {% else %}
+                                {% if is_recruiter%}
+                                <div>
+                                    <label for="datetime_interview_{{a.id}}">Chọn ngày & giờ:</label>
+                                    <input type="datetime-local" id="datetime_interview_{{a.id}}" name="datetime">
+                                    <span id="loading_{{a.id}}" style="display:none;">⏳ Đang xử lý...</span>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info text-center">
+                                    Đang chờ lịch phỏng vấn!
+                                </div>
+                                {% endif %}
+
+                            {% endif %}
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close
+                            </button>
+                            {% if is_recruiter and check_id == false %}
+                            <button id="button_create_{{a.id}}" type="button" class="btn btn-primary" onclick="createDatetimeInterview({{a.id}})">
+                                Create
+                            </button>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

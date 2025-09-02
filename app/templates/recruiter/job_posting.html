@@ -1,0 +1,249 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Job Posting{% endblock %}
+
+{% block css %}
+<style>
+    .info-box {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        height: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-icon {
+        font-size: 1.5rem;
+        color: #20c997;
+        flex-shrink: 0;
+    }
+
+    .job-post-form-wrapper {
+        /* Renamed for clarity from register-form-wrapper */
+        background-color: #edf8f6;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group-inline {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        min-width: 130px;
+        /* Consistent with your register form */
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .form-control,
+    .form-select,
+    textarea.form-control {
+        /* Ensure textarea also flexes */
+        flex: 1;
+    }
+
+    .btn-custom {
+        background-color: #20c997;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #17a589;
+    }
+
+    .btn-draft {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .btn-draft:hover {
+        background-color: #5a6268;
+    }
+
+    @media (max-width: 768px) {
+        .form-group-inline {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .form-label {
+            margin-bottom: 0.25rem;
+        }
+    }
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include 'layout/hero_section.html'%}
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3">Your Job Posting History</h2>
+                <p class="text-muted mb-4">
+                    Job posting is a crucial step in connecting with potential candidates. Here, you can manage your job
+                    listings, view applications, and communicate with applicants directly. Ensure your postings are
+                    clear and detailed to attract the right talent.
+                </p>
+
+                {% if jobs %}
+                    {% for job in jobs.items %}
+                    {% include 'layout/cardjob.html' with context %}
+                    {% endfor %}
+                    {# Pagination links can be added here if 'jobs' is a Pagination object #}
+
+                    <!-- Pagination -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if jobs.has_prev %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('job_posting', page=jobs.prev_num, keyword=request.args.get('keyword'),
+                        location=request.args.get('location'),
+                        jobType=request.args.get('jobType')) }}">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% if jobs.pages > 1 %}
+                        {% for p in range(1, jobs.pages+1) %}
+                        <li id="page{{p}}" class="page-item"><a class="page-link" href="{{ url_for('job_posting', page=p,keyword=request.args.get('keyword'),
+                        location=request.args.get('location'),
+                        jobType=request.args.get('jobType')) }}">{{p}}</a>
+                        </li>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if jobs.has_next %}
+                        <li class="page-item"><a class="page-link"
+                                                 href="{{ url_for('job_posting', page=jobs.next_num, keyword=request.args.get('keyword'),
+                        location=request.args.get('location'),
+                        jobType=request.args.get('jobType')) }}">Next</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+
+                {% else %}
+                <p class="text-muted">You haven't posted any jobs yet. Start by filling out the form on the right!</p>
+                {% endif %}
+
+
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="job-post-form-wrapper">
+                    <h4 class="fw-bold mb-3">Post a New Job</h4>
+                    <p class="text-muted mb-4">Fill in the form below to create a new job listing.</p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="#"> {# Action points to the Flask route that handles job creation #}
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="title">Job Title</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                placeholder="e.g., Senior Software Engineer" value="{{ request.form.title or '' }}" {#
+                                Retain value after form submission if error #} required>
+                        </div>
+
+                        <div class="mb-3"> {# Full width for description and requirements #}
+                            <label class="form-label" for="description">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5"
+                                placeholder="Detailed description of the role, responsibilities, etc."
+                                required>{{ request.form.description or '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="requirements">Requirements</label>
+                            <textarea class="form-control" id="requirements" name="requirements" rows="4"
+                                placeholder="List required skills, experience, qualifications."
+                                required>{{ request.form.requirements or '' }}</textarea>
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="location">Location</label>
+                            <input type="text" class="form-control" id="location" name="location"
+                                placeholder="e.g., Ho Chi Minh City" value="{{ request.form.location or '' }}" required>
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="salary">Salary (USD)</label>
+                            <input type="number" class="form-control" id="salary" name="salary" step="0.01" {# Allows
+                                decimal values for salary #} min="0" {# Salary cannot be negative #}
+                                placeholder="e.g., 1500.00" value="{{ request.form.salary or '' }}" required>
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="employment_type">Employment Type</label>
+                            <select class="form-select" id="employment_type" name="employment_type" required>
+                                <option value="" disabled {% if not request.form.employment_type %}selected{% endif %}>
+                                    Select type
+                                </option>
+                                {% for type in employment_types %} {# 'employment_types' passed from Flask context #}
+                                <option value="{{ type.value }}" {% if request.form.employment_type==type.value
+                                    %}selected{% endif %}>{{ type.value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="form-label" for="expiration_date">Expiration Date</label>
+                            <input type="date" class="form-control" id="expiration_date" name="expiration_date"
+                                value="{{ request.form.expiration_date or '' }}" {# Keep date value if form submission
+                                fails #} required>
+                        </div>
+
+                        <div class="form-group-inline mb-4">
+                            <label class="form-label" for="category_id">Category</label>
+                            <select class="form-select" id="category_id" name="category_id" {% if is_post_action %}
+                                required {% endif %} {# Chỉ yêu cầu khi là hành động POST #}>
+                                <option value="" disabled {% if not request.form.get('category_id') %}selected{% endif
+                                    %}>Select category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.form.get('category_id') and
+                                    request.form.get('category_id')|int==category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" name="save_draft" class="btn btn-draft btn-lg flex-grow-1">Save as
+                                Draft </button>
+                            <button type="submit" name="post_job" class="btn btn-custom btn-lg flex-grow-1">Post
+                                Job</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

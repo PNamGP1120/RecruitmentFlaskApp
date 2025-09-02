@@ -1,0 +1,35 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+{# Hero Section - No 'with' keyword, variables must be passed from Flask route #}
+{% include 'layout/hero_section.html' %}
+<div class="container mt-3">
+    <h2 class="text-center text-primary">List of interview schedules</h2>
+    {% if list_interview %}
+    <table class="table table-striped">
+        <thead class="table-success">
+        <tr>
+            <th>Application Id</th>
+            <th>Job</th>
+            <th>Link Jitsi</th>
+            <th>Time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in list_interview %}
+        <tr>
+            <td>{{i.application_id}}</td>
+            <td>{{i.application.job.title}}</td>
+            <td><a href="{{i.url}}" target="_blank" rel="noopener noreferrer">{{i.url}}</a></td>
+            <td>{{i.dateTime}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info text-center">There are no interviews scheduled yet!</div>
+    {% endif %}
+
+</div>
+{% endblock %}
+

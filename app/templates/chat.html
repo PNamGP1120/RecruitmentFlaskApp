@@ -1,0 +1,105 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<style>
+    .chat-container { max-width: 800px; margin: auto; }
+    .chat-header { background-color: #f8f9fa; padding: 1rem; border-bottom: 1px solid #dee2e6; }
+    .chat-messages { height: 60vh; overflow-y: auto; padding: 1rem; }
+    .message { display: flex; margin-bottom: 1rem; }
+    .message.sent { flex-direction: row-reverse; }
+    .message-content { max-width: 70%; padding: 0.5rem 1rem; border-radius: 15px; }
+    .message.sent .message-content { background-color: #0d6efd; color: white; }
+    .message.received .message-content { background-color: #e9ecef; }
+    .message img { width: 40px; height: 40px; }
+    .chat-input { padding: 1rem; border-top: 1px solid #dee2e6; }
+</style>
+
+<div class="container my-4 chat-container card">
+    <div class="chat-header text-center">
+        <h4 class="fw-bold mb-0">Chat with {{ recipient.username }}</h4>
+    </div>
+
+    <div class="chat-messages" id="messages">
+        </div>
+
+    <div class="chat-input">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Type a message..." id="message-input">
+            <button class="btn btn-primary" type="button" id="send-btn">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Server 5.x.x phu hop voi ban 4.x.x -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+<script type="text/javascript">
+    const socketio = io();
+    const messagesContainer = document.getElementById("messages");
+    const conversationId = "{{ conversation.id }}";
+    const currentUsername = "{{ current_user.username }}";
+
+    // Hàm tạo và hiển thị tin nhắn
+    const createMessage = (data) => {
+        const isSent = data.sender === currentUsername;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+
+        const content = `
+            <img src="${data.avatar}" alt="Avatar" class="rounded-circle mx-2">
+            <div>
+                <div class="message-content">
+                    ${data.message}
+                </div>
+                <small class="text-muted px-2">${data.timestamp}</small>
+            </div>
+        `;
+        messageDiv.innerHTML = content;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; // Cuộn xuống cuối
+    };
+
+    // Kết nối với server và tham gia phòng
+    socketio.on("connect", () => {
+        socketio.emit("join", { room: conversationId });
+    });
+
+    // Lắng nghe tin nhắn từ server
+    socketio.on("message", (data) => {
+        createMessage(data);
+    });
+
+    // Gửi tin nhắn
+    const sendMessage = () => {
+        const messageInput = document.getElementById("message-input");
+        const message = messageInput.value.trim();
+        if (message === "") return;
+
+        socketio.emit("message", {
+            room: conversationId,
+            data: message
+        });
+        messageInput.value = "";
+        messageInput.focus();
+    };
+
+    document.getElementById("send-btn").addEventListener("click", sendMessage);
+    document.getElementById("message-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    // Tải tin nhắn cũ
+    document.addEventListener("DOMContentLoaded", () => {
+        {% for msg in messages %}
+        createMessage({
+            sender: "{{ msg.sender.username }}",
+            avatar: "{{ msg.sender.avatar }}",
+            message: "{{ msg.content|safe }}",
+            timestamp: "{{ msg.timestamp.strftime('%b %d, %I:%M %p') }}"
+        });
+        {% endfor %}
+    });
+
+</script>
+{% endblock %}

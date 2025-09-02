@@ -1,0 +1,75 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}About Us - Job Portal{% endblock %}
+
+{% block content %}
+
+{% include 'layout/hero_section.html'%}
+<div class="container my-5">
+
+  <!-- Company Header -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body d-flex align-items-center">
+      <img src="{{ company.user.avatar or url_for('static', filename='default-logo.png') }}"
+           alt="Company Logo"
+           class="rounded me-4"
+           style="width: 100px; height: 100px; object-fit: cover;">
+      <div>
+        <h2 class="card-title mb-1">{{ company.company_name }}</h2>
+        <p class="text-muted mb-1">
+          {{ company.industry }} • {{ company.company_size }}
+        </p>
+        <p class="text-muted mb-1">
+          <i class="bi bi-geo-alt-fill me-1"></i> {{ company.address }}
+        </p>
+        {% if company.website %}
+          <a href="{{ company.website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-globe me-1"></i> Website
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Introduction -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h4 class="mb-3">Giới thiệu về công ty</h4>
+      <p class="text-secondary" style="white-space: pre-line;">
+        {{ company.introduction }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Jobs -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="mb-3">Việc làm đang tuyển</h4>
+      {% if company.jobs %}
+        <div class="row">
+          {% for job in company.jobs %}
+          <div class="col-md-6 mb-3">
+            <div class="card h-100 border-2 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">{{ job.title }}</h5>
+                <p class="card-text text-muted">{{ job.short_description }}</p>
+                <p class="text-muted small mb-2">
+                  <i class="bi bi-calendar-event me-1"></i> Đăng ngày: {{ job.created_date.strftime('%d/%m/%Y') }}
+                </p>
+                <a href="{{ url_for('job_detail', job_id=job.id) }}"
+                   class="btn btn-sm btn-primary">
+                   Xem chi tiết
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Hiện tại công ty chưa có tin tuyển dụng nào.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

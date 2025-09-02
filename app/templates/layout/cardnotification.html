@@ -1,0 +1,25 @@
+<li class="list-group-item border-0 px-0">
+    <div class="card shadow-sm {% if not notify.is_read %}border-start border-4 border-primary{% endif %}">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('notification_detail', notification_id=notify.id) }}" class="flex-grow-1 text-decoration-none text-dark">
+                <h6 class="mb-2">
+                    {{ notify.content }}
+                    {% if not notify.is_read %}
+                        <span class="badge bg-primary ms-2">New</span>
+                    {% endif %}
+                </h6>
+                <small class="text-muted">
+                    <i class="bi bi-clock"></i> {{ notify.created_date.strftime('%d/%m/%Y %H:%M') }}
+                </small>
+            </a>
+
+            {% if not notify.is_read %}
+            <form method="post" action="{{ url_for('mark_notification_as_read', notification_id=notify.id) }}" class="ms-3">
+                <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Read">
+                    <i class="bi bi-check-lg"></i>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</li>
